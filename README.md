@@ -1,12 +1,29 @@
-# React + Vite
+# MEMENTO_FRONTEND
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### :octocat: git clone
+```
+git clone https://github.com/ShinhanDSproject1/MEMENTO-REACT-WITH-VITE.git
+```
 
-Currently, two official plugins are available:
+### 📦 Install
+Node.js: https://nodejs.org/ko/download
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Mac( :beer: homebrew)
+```
+curl -o- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+```
+```
+brew install node@22
+```
+- Windows( :whale: docker)
+```
+docker pull node:22-alpine
+```
+```
+docker run -it --rm --entrypoint sh node:22-alpine
+```
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- packages install
+```
+npm i
+```
