@@ -3,12 +3,14 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import { Button } from "flowbite-react";
+import TipTapEditor from "@/components/common/TipTapEditor";
 
 function App() {
   const [count, setCount] = useState(0);
 
   return (
     <>
+      <TipTapEditor />
       <Button>Click me</Button>
       <div>
         <a href="https://vite.dev" target="_blank" rel="noreferrer">
