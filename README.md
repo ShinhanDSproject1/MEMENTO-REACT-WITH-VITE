@@ -15,6 +15,10 @@ curl -o- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | ba
 ```
 brew install node@22
 ```
+
+- Windows(homepage download)
+<img width="805" height="123" alt="스크린샷 2025-08-22 11 46 51" src="https://github.com/user-attachments/assets/2a54ef7a-d6d0-48ac-a7b4-686bb4ab68c4" />
+
 - Windows( :whale: docker)
 ```
 docker pull node:22-alpine
