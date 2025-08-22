@@ -39,7 +39,8 @@ docker run -it --rm --entrypoint sh node:22-alpine
 npm i
 ```
 
-📎 참조
+### 📎 참조
+
 <br>
 
 - Template: <a href = "https://mynamesieun.github.io/git/GitHub-Issue-%EC%82%AC%EC%9A%A9%ED%95%98%EC%97%AC-%ED%98%91%EC%97%85%ED%95%98%EA%B8%B0/"/>[Git] GitHub Isuue 사용하여 협업하기</a>
