@@ -14,6 +14,8 @@ const buttonVariants = cva(
         danger: "bg-[#DF001F] text-white",
         cancelGray: "bg-[#C6C8D5] text-white",
         light: "bg-[#F0F4FA] text-[#334054]",
+        refund: "bg-[#0C7CA9] text-white",
+        lightBlue: "bg-[#94ABFA] text-white",
         cancelWhite:
           "bg-white text-black border-solid border-[1px] border-[#E6E7EA] shadow-xs shadow-(color: rgba(5,32,81,0.05))",
       },
@@ -46,7 +48,14 @@ function Button({ children, className, variant, size, onClick, ...props }) {
 
 // PropTypes 정의
 Button.propTypes = {
-  variant: PropTypes.oneOf(["primary", "danger", "cancelGray", "cancelWhite"]),
+  variant: PropTypes.oneOf([
+    "primary",
+    "danger",
+    "cancelGray",
+    "lightBlue",
+    "refund",
+    "cancelWhite",
+  ]),
   size: PropTypes.oneOf(["xSmall", "small", "medium", "large", "xLarge"]),
   children: PropTypes.node,
   className: PropTypes.string,
