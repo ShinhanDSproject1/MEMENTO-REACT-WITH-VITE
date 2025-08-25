@@ -1,7 +1,7 @@
 // App.js 또는 부모 컴포넌트
 import MentosCard from "@/components/common/MentosCard";
 
-const App = () => {
+const MentosCardTest = () => {
   return (
     <div className="grid grid-cols-1 gap-4 p-8 md:grid-cols-3">
       <MentosCard
@@ -43,4 +43,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default MentosCardTest;
