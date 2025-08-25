@@ -2,6 +2,27 @@
 @plugin "flowbite-react/plugin/tailwindcss";
 @source "../.flowbite-react/class-list.json";
 
+@font-face {
+  font-family: "Wooridaum";
+  src: url("./assets/fonts/WooridaumR.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Wooridaum";
+  src: url("./assets/fonts/WooridaumB.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Wooridaum";
+  src: url("./assets/fonts/WooridaumL.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+}
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
