@@ -54,6 +54,11 @@ export default function Mentoprofile() {
         </div>
       </section>
 
+      <h1 className="my-title">보유자격증</h1>
+      <section className="card">
+        <div className="field row">자산관리사</div>
+      </section>
+
       <div className="bottom">
         <button className="btn-update">소개글 수정</button>
 

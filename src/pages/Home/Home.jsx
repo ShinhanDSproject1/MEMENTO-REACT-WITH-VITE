@@ -11,6 +11,10 @@ export default function Home() {
         <Link to="/mento">
           <button>멘토 화면</button>
         </Link>
+
+        <Link to="/create-mentos">
+          <button>멘토 생성하기</button>
+        </Link>
       </div>
     </div>
   );

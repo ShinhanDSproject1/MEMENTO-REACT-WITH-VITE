@@ -50,6 +50,8 @@ body {
   grid-template-columns: 86px 1fr;
   column-gap: 12px;
   align-items: center;
+  color: #606264;
+  font-size: 13px;
 }
 .field.row + .field.row {
   margin-top: 12px;
