@@ -61,7 +61,7 @@ function MentosCard({ children, title, price, location, status, imageUrl, ...pro
   })();
 
   return (
-    <div className="relative flex h-[25vh] w-full flex-col rounded-[10px] border-[1px] border-solid border-[#E5E7ED] bg-white">
+    <div className="relative flex h-[25vh] w-full max-w-[360px] flex-col rounded-[10px] border-[1px] border-solid border-[#E5E7ED] bg-white">
       <section className="h-[60%]">
         <img
           className="h-full w-full rounded-t-[10px]"
