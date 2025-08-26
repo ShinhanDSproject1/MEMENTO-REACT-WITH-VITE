@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { MODAL_CONFIG } from "@/utils/modal-config";
 import Button from "./Button";
 
-export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, ...props }) {
+export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, modalData, ...props }) {
   if (!isOpen) {
     return null;
   }
@@ -17,14 +17,18 @@ export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, ...pr
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="flex w-full max-w-[250px] flex-col gap-4 rounded-lg bg-white p-4">
+      <div
+        className={`flex w-full max-w-[250px] flex-col ${config.type === "form" ? "gap-2" : "gap-4"} rounded-lg bg-white p-4`}>
         {/* ⭐️ 모달 타입에 따라 다른 콘텐츠 렌더링 */}
         {config.type === "form" ? (
           // 폼 모달 (리뷰 작성 등)
           <>
-            <h3 className="text-center text-lg font-bold">{config.title}</h3>
-            {/* content에 JSX가 담겨있으므로 그대로 렌더링 */}
-            {config.content}
+            {/* ⭐️ modalData.title이 있다면 렌더링 */}
+            {modalData.title && (
+              <span className="text-center text-[1.2rem] font-bold">{modalData.title}</span>
+            )}
+            {/* config.content가 함수이므로 modalData를 전달 */}
+            {config.content && typeof config.content === "function" && config.content(modalData)}
           </>
         ) : (
           // 알림/결정 모달
@@ -69,4 +73,5 @@ CommonModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onConfirm: PropTypes.func,
   onSubmit: PropTypes.func,
+  modalData: PropTypes.object,
 };

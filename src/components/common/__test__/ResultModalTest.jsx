@@ -5,10 +5,9 @@ import { useModal } from "@/hooks/common/useModal";
 import Button from "@/components/common/Button";
 
 function ResultModalTest() {
-  const { isOpen, modalType, openModal, closeModal } = useModal();
+  const { isOpen, modalType, openModal, closeModal, modalData } = useModal();
 
   const handleConfirmAction = () => {
-    // 여기에 확인 버튼을 눌렀을 때 실행할 로직 (예: API 호출)을 추가합니다.
     closeModal();
     modalType === "deleteMentos" ? openModal("deleteComplete") : openModal("dismissSuccess");
   };
@@ -27,7 +26,9 @@ function ResultModalTest() {
       <Button onClick={() => openModal("createMentos")}>멘토스 생성</Button>
       <Button onClick={() => openModal("updateMentos")}>멘토스 수정</Button>
       <Button onClick={() => openModal("reportComplete")}>신고 완료</Button>
-      <Button onClick={() => openModal("review")}>리뷰 작성</Button>
+      <Button onClick={() => openModal("review", { title: "인생한방, 공격투자" })}>
+        리뷰 작성
+      </Button>
 
       <CommonModal
         type={modalType}
@@ -35,6 +36,7 @@ function ResultModalTest() {
         onCancel={handleCancelAction} // 취소 함수 전달
         isOpen={isOpen}
         onSubmit={handleSubmit}
+        modalData={modalData} // ⭐️ CommonModal에 modalData 전달
       />
     </div>
   );

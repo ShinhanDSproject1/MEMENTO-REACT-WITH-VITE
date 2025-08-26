@@ -67,15 +67,11 @@ export const MODAL_CONFIG = {
   // '폼(form)' 모달 케이스
   review: {
     type: "form", // 새로운 type 속성 추가
-    title: "리뷰 작성",
-    content: (
-      // 이 부분은 JSX가 될 것입니다.
-      <div>
-        {/* 별점 컴포넌트 */}
-        <StarRating />
-        {/* 텍스트 입력창 */}
+    content: (modalData) => (
+      <div className="flex flex-col">
+        <StarRating onRatingChange={modalData.onRatingChange} />
         <textarea
-          className="h-24 w-full resize-none rounded border p-2"
+          className="h-24 w-full resize-none rounded-[10px] border-[1px] border-solid border-[#E6E7EA] p-2"
           placeholder="내용을 입력하세요"
         />
       </div>
