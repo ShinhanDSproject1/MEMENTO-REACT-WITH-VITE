@@ -35,7 +35,7 @@ export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, modal
           <>
             {config.icon && (
               <div className="flex justify-center">
-                <img className="w-[15vw]" src={config.icon} alt="모달 아이콘" />
+                <img className="w-[15vw] max-w-[60px]" src={config.icon} alt="모달 아이콘" />
               </div>
             )}
             <div className="text-black">
