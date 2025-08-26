@@ -10,14 +10,14 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-[#005EF9] text-white",
-        danger: "bg-[#DF001F] text-white",
-        cancelGray: "bg-[#C6C8D5] text-white",
-        light: "bg-[#F0F4FA] text-[#334054]",
-        refund: "bg-[#0C7CA9] text-white",
-        lightBlue: "bg-[#94ABFA] text-white",
+        primary: "bg-[#005EF9] text-white hover:bg-[#004BC7]",
+        danger: "bg-[#DF001F] text-white hover:bg-[#AD0017]",
+        cancelGray: "bg-[#C6C8D5] text-white hover:bg-[#A7AABE]",
+        light: "bg-[#F0F4FA] text-[#334054] hover:bg-[#C9D8ED]",
+        refund: "bg-[#0C7CA9] text-white hover:bg-[#085877]",
+        lightBlue: "bg-[#94ABFA] text-white hover:bg-[#6386F8]",
         cancelWhite:
-          "bg-white text-black border-solid border-[1px] border-[#E6E7EA] shadow-xs shadow-(color: rgba(5,32,81,0.05))",
+          "bg-white text-black border-solid border-[1px] border-[#E6E7EA] shadow-xs shadow-(color: rgba(5,32,81,0.05)) hover:shadow-sm hover:border-gray-400 hover:bg-gray-50",
       },
       size: {
         // 표준화된 크기 정의
