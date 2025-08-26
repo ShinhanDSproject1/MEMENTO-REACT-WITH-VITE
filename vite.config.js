@@ -9,10 +9,7 @@ export default defineConfig({
   resolve: {
     alias: [{ find: "@", replacement: "/src" }],
   },
-
   server: {
-    host: "127.0.0.1", // localhost 강제
-    port: 5173, // 5173 대신 3000
-    strictPort: true, // 이미 쓰이면 실패하도록(자동변경 방지)
+    port: 3000,
   },
 });
