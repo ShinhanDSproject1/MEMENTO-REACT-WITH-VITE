@@ -6,7 +6,7 @@ import { clsx } from "clsx";
 
 // cva를 사용하여 variant와 size를 체계적으로 관리
 const buttonVariants = cva(
-  "max-w-[360px] rounded-[10px] font-semibold transition-colors flex justify-center items-center",
+  "max-w-[360px] rounded-[10px] font-semibold  transition-colors flex justify-center items-center whitespace-pre-wrap",
   {
     variants: {
       variant: {
@@ -21,7 +21,7 @@ const buttonVariants = cva(
       },
       size: {
         // 표준화된 크기 정의
-        xs: "h-[20px] px-2 text-xs",
+        xs: "h-[20px] px-2 text-xs ",
         sm: "h-[28px] px-3 text-sm",
         md: "h-[36px] px-4 text-sm",
         lg: "h-[40px] px-5 text-base",
@@ -35,7 +35,7 @@ const buttonVariants = cva(
   },
 );
 
-function Button({ children, className, variant, size, onClick, ...props }) {
+function Button({ children, className, variant, size, onClick, actionType, ...props }) {
   // twMerge와 clsx를 사용해 클래스 안전하게 병합
   const finalClassName = twMerge(clsx(buttonVariants({ variant, size }), className));
 
@@ -60,6 +60,7 @@ Button.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
   onClick: PropTypes.func,
+  actionType: PropTypes.string,
 };
 
 export default Button;

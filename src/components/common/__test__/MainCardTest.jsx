@@ -1,8 +1,7 @@
 import React from "react";
-import PropTypes from "prop-types";
 import MainCard from "../MainCard";
 
-function MainCardTest(props) {
+function MainCardTest() {
   return (
     <div className="grid grid-cols-1 gap-4 p-8 md:grid-cols-3">
       <MainCard
@@ -18,7 +17,5 @@ function MainCardTest(props) {
     </div>
   );
 }
-
-MainCardTest.propTypes = {};
 
 export default MainCardTest;
