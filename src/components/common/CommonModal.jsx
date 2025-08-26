@@ -11,7 +11,7 @@ export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, modal
   const config = MODAL_CONFIG[type];
 
   if (!config) {
-    console.error(`Error: "${type}" is not a valid modal type.`); //나중에 throw error
+    //나중에 throw error
     return null;
   }
 

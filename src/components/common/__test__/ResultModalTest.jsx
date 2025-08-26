@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import PropTypes from "prop-types";
+import React from "react";
 import { CommonModal } from "../CommonModal";
 import { useModal } from "@/hooks/common/useModal";
 import Button from "@/components/common/Button";
