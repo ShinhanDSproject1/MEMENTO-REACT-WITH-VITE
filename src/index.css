@@ -1,21 +1,76 @@
-@font-face {
-  font-family: "WooridaumB";
-  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2205@1.0/WooridaumB.woff2")
-    format("woff2");
-  font-weight: 700;
-  font-style: normal;
-}
-
 @import "tailwindcss";
 @import "tw-animate-css";
 @custom-variant dark (&:is(.dark *));
 @plugin "flowbite-react/plugin/tailwindcss";
 @source "../.flowbite-react/class-list.json";
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #f5f6f8;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@font-face {
+  font-family: "WooridaumB";
+  src: url("./assets/fonts/WooridaumB.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "WooridaumL";
+  src: url("./assets/fonts/WooridaumL.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "WooridaumR";
+  src: url("./assets/fonts/WooridaumR.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@theme {
+  --font-WooridaumB: "WooridaumnB", sans-serif;
+  --font-WooridaumL: "WooridaumnL", sans-serif;
+  --font-WooridaumR: "WooridaumnR", sans-serif;
+}
+
+/* 살짝 둥둥 떠다니기 */
+@keyframes floaty {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* 버튼 은은한 펄스(그림자+살짝 위로) */
+@keyframes btnPulse {
+  0%,
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 6px 14px rgba(0, 94, 249, 0);
+  }
+  50% {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 94, 249, 0.25);
   }
 }
 
@@ -130,10 +185,5 @@
   * {
     padding: 0px;
     margin: 0px;
-    font-family: "WooridaumB";
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
   }
 }
