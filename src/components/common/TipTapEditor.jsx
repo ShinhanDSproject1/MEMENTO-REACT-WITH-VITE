@@ -4,7 +4,7 @@ import "@/styles/common/tiptap-editor.css";
 
 function TipTapEditor() {
   return (
-    <div className="">
+    <div className="flex justify-center">
       <SimpleEditor />
     </div>
   );
