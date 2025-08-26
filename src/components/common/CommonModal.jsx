@@ -1,34 +1,55 @@
-import { MODAL_CONFIG } from "@/utils/modal-config";
+import React from "react";
 import PropTypes from "prop-types";
+import { MODAL_CONFIG } from "@/utils/modal-config";
 import Button from "./Button";
 
-export function CommonModal({ type, isOpen, onCancel, onConfirm, ...props }) {
+export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, ...props }) {
   if (!isOpen) {
     return null;
   }
+
   const config = MODAL_CONFIG[type];
 
-  // 유효하지 않은 type일 경우 렌더링하지 않습니다.
   if (!config) {
+    console.error(`Error: "${type}" is not a valid modal type.`); //나중에 throw error
     return null;
   }
 
-  // 모달을 body 태그에 직접 렌더링하기 위한 포털을 사용
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="flex w-full max-w-[250px] flex-col gap-4 rounded-lg bg-white p-4">
-        {config.icon && (
-          <div className="flex justify-center">
-            <img className="w-[15vw]" src={config.icon} alt="모달 아이콘" />
-          </div>
+        {/* ⭐️ 모달 타입에 따라 다른 콘텐츠 렌더링 */}
+        {config.type === "form" ? (
+          // 폼 모달 (리뷰 작성 등)
+          <>
+            <h3 className="text-center text-lg font-bold">{config.title}</h3>
+            {/* content에 JSX가 담겨있으므로 그대로 렌더링 */}
+            {config.content}
+          </>
+        ) : (
+          // 알림/결정 모달
+          <>
+            {config.icon && (
+              <div className="flex justify-center">
+                <img className="w-[15vw]" src={config.icon} alt="모달 아이콘" />
+              </div>
+            )}
+            <div className="text-black">
+              <p className="text-center">{config.message}</p>
+            </div>
+          </>
         )}
-        {config.title && <h3 className="text-center text-lg font-bold">{config.title}</h3>}
-        <div className="text-black">
-          <p className="text-center">{config.message}</p>
-        </div>
+
+        {/* 하단 버튼 영역 */}
         <div className="flex justify-center gap-4">
           {config.buttons.map((btn, index) => {
-            const onClickHandler = btn.actionType === "confirm" ? onConfirm : onCancel;
+            const onClickHandler =
+              btn.actionType === "confirm"
+                ? onConfirm
+                : btn.actionType === "submit"
+                  ? onSubmit
+                  : onCancel; // 나머지 모든 액션은 onCancel에 연결
+
             return (
               <Button key={index} {...btn} onClick={onClickHandler}>
                 {btn.text}
@@ -47,4 +68,5 @@ CommonModal.propTypes = {
   onCancel: PropTypes.func,
   isOpen: PropTypes.bool.isRequired,
   onConfirm: PropTypes.func,
+  onSubmit: PropTypes.func,
 };

@@ -1,7 +1,7 @@
-// modal-config.js (별도 파일로 관리)
 import deleteIcon from "@/assets/icons/delete.svg";
 import checkBlueIcon from "@/assets/icons/check-blue.svg";
 import checkRedIcon from "@/assets/icons/check-red.svg";
+import { StarRating } from "@/components/common/StarRating";
 
 export const MODAL_CONFIG = {
   // '확인/결정' 모달 케이스
@@ -62,5 +62,27 @@ export const MODAL_CONFIG = {
     icon: checkRedIcon,
     message: "제명이 완료되었습니다.",
     buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
+  },
+
+  // '폼(form)' 모달 케이스
+  review: {
+    type: "form", // 새로운 type 속성 추가
+    title: "리뷰 작성",
+    content: (
+      // 이 부분은 JSX가 될 것입니다.
+      <div>
+        {/* 별점 컴포넌트 */}
+        <StarRating />
+        {/* 텍스트 입력창 */}
+        <textarea
+          className="h-24 w-full resize-none rounded border p-2"
+          placeholder="내용을 입력하세요"
+        />
+      </div>
+    ),
+    buttons: [
+      { text: "등록", variant: "primary", size: "lg", actionType: "submit" },
+      { text: "취소", variant: "cancelWhite", size: "lg", actionType: "close" },
+    ],
   },
 };
