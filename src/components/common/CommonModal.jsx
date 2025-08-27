@@ -18,7 +18,7 @@ export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, modal
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div
-        className={`flex w-full max-w-[250px] flex-col ${config.type === "form" ? "gap-2" : "gap-4"} rounded-lg bg-white p-4`}>
+        className={`flex w-full max-w-[250px] flex-col ${config.type === "form" ? "gap-3" : "gap-5"} rounded-lg bg-white p-4`}>
         {/* ⭐️ 모달 타입에 따라 다른 콘텐츠 렌더링 */}
         {config.type === "form" ? (
           // 폼 모달 (리뷰 작성 등)
@@ -43,8 +43,8 @@ export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, modal
             </div>
           </>
         )}
-
         {/* 하단 버튼 영역 */}
+
         <div className="flex justify-center gap-4">
           {config.buttons.map((btn, index) => {
             const onClickHandler =
@@ -52,10 +52,17 @@ export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, modal
                 ? onConfirm
                 : btn.actionType === "submit"
                   ? onSubmit
-                  : onCancel; // 나머지 모든 액션은 onCancel에 연결
+                  : onCancel;
+            const buttonCount = config.buttons.length;
+            // 버튼이 한 개일 때는 className을 비우고, 여러 개일 때는 'w-full'을 적용
+            const buttonClassName = buttonCount > 1 ? "w-full" : "";
 
             return (
-              <Button key={index} {...btn} onClick={onClickHandler}>
+              <Button
+                key={index}
+                className={buttonClassName} // ✅ 여기에서 클래스를 적용
+                {...btn}
+                onClick={onClickHandler}>
                 {btn.text}
               </Button>
             );
