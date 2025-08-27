@@ -4,7 +4,6 @@ import Button from "@/components/common/Button";
 
 const statusStyles = {
   completed: "bg-[#2E3849]", // 진행 완료
-  inProgress: "bg-[#005EF9]", // 진행 중
   pending: "bg-[#B3B6B8]", // 진행 전
 };
 
@@ -13,7 +12,6 @@ function MentosCard({ children, title, price, location, status, imageUrl, ...pro
   const statusText =
     {
       completed: "진행 완료",
-      inProgress: "진행중",
       pending: "진행 전",
     }[status] || "";
 
@@ -31,12 +29,6 @@ function MentosCard({ children, title, price, location, status, imageUrl, ...pro
               신고하기
             </Button>
           </>
-        );
-      case "inProgress":
-        return (
-          <Button className="text-xs" variant="danger" size="sm">
-            신고하기
-          </Button>
         );
       case "pending":
         return (
@@ -94,7 +86,7 @@ MentosCard.propTypes = {
   price: PropTypes.number.isRequired,
   location: PropTypes.string,
   imageUrl: PropTypes.string,
-  status: PropTypes.oneOf(["completed", "inProgress", "pending", "mento"]),
+  status: PropTypes.oneOf(["completed", "pending", "mento"]),
   children: PropTypes.node,
 };
 export default MentosCard;

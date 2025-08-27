@@ -23,13 +23,12 @@ export const completed = {
   },
 };
 
-export const inProgress = {
+export const empty = {
   args: {
     title: "React 강의",
     price: 100000,
     location: "연남동",
     imageUrl: "https://picsum.photos/seed/react/200/300",
-    status: "inProgress",
   },
 };
 
