@@ -38,8 +38,10 @@ export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, modal
                 <img className="w-[15vw] max-w-[60px]" src={config.icon} alt="모달 아이콘" />
               </div>
             )}
-            <div className="text-black">
-              <p className="text-center">{config.message}</p>
+            <div>
+              <p className="text-center font-semibold" style={{ color: "#707070" }}>
+                {config.message}
+              </p>
             </div>
           </>
         )}
