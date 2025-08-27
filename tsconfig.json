@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "jsx": "react-jsx",
+    "checkJs": false,
+    "baseUrl": ".",
+    "moduleResolution": "bundler",
+    "paths": { "@/*": ["src/*"] }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "**/node_modules", "dist"]
+}
