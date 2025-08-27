@@ -86,3 +86,11 @@ export const report = {
     modalData: { title: "신고하기" }, // 이 title이 CommonModal 컴포넌트로 전달됩니다.
   },
 };
+
+export const reportDetail = {
+  args: {
+    type: "reportDetail",
+    isOpen: true,
+    modalData: { title: "상세보기" }, // 이 title이 CommonModal 컴포넌트로 전달됩니다.
+  },
+};
