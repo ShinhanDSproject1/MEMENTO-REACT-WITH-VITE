@@ -10,7 +10,7 @@ export default function MainHeader({ onClickLogin, onClickHome }) {
       <img
         src={logo}
         alt="memento logo"
-        className="h-auto w-[120px] hover:brightness-60 sm:w-[140px] lg:w-[160px]"
+        className="h-auto w-[120px] cursor-pointer hover:brightness-60 sm:w-[140px] lg:w-[160px]"
       />
 
       {/* 오른쪽 아이콘들 */}
@@ -19,14 +19,14 @@ export default function MainHeader({ onClickLogin, onClickHome }) {
           <img
             src={loginIcon}
             alt="lgoinIcon"
-            className="h-auto w-6 transition duration-200 hover:brightness-60"
+            className="h-auto w-6 cursor-pointer transition duration-200 hover:brightness-60"
           />
         </button>
         <button type="button" onClick={onClickHome} aria-label="go home">
           <img
             src={homeIcon}
             alt="homeIcon"
-            className="h-auto w-6 transition duration-200 hover:brightness-60"
+            className="h-auto w-6 cursor-pointer transition duration-200 hover:brightness-60"
           />
         </button>
       </div>

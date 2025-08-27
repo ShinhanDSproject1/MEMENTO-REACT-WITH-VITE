@@ -1,0 +1,18 @@
+import PropTypes from "prop-types";
+
+export default function GuestLoginBox() {
+  return (
+    <div className="mx-auto w-full space-y-2 bg-[#F0F4FA] pb-3 text-center">
+      <p className="font-WooridaumB mb-4 pt-4 text-base text-[#23272E]">
+        회원가입하고 더 많은 서비스를 이용하세요!
+      </p>
+      <button className="mx-auto cursor-pointer rounded-full bg-[#AEC8EF] p-2 px-6 text-sm text-white hover:bg-[#657fa79d] hover:shadow">
+        로그인
+      </button>
+    </div>
+  );
+}
+
+GuestLoginBox.propTypes = {
+  userName: PropTypes.string,
+};

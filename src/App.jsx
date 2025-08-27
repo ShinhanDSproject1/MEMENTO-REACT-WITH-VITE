@@ -4,6 +4,9 @@ import MyProfile from "./pages/MyProfile/MyProfile";
 import CreateMentos from "./pages/Mentos/CreateMentos.jsx";
 import EditMentos from "./pages/Mentos/EditMentos.jsx";
 import Reviews from "@/pages/MyProfile/Review.jsx";
+import "./index.css"; // 반드시 먼저: @import "tailwindcss" 들어있어야 함
+import "./app.css"; // 그 다음: 내가 만든 CSS (여기서 @apply 사용)
+import SplashGate from "./pages/SplashGate";
 
 export default function App() {
   return (
