@@ -1,28 +1,26 @@
-/// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import flowbiteReact from "flowbite-react/plugin/vite";
 
-// https://vite.dev/config/
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
-const dirname =
-  typeof __dirname !== "undefined" ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
-// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
+// ESM에서 __dirname 대체
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), flowbiteReact()],
   resolve: {
-    alias: [
-      {
-        find: "@",
-        replacement: "/src",
-      },
-    ],
+    alias: {
+      "@": path.resolve(__dirname, "src"), // ✅ 실경로 매핑
+    },
   },
   server: {
+    host: true, // ✅ 동일 네트워크(192.168.x.x) 접속 허용
     port: 3000,
   },
   test: {
@@ -30,10 +28,8 @@ export default defineConfig({
       {
         extends: true,
         plugins: [
-          // The plugin will run tests for the stories defined in your Storybook config
-          // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
           storybookTest({
-            configDir: path.join(dirname, ".storybook"),
+            configDir: path.join(__dirname, ".storybook"),
           }),
         ],
         test: {
@@ -42,11 +38,7 @@ export default defineConfig({
             enabled: true,
             headless: true,
             provider: "playwright",
-            instances: [
-              {
-                browser: "chromium",
-              },
-            ],
+            instances: [{ browser: "chromium" }],
           },
           setupFiles: [".storybook/vitest.setup.ts"],
         },
