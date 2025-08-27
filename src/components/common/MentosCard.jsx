@@ -61,8 +61,8 @@ function MentosCard({ children, title, price, location, status, imageUrl, ...pro
   })();
 
   return (
-    <div className="relative flex h-[25vh] w-full max-w-[360px] flex-col rounded-[10px] border-[1px] border-solid border-[#E5E7ED] bg-white">
-      <section className="h-[60%]">
+    <div className="relative flex h-auto w-[80vw] max-w-[360px] flex-col rounded-[10px] border-[1px] border-solid border-[#E5E7ED] bg-white">
+      <section className="h-[15vh]">
         <img
           className="h-full w-full rounded-t-[10px]"
           src="https://picsum.photos/seed/picsum/200/300"
@@ -74,12 +74,12 @@ function MentosCard({ children, title, price, location, status, imageUrl, ...pro
           {statusText}
         </div>
       </section>
-      <section className="item-center flex flex-col gap-1 border-t p-2">
+      <section className="item-center flex flex-col gap-2 border-t px-4 py-2">
         <div className="flex flex-row items-center justify-between">
           <span className="text-sm">{title}</span>
           <span className="text-sm">₩{formattedPrice}</span>
         </div>
-        <div className="flex flex-row items-center justify-between">
+        <div className="flex h-full flex-row items-center justify-between">
           <span className="text-sm">{location}</span>
           <div className="flex flex-row gap-2">{actionButton}</div>
         </div>
