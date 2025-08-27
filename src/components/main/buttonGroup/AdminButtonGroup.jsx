@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { InteractiveHoverButton } from "../MainButton";
+import { MainButton } from "./MainButton";
 
 function AdminButtonGroup() {
   const navigate = useNavigate();
@@ -7,15 +7,15 @@ function AdminButtonGroup() {
     "font-WooridaumB w-[300px] max-w-sm rounded-lg bg-[#005EF9] px-6 py-3 text-center font-bold text-white";
   return (
     <div className="mt-10 flex flex-col items-center gap-y-4">
-      <InteractiveHoverButton className={style} onClick={() => navigate("/admin/user-management")}>
+      <MainButton className={style} onClick={() => navigate("/admin/user-management")}>
         회원관리
-      </InteractiveHoverButton>
-      <InteractiveHoverButton className={style} onClick={() => navigate("/admin/declaration")}>
+      </MainButton>
+      <MainButton className={style} onClick={() => navigate("/admin/declaration")}>
         관리자 신고확인
-      </InteractiveHoverButton>
-      <InteractiveHoverButton className={style} onClick={() => navigate("/admin/revenue")}>
+      </MainButton>
+      <MainButton className={style} onClick={() => navigate("/admin/revenue")}>
         수익관리
-      </InteractiveHoverButton>
+      </MainButton>
     </div>
   );
 }

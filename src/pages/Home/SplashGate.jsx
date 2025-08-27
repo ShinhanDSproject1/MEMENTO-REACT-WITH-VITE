@@ -1,12 +1,12 @@
 // src/components/SplashGateHome.jsx
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import Splash from "@/components/Splash";
+import Splash from "../../components/common/Splash";
 
 const HOLD_MS = 2000; // 스플래시 유지
 const FADE_MS = 500; // 페이드아웃
 
-export default function SplashGateHome({ children }) {
+export default function SplashGate({ children }) {
   const [show, setShow] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
 
@@ -31,6 +31,6 @@ export default function SplashGateHome({ children }) {
   );
 }
 
-SplashGateHome.propTypes = {
+SplashGate.propTypes = {
   children: PropTypes.node,
 };
