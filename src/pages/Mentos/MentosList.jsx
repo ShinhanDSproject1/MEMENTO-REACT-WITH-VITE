@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import MentosMainTitleComponent from "@/components/mentos/MentosMainTitleComponent";
 import MainHeader from "@/components/MainHeader";
 import MentosCard from "@/components/common/MentosCard";
-import { danger } from "@/stories/Button.stories";
 
 function MentosList(category, props) {
   const [mainTitle, setMainTitle] = useState("");
