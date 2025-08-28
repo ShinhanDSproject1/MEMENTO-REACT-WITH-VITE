@@ -80,7 +80,7 @@ function MentosCard({
           {statusText}
         </div>
       </section>
-      <section className="item-center flex flex-col gap-2 border-t px-4 py-2">
+      <section className="item-center flex flex-col gap-1 border-t px-3 py-2">
         <div className="flex flex-row items-center justify-between">
           <span className="text-sm">{title}</span>
           <span className="text-sm">₩{formattedPrice}</span>

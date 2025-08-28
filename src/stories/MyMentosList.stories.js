@@ -1,5 +1,5 @@
 import { fn } from "storybook/test";
-
+import { BrowserRouter } from "react-router-dom";
 import MyMentosList from "@/pages/MyProfile/MyMentosList";
 
 export default {
@@ -13,7 +13,7 @@ export default {
   },
 };
 
-// ✅ MentosCardTest 컴포넌트를 보여줄 '스토리'를 정의합니다.
+// ✅ MentosCardTest 컴포넌트a를 보여줄 '스토리'를 정의합니다.
 export const Default = {
   args: {
     // 멘토스 카드에 필요한 props를 여기에 추가합니다.

@@ -4,9 +4,11 @@ import MentosCard from "@/components/common/MentosCard";
 import MentosMainTitleComponent from "@/components/mentos/MentosMainTitleComponent";
 import { useModal } from "@/hooks/common/useModal";
 import { CommonModal } from "@/components/common/CommonModal";
+import { useNavigate } from "react-router-dom";
 
 function MyMentosList({ role, ...props }) {
   const { isOpen, modalType, openModal, closeModal, modalData } = useModal();
+  //const navigate = useNavigate();
 
   const handleConfirmAction = () => {
     closeModal();
@@ -30,7 +32,15 @@ function MyMentosList({ role, ...props }) {
 
   const handleSubmit = () => {
     closeModal();
-    openModal("reviewComplete");
+    if (modalType === "reviewMentos") {
+      openModal("reviewComplete");
+    }
+    if (modalType === "reportMentos") {
+      openModal("reportComplete");
+    }
+    // if (modalType === "reportDetail") {
+    //  s openModal("dismissUser");
+    // }
   };
 
   const onReviewClick = () => {
@@ -42,7 +52,7 @@ function MyMentosList({ role, ...props }) {
   };
 
   const onUpdateClick = () => {
-    openModal("updateMentos");
+    //navigate("/edit/1");
   };
 
   const onReportClick = () => {
@@ -150,6 +160,5 @@ function MyMentosList({ role, ...props }) {
   );
 }
 
-MyMentosList.propTypes = { role: PropTypes.string };
-
+MyMentosList.propTypes = { role: PropTypes.oneOf(["mento", "menti"]) };
 export default MyMentosList;
