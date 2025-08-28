@@ -18,6 +18,7 @@ export const Default = {
   args: {
     // 멘토스 카드에 필요한 props를 여기에 추가합니다.
     // 예: title, description, image, etc.
+    category: 1,
     title: "멘토스 리스트 테스트",
     description: "이것은 테스트용 멘토스 리스트입니다.",
   },

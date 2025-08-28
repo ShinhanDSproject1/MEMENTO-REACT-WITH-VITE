@@ -20,12 +20,12 @@ function ResultModalTest() {
   };
   return (
     <div className="grid grid-cols-1 gap-4 p-8 md:grid-cols-3">
-      <Button onClick={() => openModal("deleteMentos")}>멘토 삭제</Button>
+      <Button onClick={() => openModal("deleteMentos")}>멘토스 삭제</Button>
       <Button onClick={() => openModal("dismissUser")}>회원 삭제</Button>
       <Button onClick={() => openModal("createMentos")}>멘토스 생성</Button>
       <Button onClick={() => openModal("updateMentos")}>멘토스 수정</Button>
       <Button onClick={() => openModal("reportComplete")}>신고 완료</Button>
-      <Button onClick={() => openModal("review", { title: "인생한방, 공격투자" })}>
+      <Button onClick={() => openModal("reviewMentos", { title: "인생한방, 공격투자" })}>
         리뷰 작성
       </Button>
       <Button onClick={() => openModal("report")}>신고 하기</Button>
