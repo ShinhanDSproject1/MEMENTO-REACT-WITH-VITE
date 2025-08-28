@@ -1,9 +1,9 @@
 import { useState } from "react";
-import PageContainer from "../../components/profile/pageContainer.jsx";
-import SectionCard from "../../components/profile/CardSection.jsx";
-import FieldRow from "../../components/profile/FieldRow.jsx";
-import DateField from "../../components/profile/BirthDate.jsx";
-import CommonInput from "../../components/profile/CommonInput.jsx";
+import PageContainer from "@/components/profile/PageContainer";
+import SectionCard from "@/components/profile/CardSection";
+import FieldRow from "@/components/profile/FieldRow";
+import DateField from "@/components/profile/BirthDate";
+import CommonInput from "@/components/profile/CommonInput";
 
 const toDate = (v) => {
   if (!v) return null;
@@ -66,8 +66,8 @@ export default function MyProfile() {
     "mb-6 text-left text-[24px] leading-[28px] tracking-tight font-bold text-[#121418]";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[white] font-sans antialiased">
-      <main className="w-full">
+    <div className="font-WooridaumB flex min-h-dvh min-h-screen justify-center bg-[#f5f6f8] antialiased">
+      <main className="min-h-dvh w-full bg-white px-4 py-8 shadow">
         <PageContainer>
           <h2 className={headingCls}>내 프로필</h2>
           <section className="mb-8">

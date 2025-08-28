@@ -1,11 +1,12 @@
-import "./index.css"; // 반드시 먼저: @import "tailwindcss" 들어있어야 함
-import { Outlet, Route, Routes } from "react-router-dom";
-import MyProfile from "./pages/MyProfile/MyProfile";
-import CreateMentos from "./pages/Mentos/CreateMentos";
-import Home from "./pages/Home/Home";
-import SplashGate from "./pages/Home/SplashGate";
-import CommonHeader from "./components/common/CommonHeader";
-import MainHeader from "./components/main/mainHeader/MainHeader";
+import { Outlet, Routes, Route } from "react-router-dom";
+import Home from "@/pages/Home/Home";
+import MyProfile from "@/pages/MyProfile/MyProfile";
+import CreateMentos from "@/pages/Mentos/CreateMentos";
+import SplashGate from "@/pages/Home/SplashGate";
+import CommonHeader from "@/components/common/CommonHeader";
+import MainHeader from "@/components/main/mainHeader/MainHeader";
+import EditMentos from "@/pages/Mentos/EditMentos.jsx";
+import Reviews from "@/pages/MyProfile/Review.jsx";
 
 function HomeLayout() {
   return (
@@ -43,8 +44,15 @@ export default function App() {
 
       {/* 그 외 공통 레이아웃 */}
       <Route element={<AppLayout />}>
-        <Route path="/mentee/myprofile" element={<MyProfile />} />
-        <Route path="/create-mentos" element={<CreateMentos />} />
+        {/* 내 프로필 */}
+        <Route path="/menti" element={<MyProfile />} />
+
+        {/* 멘토링 생성 */}
+        <Route path="/create" element={<CreateMentos />} />
+        {/* 멘토링 수정 */}
+        <Route path="/edit/:id" element={<EditMentos />} />
+
+        <Route path="/my/reviews" element={<Reviews />} />
       </Route>
     </Routes>
   );

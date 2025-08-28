@@ -3,13 +3,10 @@
 body {
   --tt-toolbar-height: 44px;
   --tt-theme-text: var(--tt-gray-light-900);
-
   .dark & {
     --tt-theme-text: var(--tt-gray-dark-900);
   }
-}
 
-body {
   font-family: "Inter", sans-serif;
   color: var(--tt-theme-text);
   font-optical-sizing: auto;
@@ -18,12 +15,10 @@ body {
   padding: 0;
   overscroll-behavior-y: none;
 }
-
 html,
 body {
   overscroll-behavior-x: none;
 }
-
 html,
 body,
 #root,
@@ -35,17 +30,14 @@ body,
 ::-webkit-scrollbar {
   width: 0.25rem;
 }
-
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--tt-scrollbar-color) transparent;
 }
-
 ::-webkit-scrollbar-thumb {
   background-color: var(--tt-scrollbar-color);
   border-radius: 9999px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
@@ -55,28 +47,84 @@ body,
 }
 
 .simple-editor-wrapper {
-  width: 100vw;
-  height: 100vh;
-  overflow: auto;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .simple-editor-content {
-  max-width: 648px;
   width: 100%;
-  margin: 0 auto;
-  height: 100%;
+  max-width: 100%;
+  margin: 0;
+  flex: 1 1 auto;
+  min-height: 140px;
   display: flex;
   flex-direction: column;
-  flex: 1;
+  overflow: hidden;
 }
 
 .simple-editor-content .tiptap.ProseMirror.simple-editor {
-  flex: 1;
-  padding: 3rem 3rem;
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 100%;
+  padding: 12px;
+  overflow: auto;
 }
 
-@media screen and (max-width: 480px) {
+.tiptap-toolbar {
+  position: static !important;
+  z-index: 1;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  padding: 6px 8px;
+  width: 100%;
+  max-width: 100%;
+  border-bottom: 1px solid #e5e7ea;
+  background: #f9f9f9;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.tiptap-toolbar > * {
+  flex: 0 0 auto;
+}
+.tiptap-toolbar button,
+.tiptap-toolbar [data-style],
+.tiptap-toolbar .tiptap-button {
+  flex: 0 0 auto;
+  min-width: max-content;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1;
+}
+.tiptap-toolbar .tiptap-button-icon,
+.tiptap-toolbar svg {
+  width: 16px;
+  height: 16px;
+}
+
+.tiptap-toolbar .separator,
+.tiptap-toolbar hr {
+  width: 1px;
+  height: 16px;
+  background: #e5e7ea;
+  margin: 0 4px;
+  border: 0;
+}
+
+@media (max-width: 480px) {
   .simple-editor-content .tiptap.ProseMirror.simple-editor {
-    padding: 1rem 1.5rem;
+    padding: 8px 10px;
   }
 }
