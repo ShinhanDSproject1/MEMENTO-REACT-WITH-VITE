@@ -3,7 +3,6 @@ import { useState } from "react";
 import { CommonModal } from "@/components/common/CommonModal";
 import { SimpleEditor } from "@/components/common/tiptap-templates/simple/simple-editor";
 import Button from "@/components/common/Button";
-import MainHeader from "@/components/MainHeader";
 
 export default function CreateMentos() {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,8 +17,7 @@ export default function CreateMentos() {
   };
   return (
     <div className="flex min-h-screen w-full justify-center overflow-x-hidden bg-[#f5f6f8] font-sans antialiased">
-      <section className="w-[375px] overflow-x-hidden rounded-xl bg-white px-4 py-5 shadow">
-        <MainHeader />
+      <section className="w-full overflow-x-hidden bg-white px-4 py-5 shadow">
         <h1 className="font-WooridaumB mt-6 mb-15 pl-2 text-[20px] font-bold">멘토링 생성하기</h1>
         <CommonModal
           type="createMentos"

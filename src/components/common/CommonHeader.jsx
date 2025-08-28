@@ -10,7 +10,7 @@ export default function CommonHeader({ onClickLogin, onClickHome }) {
       <img
         src={backIcon}
         alt="backIcon"
-        className="h-8 w-auto cursor-pointer hover:brightness-60"
+        className="h-[20px] w-auto cursor-pointer hover:brightness-60"
       />
 
       {/* 오른쪽 아이콘들 */}
@@ -18,7 +18,7 @@ export default function CommonHeader({ onClickLogin, onClickHome }) {
         <button type="button" onClick={onClickLogin} aria-label="login">
           <img
             src={loginIcon}
-            alt="lgoinIcon"
+            alt="loginIcon"
             className="h-auto w-6 cursor-pointer transition duration-200 hover:brightness-60"
           />
         </button>
