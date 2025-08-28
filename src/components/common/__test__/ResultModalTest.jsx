@@ -28,6 +28,11 @@ function ResultModalTest() {
       <Button onClick={() => openModal("review", { title: "인생한방, 공격투자" })}>
         리뷰 작성
       </Button>
+      <Button onClick={() => openModal("report")}>신고 하기</Button>
+
+      <Button onClick={() => openModal("reportDetail", { title: "인생한방, 공격투자" })}>
+        신고 상세
+      </Button>
 
       <CommonModal
         type={modalType}
