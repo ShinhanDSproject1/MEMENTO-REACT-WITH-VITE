@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import PageContainer from "@/components/profile/pageContainer.jsx";
+import PageContainer from "@/components/profile/PageContainer.jsx";
 import ReviewCard from "@/components/profile/ReviewCard.jsx";
-import MainHeader from "@/components/MainHeader";
+import MainHeader from "@/components/main/mainHeader/MainHeader";
 
 export default function Review() {
   const [items, setItems] = useState([]);
@@ -107,9 +107,8 @@ export default function Review() {
   }, [hasMore, loading]);
 
   return (
-    <div className="font-WooridaumB flex min-h-dvh min-h-screen justify-center bg-[#f5f6f8] font-sans antialiased">
-      <main className="min-h-dvh w-full max-w-[375px] rounded-xl bg-white px-4 py-8 shadow">
-        <MainHeader />
+    <div className="font-WooridaumB flex min-h-dvh min-h-screen justify-center bg-[#f5f6f8] antialiased">
+      <main className="min-h-dvh w-full bg-white px-4 py-8 shadow">
         <h1 className="font-WooridaumB mt-6 mb-5 pl-2 text-[20px] font-bold">리뷰 확인하기</h1>
         <PageContainer className="space-y-4">
           {items.map((it) => (

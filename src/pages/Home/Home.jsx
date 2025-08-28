@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 import ButtonGroup from "@/components/main/buttonGroup/ButtonGroup";
 import LoginBox from "@/components/main/loginBox/LoginBox";
 import MainHeader from "@/components/main/mainHeader/MainHeader";
@@ -18,7 +19,7 @@ export default function Home({ userType, userName, userProfileImage }) {
       <ButtonGroup userType={userType} />
       <HelpCard />
       <Footer />
-      <div style={{ textAlign: "center", marginTop: "50px" }}>
+      {/* <div style={{ textAlign: "center", marginTop: "50px" }}>
         <h2>Home 화면</h2>
         <div style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
           <Link to="/menti">
@@ -36,7 +37,7 @@ export default function Home({ userType, userName, userProfileImage }) {
             <button>멘토 수정하기</button>
           </Link>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
