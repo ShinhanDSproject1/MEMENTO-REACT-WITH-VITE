@@ -56,7 +56,7 @@ Button.propTypes = {
     "refund",
     "cancelWhite",
   ]),
-  size: PropTypes.oneOf(["xSmall", "small", "medium", "large", "xLarge"]),
+  size: PropTypes.oneOf(["xs", "sm", "md", "lg", "xl"]),
   children: PropTypes.node,
   className: PropTypes.string,
   onClick: PropTypes.func,

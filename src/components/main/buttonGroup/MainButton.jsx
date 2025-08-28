@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import PropTypes from "prop-types";
 
-export const InteractiveHoverButton = React.forwardRef(({ children, className, ...props }, ref) => {
+export const MainButton = React.forwardRef(({ children, className, ...props }, ref) => {
   return (
     <button
       ref={ref}
@@ -26,9 +26,9 @@ export const InteractiveHoverButton = React.forwardRef(({ children, className, .
   );
 });
 
-InteractiveHoverButton.propTypes = {
+MainButton.propTypes = {
   children: PropTypes.node.isRequired,
   className: PropTypes.string,
 };
 
-InteractiveHoverButton.displayName = "InteractiveHoverButton";
+MainButton.displayName = "MainButton";

@@ -18,14 +18,17 @@ export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, modal
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div
-        className={`flex w-full max-w-[250px] flex-col ${config.type === "form" ? "gap-2" : "gap-4"} rounded-lg bg-white p-4`}>
+        className={`flex w-full max-w-[250px] flex-col ${config.type === "form" ? "gap-3" : "gap-5 p-4"} rounded-lg bg-white`}>
         {/* ⭐️ 모달 타입에 따라 다른 콘텐츠 렌더링 */}
         {config.type === "form" ? (
           // 폼 모달 (리뷰 작성 등)
           <>
             {/* ⭐️ modalData.title이 있다면 렌더링 */}
             {modalData.title && (
-              <span className="text-center text-[1.2rem] font-bold">{modalData.title}</span>
+              <span
+                className={`${modalData.title === "상세보기" ? "rounded-t-[10px] bg-[#005EF9] px-3 pt-3 pb-3 text-white" : ""} px-4 pt-4 text-center text-[1.2rem] font-bold`}>
+                {modalData.title}
+              </span>
             )}
             {/* config.content가 함수이므로 modalData를 전달 */}
             {config.content && typeof config.content === "function" && config.content(modalData)}
@@ -45,19 +48,26 @@ export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, modal
             </div>
           </>
         )}
-
         {/* 하단 버튼 영역 */}
-        <div className="flex justify-center gap-4">
+
+        <div className={`flex justify-center gap-4 ${config.type === "form" ? "px-4 pb-4" : ""}`}>
           {config.buttons.map((btn, index) => {
             const onClickHandler =
               btn.actionType === "confirm"
                 ? onConfirm
                 : btn.actionType === "submit"
                   ? onSubmit
-                  : onCancel; // 나머지 모든 액션은 onCancel에 연결
+                  : onCancel;
+            const buttonCount = config.buttons.length;
+            // 버튼이 한 개일 때는 className을 비우고, 여러 개일 때는 'w-full'을 적용
+            const buttonClassName = buttonCount > 1 ? "w-full" : "";
 
             return (
-              <Button key={index} {...btn} onClick={onClickHandler}>
+              <Button
+                key={index}
+                className={buttonClassName} // ✅ 여기에서 클래스를 적용
+                {...btn}
+                onClick={onClickHandler}>
                 {btn.text}
               </Button>
             );

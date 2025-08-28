@@ -26,8 +26,8 @@ export default function Footer() {
               <span className="font-WooridaumB text-[#768297]">신한DS SW아카데미 메멘토</span>
             </div>
             <div className="flex gap-3">
-              <span className="font-WooridaumB w-16 shrink-0 text-[#201f1f]">팀원 </span>
-              <span className="font-WooridaumB text-[#768297]">
+              <span className="font-WooridaumB w-16 shrink-1 text-[#201f1f]">팀원 </span>
+              <span className="font-WooridaumB mt-1 shrink-2 text-xs text-[#768297]">
                 김기도/김대현/김정은/조상호/안가연/최다희
               </span>
             </div>
@@ -50,6 +50,9 @@ export default function Footer() {
             운영하는 프로젝트입니다.
           </p>
         </div>
+      </div>
+      <div className="mx-auto w-full max-w-5xl px-4 py-3 text-xs text-gray-500 sm:px-6 sm:text-sm lg:px-8">
+        © 2025
       </div>
     </footer>
   );

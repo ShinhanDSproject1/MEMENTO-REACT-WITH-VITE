@@ -1,16 +1,16 @@
-import logo from "@/assets/images/memento-logo.svg";
 import loginIcon from "@/assets/images/login-icon.svg";
 import homeIcon from "@/assets/images/move-home-icon.svg";
+import backIcon from "@/assets/icons/backArrow.svg";
 import PropTypes from "prop-types";
 
-export default function MainHeader({ onClickLogin, onClickHome }) {
+export default function CommonHeader({ onClickLogin, onClickHome }) {
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between bg-white px-4 py-3 sm:px-6 lg:px-8">
-      {/* 왼쪽 로고 */}
+    <header className="sticky top-0 z-50 flex items-center justify-between bg-white px-4 py-3">
+      {/* 왼쪽 뒤로가기 아이콘 */}
       <img
-        src={logo}
-        alt="memento logo"
-        className="h-auto w-[120px] hover:brightness-60 sm:w-[140px] lg:w-[160px]"
+        src={backIcon}
+        alt="backIcon"
+        className="h-8 w-auto cursor-pointer hover:brightness-60"
       />
 
       {/* 오른쪽 아이콘들 */}
@@ -19,14 +19,14 @@ export default function MainHeader({ onClickLogin, onClickHome }) {
           <img
             src={loginIcon}
             alt="lgoinIcon"
-            className="h-auto w-6 transition duration-200 hover:brightness-60"
+            className="h-auto w-6 cursor-pointer transition duration-200 hover:brightness-60"
           />
         </button>
         <button type="button" onClick={onClickHome} aria-label="go home">
           <img
             src={homeIcon}
             alt="homeIcon"
-            className="h-auto w-6 transition duration-200 hover:brightness-60"
+            className="h-auto w-6 cursor-pointer transition duration-200 hover:brightness-60"
           />
         </button>
       </div>
@@ -34,7 +34,7 @@ export default function MainHeader({ onClickLogin, onClickHome }) {
   );
 }
 
-MainHeader.propTypes = {
+CommonHeader.propTypes = {
   onClickLogin: PropTypes.func,
   onClickHome: PropTypes.func,
 };

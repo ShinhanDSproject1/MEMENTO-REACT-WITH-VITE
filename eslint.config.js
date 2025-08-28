@@ -1,3 +1,6 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from "eslint-plugin-storybook";
+
 import js from "@eslint/js";
 import globals from "globals";
 import react from "eslint-plugin-react";
@@ -42,6 +45,7 @@ export default defineConfig([
         "warn",
         { ignoreRestSiblings: true, argsIgnorePattern: "^_+$" }, // rest 연산자 형제 무시, _ 시작 매개변수 무시
       ],
+      "no-undef": "warn", // 👈 이 부분을 추가하거나 수정하세요
       "default-case": ["error", { commentPattern: "^skip\\sdefault" }], //switch문에 default문 넣기 or // skip default
       "no-const-assign": "error", //const는 불변
       "no-eval": "error", //eval 금지,
@@ -52,6 +56,7 @@ export default defineConfig([
       "react/jsx-no-target-blank": "off",
       "react/no-unknown-property": ["error", { ignore: ["css"] }], // 알 수 없는 속성 금지, css 속성은 허용 (CSS-in-JS)
       "react/jsx-pascal-case": "error", // 컴포넌트 이름 파스칼 케이스 강제
+      "react/jsx-no-undef": "warn",
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }], // React Fast Refresh 관련: 컴포넌트만 export하도록 경고
       "react/self-closing-comp": [
         "error",
