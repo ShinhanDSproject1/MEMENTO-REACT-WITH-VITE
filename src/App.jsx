@@ -8,6 +8,7 @@ import "./index.css"; // 반드시 먼저: @import "tailwindcss" 들어있어야
 import SplashGate from "./pages/Home/SplashGate";
 import CommonHeader from "./components/common/CommonHeader";
 import MainHeader from "./components/main/mainHeader/MainHeader";
+import MentosList from "@/pages/Mentos/MentosList";
 
 function HomeLayout() {
   return (
@@ -55,6 +56,8 @@ export default function App() {
         <Route path="/edit/:id" element={<EditMentos />} />
 
         <Route path="/my/reviews" element={<Reviews />} />
+
+        <Route path="/mentos/category/:category_seq" element={<MentosList />} />
       </Route>
     </Routes>
   );

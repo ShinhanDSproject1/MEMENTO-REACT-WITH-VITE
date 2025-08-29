@@ -20,6 +20,8 @@ export default function SelectBar(props) {
     setIsOpen(false);
   };
 
+  const selectableOptions = options.filter((option) => option.value !== "default");
+
   return (
     <div className="relative w-full max-w-[full] min-w-[150px]">
       {/* 메인 버튼/입력창 */}
@@ -38,7 +40,7 @@ export default function SelectBar(props) {
       {/* 드롭다운 메뉴 */}
       {isOpen && (
         <ul className="absolute top-full left-0 z-10 mt-1 w-full rounded-[10px] border border-[#E6E7EA] bg-white text-center text-gray-900 shadow-md">
-          {options.map((option, index) => (
+          {selectableOptions.map((option, index) => (
             <li
               key={index}
               className={`cursor-pointer border-b-[1px] whitespace-pre ${index === options.length ? "" : "border-gray-200"} border-b-[solid] p-2 hover:bg-gray-100`}

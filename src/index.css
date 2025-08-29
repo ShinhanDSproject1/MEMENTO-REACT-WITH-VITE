@@ -19,6 +19,7 @@
   -moz-osx-font-smoothing: grayscale;
   -ms-overflow-style: none;
 }
+
 ::-webkit-scrollbar {
   display: none;
 }
@@ -67,11 +68,13 @@
 
 /* 버튼 은은한 펄스(그림자+살짝 위로) */
 @keyframes btnPulse {
+
   0%,
   100% {
     transform: translateY(0);
     box-shadow: 0 6px 14px rgba(0, 94, 249, 0);
   }
+
   50% {
     transform: translateY(-2px);
     box-shadow: 0 12px 24px rgba(0, 94, 249, 0.25);
@@ -193,7 +196,23 @@
 }
 
 select {
-  -webkit-appearance: none; /* 크롬 화살표 없애기 */
-  -moz-appearance: none; /* 파이어폭스 화살표 없애기 */
-  appearance: none; /* 화살표 없애기 */
+  -webkit-appearance: none;
+  /* 크롬 화살표 없애기 */
+  -moz-appearance: none;
+  /* 파이어폭스 화살표 없애기 */
+  appearance: none;
+  /* 화살표 없애기 */
+}
+
+.scroll-hidden {
+  /* 스크롤바를 숨기는 핵심 코드 */
+  -ms-overflow-style: none;
+  /* IE, Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* 웹킷 기반 브라우저용 (Chrome, Safari, Edge) */
+.scroll-hidden::-webkit-scrollbar {
+  display: none;
 }
