@@ -2,16 +2,26 @@ import loginIcon from "@/assets/images/login-icon.svg";
 import homeIcon from "@/assets/images/move-home-icon.svg";
 import backIcon from "@/assets/icons/backArrow.svg";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 
 export default function CommonHeader({ onClickLogin, onClickHome }) {
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    // 이전 페이지로 돌아갑니다.
+    navigate(-1);
+  };
+
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between bg-white px-4 py-3">
       {/* 왼쪽 뒤로가기 아이콘 */}
-      <img
-        src={backIcon}
-        alt="backIcon"
-        className="h-[20px] w-auto cursor-pointer hover:brightness-60"
-      />
+      <button onClick={handleGoBack}>
+        <img
+          src={backIcon}
+          alt="backIcon"
+          className="h-[20px] w-auto cursor-pointer hover:brightness-60"
+        />
+      </button>
 
       {/* 오른쪽 아이콘들 */}
       <div className="flex items-center gap-4">
