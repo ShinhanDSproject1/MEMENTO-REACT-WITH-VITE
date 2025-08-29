@@ -9,6 +9,7 @@ import SplashGate from "./pages/Home/SplashGate";
 import CommonHeader from "./components/common/CommonHeader";
 import MainHeader from "./components/main/mainHeader/MainHeader";
 import MentosList from "@/pages/Mentos/MentosList";
+import MyMentosList from "./pages/MyProfile/MyMentosList";
 
 function HomeLayout() {
   return (
@@ -58,6 +59,9 @@ export default function App() {
         <Route path="/my/reviews" element={<Reviews />} />
 
         <Route path="/mentos/category/:category_seq" element={<MentosList />} />
+
+        <Route path="/menti/my-mentos-list" element={<MyMentosList role={"menti"} />} />
+        <Route path="/mento/my-list" element={<MyMentosList role={"mento"} />} />
       </Route>
     </Routes>
   );

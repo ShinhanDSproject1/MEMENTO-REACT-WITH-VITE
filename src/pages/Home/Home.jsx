@@ -8,11 +8,11 @@ import CharacterAni from "@/components/main/mainHeader/CharacterAni";
 import HelpCard from "@/components/main/cardGroup/HelpCard";
 
 export default function Home({ userType, userName, userProfileImage }) {
-  userType = "mentee"; //test
-  userName = "조상호"; //test
+  // userType = "mentee"; //test
+  // userName = "조상호"; //test
 
-  // userType = "mentor"; //test
-  // userName = "김대현"; //test
+  userType = "mentor"; //test
+  userName = "김대현"; //test
 
   return (
     <div className="mx-auto w-full max-w-100 rounded-xl bg-white">

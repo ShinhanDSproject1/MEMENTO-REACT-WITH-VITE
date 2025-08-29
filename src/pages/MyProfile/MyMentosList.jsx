@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 function MyMentosList({ role, ...props }) {
   const { isOpen, modalType, openModal, closeModal, modalData } = useModal();
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleConfirmAction = () => {
     closeModal();
@@ -52,7 +52,7 @@ function MyMentosList({ role, ...props }) {
   };
 
   const onUpdateClick = () => {
-    //navigate("/edit/1");
+    navigate("/edit/1"); //id로 수정필요
   };
 
   const onReportClick = () => {
