@@ -7,6 +7,10 @@ import CommonHeader from "@/components/common/CommonHeader";
 import MainHeader from "@/components/main/mainHeader/MainHeader";
 import EditMentos from "@/pages/Mentos/EditMentos.jsx";
 import Reviews from "@/pages/MyProfile/Review.jsx";
+import MemberReport from "./pages/Admin/MemberReport";
+import ReportList from "./pages/Admin/ReportList";
+import ChatListPage from "./pages/Chat/ChatListPage";
+import ChatRoomPage from "./pages/Chat/ChatRoomPage";
 
 function HomeLayout() {
   return (
@@ -53,6 +57,11 @@ export default function App() {
         <Route path="/edit/:id" element={<EditMentos />} />
 
         <Route path="/my/reviews" element={<Reviews />} />
+        <Route path="/admin/report" element={<MemberReport />} />
+        <Route path="/admin/reportlist" element={<ReportList />} />
+
+        <Route path="/chat" element={<ChatListPage />} />
+        <Route path="/chat/:roomId" element={<ChatRoomPage />} />
       </Route>
     </Routes>
   );
