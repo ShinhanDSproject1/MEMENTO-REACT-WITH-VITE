@@ -7,6 +7,8 @@ import SplashGate from "./pages/Home/SplashGate";
 import CommonHeader from "./components/common/CommonHeader";
 import MainHeader from "./components/main/mainHeader/MainHeader";
 import Login from "./pages/Login/Login";
+import EditMentos from "@/pages/Mentos/EditMentos.jsx";
+import Reviews from "@/pages/MyProfile/Review.jsx";
 
 const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 
@@ -49,6 +51,8 @@ export default function App() {
         <Route path="/mentee/myprofile" element={<MyProfile />} />
         <Route path="/create-mentos" element={<CreateMentos />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/edit/:id" element={<EditMentos />} />
+        <Route path="/my/reviews" element={<Reviews />} />
       </Route>
     </Routes>
   );

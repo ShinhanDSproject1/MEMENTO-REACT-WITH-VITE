@@ -14,7 +14,7 @@ export const MainButton = React.forwardRef(({ children, className, ...props }, r
       {...props}>
       <div className="flex items-center gap-2">
         <div className="h-2 w-2 rounded-full bg-[#0C2D62] transition-all duration-300 group-hover:scale-[100.8]" />
-        <span className="inline-block transition-all duration-300 group-hover:translate-x-12 group-hover:opacity-0">
+        <span className="etransition-all inline-block duration-300 group-hover:translate-x-12 group-hover:opacity-0">
           {children}
         </span>
       </div>

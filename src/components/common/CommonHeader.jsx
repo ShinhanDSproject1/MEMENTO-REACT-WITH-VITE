@@ -23,7 +23,7 @@ export default function CommonHeader({ onClickLogin, onClickHome }) {
         <button type="button" onClick={onClickLogin} aria-label="login">
           <img
             src={loginIcon}
-            alt="lgoinIcon"
+            alt="loginIcon"
             className="h-auto w-6 cursor-pointer transition duration-200 hover:brightness-60"
           />
         </button>
