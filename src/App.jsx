@@ -9,6 +9,10 @@ import MainHeader from "./components/main/mainHeader/MainHeader";
 import Login from "./pages/Login/Login";
 import EditMentos from "@/pages/Mentor/EditMentos.jsx";
 import Reviews from "@/pages/Mentor/Review.jsx";
+import SignupComplete from "./pages/Login/SignUpComplete";
+import MentorSignup from "./pages/Login/MentorSignup";
+import MenteeSignup from "./pages/Login/MenteeSignup";
+import SignupSelect from "./pages/Login/SignupSelect";
 
 const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 
@@ -51,7 +55,10 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/myprofile" element={<MyProfile />} />
         <Route path="/create-mentos" element={<CreateMentos />} />
-
+        <Route path="/signup/" element={<SignupSelect />} />
+        <Route path="/signup/mentor" element={<MentorSignup />} />
+        <Route path="/signup/mentee" element={<MenteeSignup />} />
+        <Route path="/signup-complete" element={<SignupComplete />} />
         <Route path="/edit/:id" element={<EditMentos />} />
         <Route path="/reviews" element={<Reviews />} />
       </Route>
