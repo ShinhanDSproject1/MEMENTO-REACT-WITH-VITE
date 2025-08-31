@@ -22,10 +22,14 @@ function Login() {
     try {
       // await api.login({ role, id, pw });
       // test logic
-      if (role === "mentee" && id === "mentee" && pw === "mentee") {
-        navigate("/", { state: { userType: "mentee", userName: "김대현" } });
-      } else if (role === "mentor" && id === "mentor" && pw === "mentor") {
-        navigate("/", { state: { userType: "mentor", userName: "안가연" } });
+      if (role === "mentee" && pw === "mentee") {
+        if (id === "안가연") {
+          navigate("/", { state: { userType: "mentee", userName: id, recommend: true } });
+        } else {
+          navigate("/", { state: { userType: "mentee", userName: id, recommend: false } });
+        }
+      } else if (role === "mentor" && pw === "mentor") {
+        navigate("/", { state: { userType: "mentor", userName: id } });
       } else if (id === "admin" && pw === "admin") {
         navigate("/", { state: { userType: "admin" } });
       } else {
