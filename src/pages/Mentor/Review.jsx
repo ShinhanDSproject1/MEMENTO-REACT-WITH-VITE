@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import PageContainer from "@/components/profile/PageContainer.jsx";
 import ReviewCard from "@/components/profile/ReviewCard.jsx";
-import MainHeader from "@/components/main/mainHeader/MainHeader";
 
 export default function Review() {
   const [items, setItems] = useState([]);

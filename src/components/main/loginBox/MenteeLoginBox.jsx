@@ -19,7 +19,7 @@ function MenteeLoginBox({ userName }) {
       </button>
       <button
         className="mx-auto ml-5 cursor-pointer rounded-full bg-[#005EF9] p-2 px-6 text-sm font-semibold text-white hover:bg-[#0C2D62] hover:shadow"
-        onClick={() => navigate("/mentee/myprofile")}>
+        onClick={() => navigate("/myprofile")}>
         나의 정보관리
       </button>
     </div>
