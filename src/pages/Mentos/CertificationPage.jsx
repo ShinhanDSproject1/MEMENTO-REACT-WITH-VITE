@@ -1,0 +1,78 @@
+import React from "react";
+import PropTypes from "prop-types";
+import certificationSuccess from "@/assets/images/certification-success.svg";
+import certificationFail from "@/assets/images/certification-fail.svg";
+import Button from "@/components/common/Button";
+import { Spinner } from "flowbite-react";
+import { Progress } from "flowbite-react";
+
+function CertificationPage({ result, ...props }) {
+  if (result === "inprogress") {
+    return (
+      <div className="flex h-full w-full flex-col justify-between gap-4 bg-white py-4">
+        <div className="flex w-full">
+          <p className="font-WooridaumB text-black">
+            자격증 인증 <span className="font-WooridaumB text-[#005EF9]">진행중</span>...
+          </p>
+        </div>
+        <div className="flex w-full flex-col items-center justify-center gap-2">
+          <Spinner aria-label="Extra large spinner example" size="xl" />
+          <Progress
+            className="w-full"
+            progress={45}
+            progressLabelPosition="inside"
+            textLabel=""
+            textLabelPosition="outside"
+            size="lg"
+            labelProgress
+            labelText
+          />
+        </div>
+
+        <Button
+          variant="cancelGray"
+          className="font-WooridaumB w-full px-8 py-4 font-bold"
+          size="lg">
+          취소하기
+        </Button>
+      </div>
+    );
+  }
+  if (result === "fail") {
+    return (
+      <div className="flex h-full w-full flex-col justify-between gap-4 bg-white p-4">
+        <div className="flex w-full">
+          <p className="font-WooridaumB text-black">
+            자격증을 <span className="font-WooridaumB text-[#DF001F]">인증하지</span> 못했습니다
+          </p>
+        </div>
+
+        <div className="flex w-full justify-center">
+          <img className="w-[80%]" src={certificationFail} />
+        </div>
+        <Button variant="danger" className="font-WooridaumB w-full px-8 py-4 font-bold" size="lg">
+          돌아가기
+        </Button>
+      </div>
+    );
+  }
+  return (
+    <div className="flex h-full w-full flex-col justify-around gap-4 bg-white p-4">
+      <div className="flex w-full">
+        <p className="font-WooridaumB text-black">
+          자격증이 <span className="font-WooridaumB text-[#005EF9]">인증</span>되었습니다
+        </p>
+      </div>
+      <div className="flex w-full justify-center">
+        <img className="w-[80%]" src={certificationSuccess} />
+      </div>
+      <Button variant="primary" className="font-WooridaumB w-full px-8 py-4 font-bold" size="lg">
+        확인
+      </Button>
+    </div>
+  );
+}
+
+CertificationPage.propTypes = { result: PropTypes.string };
+
+export default CertificationPage;
