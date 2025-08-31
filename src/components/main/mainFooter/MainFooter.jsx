@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer className="w-full border-t border-slate-200 bg-slate-50">
-      <div className="mx-auto flex max-w-6xl flex-col px-4 py-8 sm:px-6">
+      <section className="mx-auto flex max-w-6xl flex-col px-4 py-8 sm:px-6">
         {/* 고객센터 + 회사 정보를 세로 배치 */}
         <div className="flex flex-col gap-6">
           {/* 고객센터 */}
@@ -50,7 +50,7 @@ export default function Footer() {
             운영하는 프로젝트입니다.
           </p>
         </div>
-      </div>
+      </section>
       <div className="mx-auto w-full max-w-5xl px-4 py-3 text-xs text-gray-500 sm:px-6 sm:text-sm lg:px-8">
         © 2025
       </div>

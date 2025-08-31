@@ -6,10 +6,13 @@ import Home from "./pages/Home/Home";
 import SplashGate from "./pages/Home/SplashGate";
 import CommonHeader from "./components/common/CommonHeader";
 import MainHeader from "./components/main/mainHeader/MainHeader";
+import Login from "./pages/Login/Login";
+
+const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 
 function HomeLayout() {
   return (
-    <div className="mx-auto w-100 max-w-5xl rounded-xl bg-white">
+    <div className={layoutStyle}>
       <SplashGate>
         <>
           <MainHeader />
@@ -24,7 +27,7 @@ function HomeLayout() {
 
 function AppLayout() {
   return (
-    <div className="mx-auto w-100 max-w-5xl rounded-xl bg-white">
+    <div className={layoutStyle}>
       <CommonHeader />
       <main>
         <Outlet />
@@ -45,6 +48,7 @@ export default function App() {
       <Route element={<AppLayout />}>
         <Route path="/mentee/myprofile" element={<MyProfile />} />
         <Route path="/create-mentos" element={<CreateMentos />} />
+        <Route path="/login" element={<Login />} />
       </Route>
     </Routes>
   );
