@@ -1,3 +1,4 @@
+// src/pages/Profile/MentorProfile.jsx
 import { useState } from "react";
 import PageContainer from "@/components/profile/PageContainer";
 import SectionCard from "@/components/profile/CardSection";
@@ -16,13 +17,10 @@ const toDate = (v) => {
   const dt = new Date(v);
   return isNaN(dt.getTime()) ? null : dt;
 };
-const toISO = (date) => {
-  if (!date) return "";
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-};
+const toISO = (date) =>
+  !date
+    ? ""
+    : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 const fmtKOR = (v) => {
   if (!v) return "";
   const iso = /^\d{4}-\d{2}-\d{2}$/.test(v);
@@ -33,13 +31,17 @@ const fmtKOR = (v) => {
   return v;
 };
 
-export default function MyProfile() {
+export default function MentorProfile() {
   const [user, setUser] = useState({
     name: "안가연",
     phone: "010-1111-2222",
     dob: "2001년 01월 25일",
     userid: "memento",
     pw: "12345",
+
+    // 멘토 전용
+    intro: "안녕하세요. 금융/투자 분야 멘토 안가연입니다.",
+    certs: ["자산관리사", "투자운용사"], // 보유자격증
   });
 
   const [editProfile, setEditProfile] = useState(false);
@@ -62,6 +64,21 @@ export default function MyProfile() {
     setInfoDraft({ current: "", next: "", confirm: "" });
   };
 
+  // 멘토 전용 핸들러
+  const handleEditIntro = () => {
+    // const next = window.prompt("소개글을 입력하세요", user.intro || "");
+    if (next === null) return;
+    setUser((prev) => ({ ...prev, intro: next }));
+  };
+  const handleAddCert = () => {
+    const cert = window.prompt("추가할 자격증 이름을 입력하세요");
+    if (!cert) return;
+    setUser((prev) => ({ ...prev, certs: [...prev.certs, cert] }));
+  };
+  const handleRemoveCert = (idx) => {
+    setUser((prev) => ({ ...prev, certs: prev.certs.filter((_, i) => i !== idx) }));
+  };
+
   const headingCls =
     "mb-6 text-left text-[24px] leading-[28px] tracking-tight font-bold text-[#121418]";
 
@@ -69,6 +86,7 @@ export default function MyProfile() {
     <div className="font-WooridaumB flex min-h-dvh min-h-screen justify-center bg-[#f5f6f8] antialiased">
       <main className="min-h-dvh w-full bg-white px-4 py-8 shadow">
         <PageContainer>
+          {/* 내 프로필 */}
           <h2 className={headingCls}>내 프로필</h2>
           <section className="mb-8">
             <SectionCard>
@@ -100,13 +118,13 @@ export default function MyProfile() {
               <div className="flex justify-end">
                 {editProfile ? (
                   <button
-                    className="cursor-pointer rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white hover:bg-[#005EF9] md:text-base"
+                    className="rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white md:text-base"
                     onClick={handleProfileSave}>
                     수정 완료
                   </button>
                 ) : (
                   <button
-                    className="cursor-pointer rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white hover:bg-[#005EF9] md:text-base"
+                    className="cursor-pointer rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white md:text-base"
                     onClick={() => setEditProfile(true)}>
                     프로필 수정
                   </button>
@@ -115,6 +133,7 @@ export default function MyProfile() {
             </SectionCard>
           </section>
 
+          {/* 기본정보 */}
           <h2 className={headingCls}>기본정보</h2>
           <section className="mb-8">
             <SectionCard>
@@ -134,7 +153,7 @@ export default function MyProfile() {
                   </FieldRow>
                   <div className="flex justify-end">
                     <button
-                      className="cursor-pointer rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white hover:bg-[#005EF9] md:text-base"
+                      className="cursor-pointer rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white md:text-base"
                       onClick={() => setEditInfo(true)}>
                       기본정보 변경
                     </button>
@@ -159,7 +178,6 @@ export default function MyProfile() {
                       }
                     />
                   </FieldRow>
-
                   <FieldRow label="새 비밀번호" htmlFor="newPw">
                     <CommonInput
                       id="newPw"
@@ -170,7 +188,6 @@ export default function MyProfile() {
                       placeholder="8자 이상 권장"
                     />
                   </FieldRow>
-
                   <FieldRow label="비밀번호 확인" htmlFor="confirmPw">
                     <CommonInput
                       id="confirmPw"
@@ -188,14 +205,9 @@ export default function MyProfile() {
                       }
                     />
                   </FieldRow>
-
                   <div className="mt-1 flex justify-end">
                     <button
-                      className={`cursor-pointer rounded-lg px-4 py-2 text-sm font-semibold text-white md:text-base ${
-                        canSubmit
-                          ? "bg-[#005EF9] hover:bg-[#005EF9]"
-                          : "cursor-not-allowed bg-gray-300"
-                      }`}
+                      className={`cursor-pointerrounded-lg px-4 py-2 text-sm font-semibold text-white md:text-base ${canSubmit ? "bg-[#005EF9]" : "cursor-not-allowed bg-gray-300"}`}
                       disabled={!canSubmit}
                       onClick={handleInfoSave}>
                       변경 완료
@@ -206,11 +218,31 @@ export default function MyProfile() {
             </SectionCard>
           </section>
 
-          <div className="mb-12 flex w-full justify-end">
-            <button className="cursor-pointer rounded-lg bg-[#DF001F] px-5 py-2 text-sm font-semibold text-white hover:bg-[#DF001F] md:text-base">
-              계정 탈퇴
-            </button>
-          </div>
+          <h2 className={headingCls}>보유자격증</h2>
+          <section className="mb-8">
+            <div className="rounded-xl border border-[#E5E7ED] bg-white px-5 py-4 text-sm leading-6 text-[#606264]">
+              {user.certs.join("    ")}
+            </div>
+
+            <div className="mt-4 flex items-start justify-between">
+              <div className="flex flex-col gap-2">
+                <button
+                  className="cursor-pointer rounded-lg bg-[#6DA4FF] px-5 py-2 text-sm font-semibold text-white"
+                  onClick={handleEditIntro}>
+                  소개글 수정
+                </button>
+                <button
+                  className="cursor-pointer rounded-lg bg-[#1068F9] px-5 py-2 text-sm font-semibold text-white"
+                  onClick={handleAddCert}>
+                  자격증 추가
+                </button>
+              </div>
+
+              <button className="cursor-pointer rounded-lg bg-[#DF001F] px-5 py-2 text-sm font-semibold text-white">
+                계정 탈퇴
+              </button>
+            </div>
+          </section>
         </PageContainer>
       </main>
     </div>

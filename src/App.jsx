@@ -11,6 +11,7 @@ import MemberReport from "./pages/Admin/MemberReport";
 import ReportList from "./pages/Admin/ReportList";
 import ChatListPage from "./pages/Chat/ChatListPage";
 import ChatRoomPage from "./pages/Chat/ChatRoomPage";
+import MentorProfile from "./pages/MyProfile/MentoProfile";
 
 function HomeLayout() {
   return (
@@ -50,6 +51,7 @@ export default function App() {
       <Route element={<AppLayout />}>
         {/* 내 프로필 */}
         <Route path="/menti" element={<MyProfile />} />
+        <Route path="/mento" element={<MentorProfile />} />
 
         {/* 멘토링 생성 */}
         <Route path="/create" element={<CreateMentos />} />
@@ -57,6 +59,7 @@ export default function App() {
         <Route path="/edit/:id" element={<EditMentos />} />
 
         <Route path="/my/reviews" element={<Reviews />} />
+
         <Route path="/admin/report" element={<MemberReport />} />
         <Route path="/admin/reportlist" element={<ReportList />} />
 
