@@ -4,6 +4,7 @@ import MentosCard from "@/components/common/MentosCard";
 import MentosMainTitleComponent from "@/components/mentos/MentosMainTitleComponent";
 import { useModal } from "@/hooks/common/useModal";
 import { CommonModal } from "@/components/common/CommonModal";
+import Button from "@/components/common/Button";
 import { useNavigate } from "react-router-dom";
 
 function MyMentosList({ role, ...props }) {
@@ -39,7 +40,7 @@ function MyMentosList({ role, ...props }) {
       openModal("reportComplete");
     }
     // if (modalType === "reportDetail") {
-    //  s openModal("dismissUser");
+    //  openModal("dismissUser");
     // }
   };
 
@@ -65,9 +66,14 @@ function MyMentosList({ role, ...props }) {
 
   if (role === "mento") {
     return (
-      <div className="flex h-full w-full min-w-[375px] flex-col overflow-y-scroll bg-white pb-4">
+      <div className="flex h-full w-full min-w-[375px] flex-col gap-4 overflow-y-scroll bg-white pb-4">
         <MentosMainTitleComponent mainTitle={"멘토링 관리"} />
-        <section className="flex w-full flex-col items-center justify-center gap-3">
+        <div className="flex w-full justify-end px-6">
+          <Button variant="primary" size="lg" onClick={() => navigate("/create-mentos")}>
+            멘토링 생성하기
+          </Button>
+        </div>
+        <section className="flex w-full flex-col items-center justify-center gap-4">
           <MentosCard
             title="React 강의"
             price={50000}
@@ -114,7 +120,7 @@ function MyMentosList({ role, ...props }) {
   }
 
   return (
-    <div className="flex h-full w-full min-w-[375px] flex-col overflow-y-scroll bg-white pb-4">
+    <div className="flex h-full w-full min-w-[375px] flex-col gap-4 overflow-y-scroll bg-white pb-4">
       <MentosMainTitleComponent mainTitle={"나의 멘토링 내역"} />
       <section className="flex w-full flex-col items-center justify-center gap-3">
         <MentosCard
