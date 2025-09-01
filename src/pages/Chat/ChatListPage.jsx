@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getRooms } from "./services/chat";
+import defaultimage from "@/assets/images/gom.png";
 
 const groupBy = (arr, key) => arr.reduce((acc, x) => ((acc[x[key]] ??= []).push(x), acc), {});
 
@@ -40,7 +41,7 @@ export default function ChatListPage() {
                     to={`/chat/${r.id}`}
                     className="flex items-center gap-3 rounded-[14px] border border-[#eef0f4] bg-white px-4 py-3 shadow-[0_1px_0_rgba(17,17,17,0.02)] hover:bg-[#fafafa]">
                     <div className="grid h-12 w-12 place-items-center rounded-full bg-[#f1f3f6] text-xl">
-                      🐻
+                      <img src={defaultimage} alt="gom" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[14px] font-semibold">{r.name}</div>
