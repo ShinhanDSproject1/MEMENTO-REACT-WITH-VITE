@@ -3,11 +3,14 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 import { BrowserRouter } from "react-router-dom";
+import SplashGate from "./pages/Home/SplashGate";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <BrowserRouter basename="/memento-finance">
-      <App />
-    </BrowserRouter>
+    <SplashGate>
+      <BrowserRouter basename="/memento-finance">
+        <App />
+      </BrowserRouter>
+    </SplashGate>
   </React.StrictMode>,
 );
