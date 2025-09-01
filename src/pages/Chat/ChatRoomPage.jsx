@@ -1,8 +1,8 @@
-// src/pages/Chat/ChatRoomPage.jsx
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Send } from "lucide-react";
 import { getMessages, sendMessage } from "./services/chat";
+import defaultimage from "@/assets/images/gom.png";
 
 export default function ChatRoomPage() {
   const { roomId } = useParams();
@@ -45,7 +45,10 @@ export default function ChatRoomPage() {
             key={m.id}
             className={`flex ${m.role === "me" ? "justify-end" : "items-start gap-2"}`}>
             {m.role !== "me" && (
-              <div className="grid h-8 w-8 place-items-center rounded-full bg-[#565C63]">🐻</div>
+              <div className="grid h-8 w-8 place-items-center rounded-full bg-[#565C63]">
+                {" "}
+                <img src={defaultimage} alt="gom" />
+              </div>
             )}
             <div className="max-w-[78%] rounded-[18px] bg-[#93B1FF] px-4 py-2 text-white">
               {m.text}

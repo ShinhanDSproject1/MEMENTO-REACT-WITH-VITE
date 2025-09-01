@@ -10,7 +10,6 @@ import { Outlet, Route, Routes } from "react-router-dom";
 import MyProfile from "./pages/MyProfile/MyProfile";
 import CreateMentos from "./pages/Mentor/CreateMentos";
 import Home from "./pages/Home/Home";
-import SplashGate from "./pages/Home/SplashGate";
 import CommonHeader from "./components/common/CommonHeader";
 import MainHeader from "./components/main/mainHeader/MainHeader";
 import Login from "./pages/Login/Login";
@@ -20,20 +19,21 @@ import MentosDetail from "./pages/Mentos/MentosDetail";
 import CertificationRegister from "./pages/Mentos/CertificationRegister";
 import MentoIntroduce from "./pages/Mentos/MentoIntroduce";
 import CertificationPage from "./pages/Mentos/CertificationPage";
+import SignupComplete from "./pages/Login/SignUpComplete";
+import MentorSignup from "./pages/Login/MentorSignup";
+import MenteeSignup from "./pages/Login/MenteeSignup";
+import SignupSelect from "./pages/Login/SignupSelect";
+
 
 const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 
 function HomeLayout() {
   return (
     <div className={layoutStyle}>
-      <SplashGate>
-        <>
-          <MainHeader />
-          <main>
-            <Outlet />
-          </main>
-        </>
-      </SplashGate>
+      <MainHeader />
+      <main>
+        <Outlet />
+      </main>
     </div>
   );
 }
@@ -67,6 +67,10 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/myprofile" element={<MyProfile />} />
         <Route path="/create-mentos" element={<CreateMentos />} />
+        <Route path="/signup/" element={<SignupSelect />} />
+        <Route path="/signup/mentor" element={<MentorSignup />} />
+        <Route path="/signup/mentee" element={<MenteeSignup />} />
+        <Route path="/signup-complete" element={<SignupComplete />} />
         <Route path="/edit/:id" element={<EditMentos />} />
         <Route path="/admin/report" element={<MemberReport />} />
         <Route path="/admin/declaration" element={<ReportList />} />
