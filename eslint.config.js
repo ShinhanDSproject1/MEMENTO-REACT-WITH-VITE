@@ -56,6 +56,7 @@ export default defineConfig([
       "react/jsx-no-target-blank": "off",
       "react/no-unknown-property": ["error", { ignore: ["css"] }], // 알 수 없는 속성 금지, css 속성은 허용 (CSS-in-JS)
       "react/jsx-pascal-case": "error", // 컴포넌트 이름 파스칼 케이스 강제
+      "react/jsx-no-undef": "warn",
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }], // React Fast Refresh 관련: 컴포넌트만 export하도록 경고
       "react/self-closing-comp": [
         "error",

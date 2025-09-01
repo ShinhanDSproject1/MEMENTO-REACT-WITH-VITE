@@ -1,7 +1,11 @@
 import PropTypes from "prop-types";
 import kogiri from "@/assets/images/character-kogiri.svg";
 
+import { useNavigate } from "react-router-dom";
+
 function MentoLoginBox({ userName, userProfileImage }) {
+  const navigate = useNavigate();
+
   const profileImg = userProfileImage || kogiri;
   return (
     <div className="mx-auto w-full space-y-2 bg-[#F0F4FA] pb-3 text-center">
@@ -17,7 +21,9 @@ function MentoLoginBox({ userName, userProfileImage }) {
         </div>
       </div>
 
-      <button className="mx-auto cursor-pointer rounded-full bg-[#005EF9] p-2 px-6 text-sm font-semibold text-white hover:bg-[#0C2D62] hover:shadow">
+      <button
+        className="mx-auto cursor-pointer rounded-full bg-[#005EF9] p-2 px-6 text-sm font-semibold text-white hover:bg-[#0C2D62] hover:shadow"
+        onClick={() => navigate("/myprofile")}>
         내 정보수정
       </button>
     </div>

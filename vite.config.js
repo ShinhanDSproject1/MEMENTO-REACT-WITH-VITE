@@ -22,6 +22,7 @@ export default defineConfig({
   server: {
     host: true, // ✅ 동일 네트워크(192.168.x.x) 접속 허용
     port: 3000,
+    open: "/memento-finance",
   },
   test: {
     projects: [

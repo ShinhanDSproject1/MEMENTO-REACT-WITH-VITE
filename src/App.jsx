@@ -1,19 +1,27 @@
-import { Outlet, BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home/Home";
-import MyProfile from "./pages/MyProfile/MyProfile";
-import CreateMentos from "./pages/Mentos/CreateMentos.jsx";
-import EditMentos from "./pages/Mentos/EditMentos.jsx";
-import Reviews from "@/pages/MyProfile/Review.jsx";
+import MentosList from "@/pages/Mentos/MentosList";
+import MyMentosList from "./pages/MyProfile/MyMentosList";
+import MemberReport from "./pages/Admin/MemberReport";
+import ReportList from "./pages/Admin/ReportList";
+import ChatListPage from "./pages/Chat/ChatListPage";
+import ChatRoomPage from "./pages/Chat/ChatRoomPage";
+import MentorProfile from "./pages/MyProfile/MentoProfile";
 import "./index.css"; // 반드시 먼저: @import "tailwindcss" 들어있어야 함
+import { Outlet, Route, Routes } from "react-router-dom";
+import MyProfile from "./pages/MyProfile/MyProfile";
+import CreateMentos from "./pages/Mentor/CreateMentos";
+import Home from "./pages/Home/Home";
 import SplashGate from "./pages/Home/SplashGate";
 import CommonHeader from "./components/common/CommonHeader";
 import MainHeader from "./components/main/mainHeader/MainHeader";
-import MentosList from "@/pages/Mentos/MentosList";
-import MyMentosList from "./pages/MyProfile/MyMentosList";
+import Login from "./pages/Login/Login";
+import EditMentos from "@/pages/Mentor/EditMentos.jsx";
+import Reviews from "@/pages/Mentor/Review.jsx";
+
+const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 
 function HomeLayout() {
   return (
-    <div className="mx-auto w-100 max-w-5xl rounded-xl bg-white">
+    <div className={layoutStyle}>
       <SplashGate>
         <>
           <MainHeader />
@@ -28,7 +36,7 @@ function HomeLayout() {
 
 function AppLayout() {
   return (
-    <div className="mx-auto w-100 max-w-5xl rounded-xl bg-white">
+    <div className={layoutStyle}>
       <CommonHeader />
       <main>
         <Outlet />
@@ -47,21 +55,19 @@ export default function App() {
 
       {/* 그 외 공통 레이아웃 */}
       <Route element={<AppLayout />}>
-        {/* 내 프로필 */}
-        <Route path="/menti" element={<MyProfile />} />
-
-        {/* 멘토링 생성 */}
-        <Route path="/create" element={<CreateMentos />} />
-
-        {/* 멘토링 수정 */}
-        <Route path="/edit/:id" element={<EditMentos />} />
-
-        <Route path="/my/reviews" element={<Reviews />} />
-
         <Route path="/mentos/category/:category_seq" element={<MentosList />} />
-
         <Route path="/menti/my-mentos-list" element={<MyMentosList role={"menti"} />} />
         <Route path="/mento/my-list" element={<MyMentosList role={"mento"} />} />
+        <Route path="/mento" element={<MentorProfile />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/myprofile" element={<MyProfile />} />
+        <Route path="/create-mentos" element={<CreateMentos />} />
+        <Route path="/edit/:id" element={<EditMentos />} />
+        <Route path="/admin/report" element={<MemberReport />} />
+        <Route path="/admin/declaration" element={<ReportList />} />
+        <Route path="/chat" element={<ChatListPage />} />
+        <Route path="/chat/:roomId" element={<ChatRoomPage />} />
+        <Route path="/reviews" element={<Reviews />} />
       </Route>
     </Routes>
   );

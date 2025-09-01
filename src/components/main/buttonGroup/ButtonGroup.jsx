@@ -11,7 +11,7 @@ export default function ButtonGroup({ userType }) {
   } else if (userType === "admin") {
     return <AdminButtonGroup />;
   } else {
-    <MenteeButtonGroup />;
+    return <MenteeButtonGroup />;
   }
 }
 

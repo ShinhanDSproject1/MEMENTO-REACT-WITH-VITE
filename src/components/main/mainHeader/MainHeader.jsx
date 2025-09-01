@@ -2,8 +2,10 @@ import logo from "@/assets/images/memento-logo.svg";
 import loginIcon from "@/assets/images/login-icon.svg";
 import homeIcon from "@/assets/images/move-home-icon.svg";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 
 export default function MainHeader({ onClickLogin, onClickHome }) {
+  const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between bg-white px-4 py-3 sm:px-6 lg:px-8">
       {/* 왼쪽 로고 */}
@@ -20,6 +22,7 @@ export default function MainHeader({ onClickLogin, onClickHome }) {
             src={loginIcon}
             alt="loginIcon"
             className="h-auto w-6 cursor-pointer transition duration-200 hover:brightness-60"
+            onClick={() => navigate("/login")}
           />
         </button>
         <button type="button" onClick={onClickHome} aria-label="go home">
@@ -27,6 +30,7 @@ export default function MainHeader({ onClickLogin, onClickHome }) {
             src={homeIcon}
             alt="homeIcon"
             className="h-auto w-6 cursor-pointer transition duration-200 hover:brightness-60"
+            onClick={() => navigate("/")}
           />
         </button>
       </div>

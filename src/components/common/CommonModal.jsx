@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { createPortal } from "react-dom";
 import { MODAL_CONFIG } from "@/utils/modal-config";
 import Button from "./Button";
 
@@ -15,10 +16,10 @@ export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, modal
     return null;
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+  const modal = (
+    <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/50">
       <div
-        className={`flex w-full max-w-[250px] flex-col ${config.type === "form" ? "gap-3" : "gap-5 p-4"} rounded-lg bg-white`}>
+        className={`flex w-full max-w-[250px] flex-col ${config.type === "form" ? "gap-3 p-4" : "gap-5 p-4"} max-h-[80vh] overflow-y-auto rounded-lg bg-white break-words`}>
         {/* ⭐️ 모달 타입에 따라 다른 콘텐츠 렌더링 */}
         {config.type === "form" ? (
           // 폼 모달 (리뷰 작성 등)
@@ -76,6 +77,7 @@ export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, modal
       </div>
     </div>
   );
+  return createPortal(modal, document.body);
 }
 
 // PropTypes 정의
