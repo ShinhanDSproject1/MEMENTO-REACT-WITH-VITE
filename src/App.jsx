@@ -10,7 +10,6 @@ import { Outlet, Route, Routes } from "react-router-dom";
 import MyProfile from "./pages/MyProfile/MyProfile";
 import CreateMentos from "./pages/Mentor/CreateMentos";
 import Home from "./pages/Home/Home";
-import SplashGate from "./pages/Home/SplashGate";
 import CommonHeader from "./components/common/CommonHeader";
 import MainHeader from "./components/main/mainHeader/MainHeader";
 import Login from "./pages/Login/Login";
@@ -26,14 +25,10 @@ const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 function HomeLayout() {
   return (
     <div className={layoutStyle}>
-      <SplashGate>
-        <>
-          <MainHeader />
-          <main>
-            <Outlet />
-          </main>
-        </>
-      </SplashGate>
+      <MainHeader />
+      <main>
+        <Outlet />
+      </main>
     </div>
   );
 }
