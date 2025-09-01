@@ -1,6 +1,16 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, forwardRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "@/assets/images/memento-logo.svg";
+import { ko } from "date-fns/locale";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
+// ✅ DatePicker가 필요로 하는 ref를 전달하기 위한 숨김 인풋
+const HiddenInput = forwardRef(function HiddenInput(props, ref) {
+  return (
+    <input ref={ref} {...props} className="sr-only" readOnly aria-hidden="true" tabIndex={-1} />
+  );
+});
 
 export default function MentorSignup() {
   const navigate = useNavigate();
@@ -12,16 +22,29 @@ export default function MentorSignup() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [birth, setBirth] = useState({ y: "", m: "", d: "" });
-  const [certOwn, setCertOwn] = useState(null); // true: 보유, false: 미보유
+  const [certOwn, setCertOwn] = useState(false); // true: 보유, false: 미보유
   const [certFile, setCertFile] = useState(null);
   const [agree, setAgree] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [verified, setVerified] = useState(false);
 
-  // 간단 검증
+  // DatePicker 열림 상태
+  const [isCalOpen, setIsCalOpen] = useState(false);
+
+  /// 전화번호/비번 검증
   const pwOk = pw.length >= 6 && pw === pw2;
   const phoneOk = /^\d{9,13}$/.test(phone.replace(/\D/g, ""));
-  const birthOk = /^\d{4}$/.test(birth.y) && /^\d{1,2}$/.test(birth.m) && /^\d{1,2}$/.test(birth.d);
+
+  // 생년월일 검증(실제 날짜 유효성)
+  const birthOk = useMemo(() => {
+    if (!/^\d{4}$/.test(birth.y)) return false;
+    if (!/^\d{1,2}$/.test(birth.m) || !/^\d{1,2}$/.test(birth.d)) return false;
+    const y = Number(birth.y);
+    const m = Number(birth.m);
+    const d = Number(birth.d);
+    const dt = new Date(y, m - 1, d);
+    return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d;
+  }, [birth]);
 
   const canSubmit = useMemo(() => {
     return (
@@ -31,10 +54,9 @@ export default function MentorSignup() {
       phoneOk &&
       birthOk &&
       (certOwn === false || (certOwn === true && !!certFile)) &&
-      agree &&
-      verified // 이름 본인인증 완료
+      agree
     );
-  }, [id, pwOk, name, phoneOk, birthOk, certOwn, certFile, agree, verified]);
+  }, [id, pwOk, name, phoneOk, birthOk, certOwn, certFile, agree]);
 
   const onSelfVerify = async () => {
     // 데모용: 0.7초 후 인증 완료 처리
@@ -47,11 +69,17 @@ export default function MentorSignup() {
   const onSubmit = (e) => {
     e.preventDefault();
     if (!canSubmit) return;
-
     // TODO: 실제 가입 API 호출
-    // api.signup({...})
     navigate("/signup-complete");
   };
+
+  // DatePicker 선택 값 및 기본 오픈 날짜
+  const selectedDate =
+    birth.y && birth.m && birth.d
+      ? new Date(Number(birth.y), Number(birth.m) - 1, Number(birth.d))
+      : null;
+
+  const openToDate = selectedDate ?? new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
   return (
     <main className="mx-auto w-full max-w-md px-5 py-8">
@@ -87,7 +115,7 @@ export default function MentorSignup() {
             placeholder="PW입력"
             value={pw}
             onChange={(e) => setPw(e.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:bg-white focus:shadow-[0_0_0_3px_rgba(47,108,255,0.12)]"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:bg-white focus:shadow-[0_0_0_3px_rgba(47,108,255,0.12)]"
           />
         </label>
 
@@ -98,81 +126,123 @@ export default function MentorSignup() {
             placeholder="PW확인"
             value={pw2}
             onChange={(e) => setPw2(e.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:bg-white focus:shadow-[0_0_0_3px_rgba(47,108,255,0.12)]"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:bg-white focus:shadow-[0_0_0_3px_rgba(47,108,255,0.12)]"
           />
           {!pwOk && pw2 && (
             <p className="mt-1 text-xs text-red-500">비밀번호가 일치하지 않거나 너무 짧습니다.</p>
           )}
         </label>
 
-        {/* 이름 + 본인인증 */}
+        {/* 이름 */}
         <div className="flex gap-2">
           <input
             type="text"
             placeholder="이름"
             value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              setVerified(false);
-            }}
+            onChange={(e) => setName(e.target.value)}
             className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.12)]"
           />
-          <button
-            type="button"
-            onClick={onSelfVerify}
-            disabled={!name.trim() || verifying}
-            className={[
-              "h-12 rounded-2xl px-4 text-sm font-bold text-white",
-              name.trim() && !verifying ? "bg-[#1161FF] hover:bg-[#0C2D62]" : "bg-[#9BB9FF]",
-            ].join(" ")}>
-            {verified ? "인증완료" : verifying ? "인증중..." : "본인인증"}
-          </button>
         </div>
 
         {/* 전화번호 */}
         <label className="block">
           <input
             type="tel"
-            placeholder="전화번호"
+            placeholder="핸드폰 번호  (ex : 010-1234-5678)"
             inputMode="numeric"
+            maxLength={13}
             value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/[^\d-]/g, ""))}
+            onChange={(e) => {
+              let value = e.target.value.replace(/\D/g, "");
+              if (value.length > 3 && value.length <= 7) {
+                value = value.replace(/(\d{3})(\d+)/, "$1-$2");
+              } else if (value.length > 7) {
+                value = value.replace(/(\d{3})(\d{4})(\d+)/, "$1-$2-$3");
+              }
+              setPhone(value);
+            }}
             className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.12)]"
           />
-          {!phoneOk && phone && (
-            <p className="mt-1 text-xs text-red-500">숫자 9~13자리로 입력해주세요.</p>
+          {!/^010-\d{4}-\d{4}$/.test(phone) && phone && (
+            <p className="mt-1 text-xs text-red-500">
+              올바른 12자리 핸드폰번호로 입력해주세요.(ex : 010-1234-5678)
+            </p>
           )}
         </label>
 
-        {/* 생년월일 */}
+        {/* 생년월일: 읽기 전용 표시 + 우측 캘린더 버튼 */}
         <div>
           <div className="mb-2 text-sm font-semibold text-slate-600">생년월일</div>
-          <div className="grid grid-cols-3 gap-2">
-            <input
-              placeholder="년도"
-              inputMode="numeric"
-              maxLength={4}
-              value={birth.y}
-              onChange={(e) => setBirth({ ...birth, y: e.target.value.replace(/\D/g, "") })}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF]"
-            />
-            <input
-              placeholder="월"
-              inputMode="numeric"
-              maxLength={2}
-              value={birth.m}
-              onChange={(e) => setBirth({ ...birth, m: e.target.value.replace(/\D/g, "") })}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF]"
-            />
-            <input
-              placeholder="일"
-              inputMode="numeric"
-              maxLength={2}
-              value={birth.d}
-              onChange={(e) => setBirth({ ...birth, d: e.target.value.replace(/\D/g, "") })}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF]"
-            />
+
+          <div className="relative">
+            {/* 4열: 년/월/일 + 버튼 */}
+            <div className="grid grid-cols-4 gap-2">
+              <input
+                placeholder="년도"
+                readOnly
+                value={birth.y}
+                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
+              />
+              <input
+                placeholder="월"
+                readOnly
+                value={birth.m}
+                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
+              />
+              <input
+                placeholder="일"
+                readOnly
+                value={birth.d}
+                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
+              />
+              <button
+                type="button"
+                onClick={() => setIsCalOpen((v) => !v)}
+                className="flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#1161FF] shadow-sm hover:bg-slate-50"
+                aria-label="생년월일 선택">
+                📅 선택
+              </button>
+            </div>
+
+            {/* 캘린더 팝오버 (인라인 렌더) */}
+            {isCalOpen && (
+              <>
+                {/* 바깥 클릭 닫힘용 오버레이 */}
+                <div className="fixed inset-0 z-[9998]" onClick={() => setIsCalOpen(false)} />
+                <div className="absolute right-0 z-[9999] mt-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+                  <DatePicker
+                    selected={
+                      birth.y && birth.m && birth.d
+                        ? new Date(Number(birth.y), Number(birth.m) - 1, Number(birth.d))
+                        : null
+                    }
+                    onChange={(date) => {
+                      if (!date) return;
+                      setBirth({
+                        y: String(date.getFullYear()),
+                        m: String(date.getMonth() + 1).padStart(2, "0"),
+                        d: String(date.getDate()).padStart(2, "0"),
+                      });
+                      setIsCalOpen(false); // 날짜 선택하면 닫기
+                    }}
+                    inline // ✅ 인라인 모드: input/ref 불필요
+                    showMonthDropdown
+                    showYearDropdown
+                    locale={ko}
+                    openToDate={
+                      birth.y && birth.m
+                        ? new Date(Number(birth.y), Number(birth.m) - 1, 1)
+                        : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+                    }
+                  />
+                </div>
+              </>
+            )}
           </div>
+
+          {!birthOk && (birth.y || birth.m || birth.d) && (
+            <p className="mt-1 text-xs text-red-500">유효한 생년월일을 선택해주세요.</p>
+          )}
         </div>
 
         {/* 자격증 여부 확인 */}
