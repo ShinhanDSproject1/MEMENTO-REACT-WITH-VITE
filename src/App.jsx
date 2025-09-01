@@ -17,6 +17,9 @@ import Login from "./pages/Login/Login";
 import EditMentos from "@/pages/Mentor/EditMentos.jsx";
 import Reviews from "@/pages/Mentor/Review.jsx";
 import MentosDetail from "./pages/Mentos/MentosDetail";
+import CertificationRegister from "./pages/Mentos/CertificationRegister";
+import MentoIntroduce from "./pages/Mentos/MentoIntroduce";
+import CertificationPage from "./pages/Mentos/CertificationPage";
 
 const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 
@@ -70,6 +73,9 @@ export default function App() {
         <Route path="/chat" element={<ChatListPage />} />
         <Route path="/chat/:roomId" element={<ChatRoomPage />} />
         <Route path="/reviews" element={<Reviews />} />
+        <Route path="/mento/certification" element={<CertificationRegister />} />
+        <Route path="/mento/introduce" element={<MentoIntroduce />} />
+        <Route path="/mento/certification/:result" element={<CertificationPage />} />
       </Route>
     </Routes>
   );

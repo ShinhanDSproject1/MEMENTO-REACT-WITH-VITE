@@ -18,7 +18,7 @@ function MentoIntroduce() {
   };
 
   return (
-    <div className="flex h-full w-[100vw] flex-col justify-between gap-4 bg-white py-4">
+    <div className="flex h-full w-[100%] flex-col justify-between gap-8 bg-white p-4">
       <div className="flex flex-col items-center gap-2">
         {/* label로 프로필 이미지를 감싸고, input과 연결 */}
         <label htmlFor="profile-upload" className="cursor-pointer">
@@ -36,7 +36,7 @@ function MentoIntroduce() {
           className="hidden"
           onChange={handleImageChange}
         />
-        <p className="font-WooridaumB text-sm text-gray-500">사진을 추가하세요</p>
+        <p className="font-WooridaumB text-gray-500">사진을 추가하세요</p>
       </div>
       <p className="font-WooridaumB ml-4 text-lg font-bold">소개글 입력</p>
       <div className="flex max-w-[90vw] items-center justify-center rounded-[5px] border-[1px] border-gray-200">

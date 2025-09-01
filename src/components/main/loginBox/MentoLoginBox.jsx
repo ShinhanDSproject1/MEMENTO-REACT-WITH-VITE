@@ -23,7 +23,7 @@ function MentoLoginBox({ userName, userProfileImage }) {
 
       <button
         className="mx-auto cursor-pointer rounded-full bg-[#005EF9] p-2 px-6 text-sm font-semibold text-white hover:bg-[#0C2D62] hover:shadow"
-        onClick={() => navigate("/myprofile")}>
+        onClick={() => navigate("/mento")}>
         내 정보수정
       </button>
     </div>
