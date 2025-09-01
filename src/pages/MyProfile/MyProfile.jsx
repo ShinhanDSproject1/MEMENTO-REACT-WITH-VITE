@@ -66,7 +66,7 @@ export default function MyProfile() {
     "mb-6 text-left text-[24px] leading-[28px] tracking-tight font-bold text-[#121418]";
 
   return (
-    <div className="font-WooridaumB flex min-h-dvh min-h-screen justify-center bg-[#f5f6f8] antialiased">
+    <div className="font-WooridaumB flex min-h-screen justify-center bg-[#f5f6f8] antialiased">
       <main className="min-h-dvh w-full bg-white px-4 py-8 shadow">
         <PageContainer>
           <h2 className={headingCls}>내 프로필</h2>
