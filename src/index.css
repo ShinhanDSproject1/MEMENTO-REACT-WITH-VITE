@@ -14,6 +14,11 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -ms-overflow-style: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
 }
 
 @font-face {
@@ -80,4 +85,19 @@ select {
   /* 파이어폭스 화살표 없애기 */
   appearance: none;
   /* 화살표 없애기 */
+
+}
+
+.scroll-hidden {
+  /* 스크롤바를 숨기는 핵심 코드 */
+  -ms-overflow-style: none;
+  /* IE, Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* 웹킷 기반 브라우저용 (Chrome, Safari, Edge) */
+.scroll-hidden::-webkit-scrollbar {
+  display: none;
+
 }

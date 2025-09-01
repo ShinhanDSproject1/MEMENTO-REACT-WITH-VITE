@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function CommonHeader({ onClickLogin, onClickHome }) {
   const navigate = useNavigate();
+
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between bg-white px-4 py-3">
       {/* 왼쪽 뒤로가기 아이콘 */}

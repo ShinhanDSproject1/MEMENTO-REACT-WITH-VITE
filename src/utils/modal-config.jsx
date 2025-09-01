@@ -35,6 +35,15 @@ export const MODAL_CONFIG = {
     ],
   },
 
+  refundMentos: {
+    icon: deleteIcon,
+    message: "정말 환불하시겠습니까?",
+    buttons: [
+      { text: "확인", variant: "danger", size: "lg", actionType: "confirm" },
+      { text: "취소", variant: "cancelWhite", size: "lg", actionType: "close" },
+    ],
+  },
+
   // '알림/완료' 모달 케이스
   createMentos: {
     icon: checkBlueIcon,
@@ -56,6 +65,11 @@ export const MODAL_CONFIG = {
     message: "리뷰 작성이 완료되었습니다.",
     buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
   },
+  refundComplete: {
+    icon: checkRedIcon,
+    message: "환불이 완료되었습니다.",
+    buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
+  },
   deleteComplete: {
     icon: checkRedIcon,
     message: "삭제가 완료되었습니다!",
@@ -68,7 +82,7 @@ export const MODAL_CONFIG = {
   },
 
   // '폼(form)' 모달 케이스
-  review: {
+  reviewMentos: {
     type: "form", // 새로운 type 속성 추가
     content: (modalData) => (
       <div className="flex flex-col px-4">
@@ -86,7 +100,7 @@ export const MODAL_CONFIG = {
   },
 
   // '폼(form)' 모달 케이스
-  report: {
+  reportMentos: {
     type: "form", // 새로운 type 속성 추가
     content: (modalData) => (
       <div className="flex flex-col gap-4 px-4">

@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import PropTypes from "prop-types";
-import UploadIcon from "@/assets/icons/upload-icon.png";
+import UploadIcon from "@/assets/icons/upload-icon.svg";
 
 function FileInput({ accept, onFileChange }) {
   // 실제 input 엘리먼트에 접근하기 위한 ref 생성

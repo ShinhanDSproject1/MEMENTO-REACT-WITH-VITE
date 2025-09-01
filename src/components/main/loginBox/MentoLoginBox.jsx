@@ -1,9 +1,11 @@
 import PropTypes from "prop-types";
 import kogiri from "@/assets/images/character-kogiri.svg";
+
 import { useNavigate } from "react-router-dom";
 
 function MentoLoginBox({ userName, userProfileImage }) {
   const navigate = useNavigate();
+
   const profileImg = userProfileImage || kogiri;
   return (
     <div className="mx-auto w-full space-y-2 bg-[#F0F4FA] pb-3 text-center">
