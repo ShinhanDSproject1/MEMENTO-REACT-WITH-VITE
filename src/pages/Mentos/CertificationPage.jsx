@@ -15,10 +15,10 @@ function CertificationPage({ result, ...props }) {
             자격증 인증 <span className="font-WooridaumB text-[#005EF9]">진행중</span>...
           </p>
         </div>
-        <div className="flex w-full flex-col items-center justify-center gap-2">
-          <Spinner aria-label="Extra large spinner example" size="xl" />
+        <div className="flex w-full flex-col items-center justify-center gap-10">
+          <Spinner aria-label="Extra large spinner example" size="xl" className="h-50 w-50" />
           <Progress
-            className="w-full"
+            className="w-[70vw]"
             progress={45}
             progressLabelPosition="inside"
             textLabel=""

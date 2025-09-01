@@ -64,6 +64,7 @@ export default defineConfig([
           html: true, // HTML 요소도 적용
         },
       ],
+      "react/prop-types": "warn",
       "prettier/prettier": "error", // Prettier 규칙을 위반하면 ESLint에서 에러로 처리
     },
   },
