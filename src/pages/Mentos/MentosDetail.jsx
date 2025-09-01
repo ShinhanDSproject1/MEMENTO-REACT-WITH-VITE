@@ -22,7 +22,7 @@ function MentosDetail(props) {
       <section className="flex h-[20%] w-full items-center justify-center">
         <img className="w-full" src="https://picsum.photos/id/1/300/200" alt="mentos image" />
       </section>
-      <section className="flex w-full flex-col gap-2">
+      <section className="flex w-full flex-col gap-2 px-4">
         <p className="font-WooridaumB text-[0.85rem] font-bold">
           [홍대] 하루에 100만원 벌고 부자되는 비법 공유!!!
         </p>
@@ -110,7 +110,7 @@ function MentosDetail(props) {
           <div className="flex flex-col">
             <span>금융권 취준 대외활동의 절대 강자!! </span>
             <span>
-              <b>삼성</b>이하면 다르다!
+              <b>삼성</b>이 하면 다르다!
             </span>
             <span>교육의 메카 삼성에서 제공하는 프리미엄 금융교육!</span>
             전문지식과 실무경험이 함께하는 예비금융권취업(은행,증권,카드,보험)을 위한 프로그램

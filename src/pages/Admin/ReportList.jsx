@@ -13,8 +13,16 @@ const MOCK = [
 export default function ReportList() {
   const [rows] = useState(MOCK);
   const { isOpen, modalType, openModal, closeModal, modalData } = useModal();
+
+  const handleSubmit = () => {
+    if (modalType === "reportDetail") {
+      openModal("dismissSuccess");
+    }
+  };
+
   const onClickDetail = (row) => {
     openModal("reportDetail", {
+      title: "상세보기",
       reporter: row.name,
       role: row.role,
       category: row.category,
@@ -79,7 +87,7 @@ export default function ReportList() {
         isOpen={isOpen}
         onConfirm={closeModal}
         onCancel={closeModal}
-        onSubmit={closeModal}
+        onSubmit={handleSubmit}
         modalData={modalData}
       />
     </div>

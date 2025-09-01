@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 const StarIcon = ({ colorClass }) => (
   <svg
-    className={`ms-3 h-8 w-8 ${colorClass}`}
+    className={`h-8 w-8 ${colorClass}`}
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     fill="currentColor"
@@ -38,7 +38,7 @@ export function StarRating({ onRatingChange }) {
   };
 
   return (
-    <div className="my-4 flex items-center justify-center">
+    <div className="my-3 flex items-center justify-around">
       {Array.from({ length: totalStars }, (_, index) => {
         const starValue = index + 1;
         const colorClass =

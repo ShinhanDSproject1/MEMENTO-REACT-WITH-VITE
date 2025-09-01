@@ -15,10 +15,15 @@ import MainHeader from "./components/main/mainHeader/MainHeader";
 import Login from "./pages/Login/Login";
 import EditMentos from "@/pages/Mentor/EditMentos.jsx";
 import Reviews from "@/pages/Mentor/Review.jsx";
+import MentosDetail from "./pages/Mentos/MentosDetail";
+import CertificationRegister from "./pages/Mentos/CertificationRegister";
+import MentoIntroduce from "./pages/Mentos/MentoIntroduce";
+import CertificationPage from "./pages/Mentos/CertificationPage";
 import SignupComplete from "./pages/Login/SignUpComplete";
 import MentorSignup from "./pages/Login/MentorSignup";
 import MenteeSignup from "./pages/Login/MenteeSignup";
 import SignupSelect from "./pages/Login/SignupSelect";
+
 
 const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 
@@ -54,8 +59,9 @@ export default function App() {
 
       {/* 그 외 공통 레이아웃 */}
       <Route element={<AppLayout />}>
-        <Route path="/mentos/category/:category_seq" element={<MentosList />} />
-        <Route path="/menti/my-mentos-list" element={<MyMentosList role={"menti"} />} />
+        <Route path="/mentee/:category" element={<MentosList />} />
+        <Route path="/mentee/mentos-detail/:id" element={<MentosDetail />} />
+        <Route path="/mentee/mymentos" element={<MyMentosList role={"menti"} />} />
         <Route path="/mento/my-list" element={<MyMentosList role={"mento"} />} />
         <Route path="/mento" element={<MentorProfile />} />
         <Route path="/login" element={<Login />} />
@@ -71,6 +77,9 @@ export default function App() {
         <Route path="/chat" element={<ChatListPage />} />
         <Route path="/chat/:roomId" element={<ChatRoomPage />} />
         <Route path="/reviews" element={<Reviews />} />
+        <Route path="/mento/certification" element={<CertificationRegister />} />
+        <Route path="/mento/introduce" element={<MentoIntroduce />} />
+        <Route path="/mento/certification/:result" element={<CertificationPage />} />
       </Route>
     </Routes>
   );

@@ -2,10 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 import { FileInput, Label } from "flowbite-react";
 import Button from "@/components/common/Button";
+import { useNavigate } from "react-router-dom";
 
 function CertificationRegister(props) {
+  const navigate = useNavigate("");
   return (
-    <div className="flex h-full w-full flex-col justify-between gap-4 bg-white py-4">
+    <div className="flex h-[70vh] w-full flex-col justify-between gap-4 bg-white p-4 py-4">
       <div className="flex w-full">
         <p className="font-WooridaumB text-black">
           보유중인 <span className="font-WooridaumB text-[#005EF9]">자격증</span>을 <br />{" "}
@@ -38,17 +40,22 @@ function CertificationRegister(props) {
               SVG, PNG, JPG or GIF (MAX. 800x400px)
             </p>
           </div>
-          <FileInput id="dropzone-file" className="hidden" />
+          <FileInput id="dropzone-file" className="hidden" required />
         </Label>
       </div>
-      <div className="flex flex-col gap-2">
-        <Button variant="primary" className="font-WooridaumB w-full px-8 py-4 font-bold" size="lg">
-          Submit
+      <div className="flex flex-col items-center justify-center gap-2">
+        <Button
+          onClick={() => navigate("/mento/certification/inprogress")}
+          variant="primary"
+          className="font-WooridaumB w-full px-8 py-4 font-bold"
+          size="xl">
+          추가하기
         </Button>
         <Button
+          onClick={() => navigate("/mento")}
           variant="cancelGray"
           className="font-WooridaumB w-full px-8 py-4 font-bold"
-          size="lg">
+          size="xl">
           돌아가기
         </Button>
       </div>
