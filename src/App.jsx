@@ -59,9 +59,8 @@ export default function App() {
         <Route path="/myprofile" element={<MyProfile />} />
         <Route path="/create-mentos" element={<CreateMentos />} />
         <Route path="/edit/:id" element={<EditMentos />} />
-        <Route path="/my/reviews" element={<Reviews />} />
         <Route path="/admin/report" element={<MemberReport />} />
-        <Route path="/admin/reportlist" element={<ReportList />} />
+        <Route path="/admin/declaration" element={<ReportList />} />
         <Route path="/chat" element={<ChatListPage />} />
         <Route path="/chat/:roomId" element={<ChatRoomPage />} />
         <Route path="/reviews" element={<Reviews />} />
