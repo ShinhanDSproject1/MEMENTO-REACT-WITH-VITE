@@ -4,16 +4,28 @@ import Button from "@/components/common/Button";
 
 const statusStyles = {
   completed: "bg-[#2E3849]", // 진행 완료
-  inProgress: "bg-[#005EF9]", // 진행 중
   pending: "bg-[#B3B6B8]", // 진행 전
 };
 
-function MentosCard({ children, title, price, location, status, imageUrl, ...props }) {
+function MentosCard({
+  mentosSeq,
+  onReviewClick,
+  onDeleteClick,
+  onRefundClick,
+  onReportClick,
+  onUpdateClick,
+  children,
+  title,
+  price,
+  location,
+  status,
+  imageUrl,
+  ...props
+}) {
   const statusClassName = statusStyles[status] || "";
   const statusText =
     {
       completed: "진행 완료",
-      inProgress: "진행중",
       pending: "진행 전",
     }[status] || "";
 
@@ -24,33 +36,27 @@ function MentosCard({ children, title, price, location, status, imageUrl, ...pro
       case "completed":
         return (
           <>
-            <Button className="text-xs" variant="lightBlue" size="sm">
+            <Button className="text-xs" variant="lightBlue" size="sm" onClick={onReviewClick}>
               리뷰작성
             </Button>
-            <Button className="text-xs" variant="danger" size="sm">
+            <Button className="text-xs" variant="danger" size="sm" onClick={onReportClick}>
               신고하기
             </Button>
           </>
         );
-      case "inProgress":
-        return (
-          <Button className="text-xs" variant="danger" size="sm">
-            신고하기
-          </Button>
-        );
       case "pending":
         return (
-          <Button className="text-xs" variant="refund" size="sm">
+          <Button className="text-xs" variant="refund" size="sm" onClick={onRefundClick}>
             환불하기
           </Button>
         );
       case "mento":
         return (
           <>
-            <Button className="text-xs" variant="lightBlue" size="sm">
+            <Button className="text-xs" variant="lightBlue" size="sm" onClick={onUpdateClick}>
               수정하기
             </Button>
-            <Button className="text-xs" variant="danger" size="sm">
+            <Button className="text-xs" variant="danger" size="sm" onClick={onDeleteClick}>
               삭제하기
             </Button>
           </>
@@ -61,8 +67,8 @@ function MentosCard({ children, title, price, location, status, imageUrl, ...pro
   })();
 
   return (
-    <div className="relative flex h-[25vh] w-full max-w-[360px] flex-col rounded-[10px] border-[1px] border-solid border-[#E5E7ED] bg-white">
-      <section className="h-[60%]">
+    <div className="relative flex h-auto w-[80vw] max-w-[360px] flex-col rounded-[10px] border-[1px] border-solid border-[#E5E7ED] bg-white">
+      <section className="h-[15vh]">
         <img
           className="h-full w-full rounded-t-[10px]"
           src="https://picsum.photos/seed/picsum/200/300"
@@ -74,12 +80,12 @@ function MentosCard({ children, title, price, location, status, imageUrl, ...pro
           {statusText}
         </div>
       </section>
-      <section className="item-center flex flex-col gap-1 border-t p-2">
+      <section className="item-center flex flex-col gap-1 border-t px-3 py-2">
         <div className="flex flex-row items-center justify-between">
           <span className="text-sm">{title}</span>
           <span className="text-sm">₩{formattedPrice}</span>
         </div>
-        <div className="flex flex-row items-center justify-between">
+        <div className="flex h-full flex-row items-center justify-between">
           <span className="text-sm">{location}</span>
           <div className="flex flex-row gap-2">{actionButton}</div>
         </div>
@@ -94,7 +100,13 @@ MentosCard.propTypes = {
   price: PropTypes.number.isRequired,
   location: PropTypes.string,
   imageUrl: PropTypes.string,
-  status: PropTypes.oneOf(["completed", "inProgress", "pending", "mento"]),
+  status: PropTypes.oneOf(["completed", "pending", "mento"]),
   children: PropTypes.node,
+  onRefundClick: PropTypes.func,
+  onReportClick: PropTypes.func,
+  onReviewClick: PropTypes.func,
+  onDeleteClick: PropTypes.func,
+  onUpdateClick: PropTypes.func,
+  mentosSeq: PropTypes.number,
 };
 export default MentosCard;

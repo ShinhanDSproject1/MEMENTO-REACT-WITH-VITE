@@ -12,13 +12,6 @@ const MentosCardTest = () => {
         status="completed" // 진행 완료 상태
       />
       <MentosCard
-        title="디자인 포트폴리오"
-        price={50000}
-        location="오프라인"
-        imageUrl="https://picsum.photos/seed/design/200/300"
-        status="inProgress" // 진행 중 상태
-      />
-      <MentosCard
         title="UX/UI 멘토링"
         price={100000}
         location="온라인"

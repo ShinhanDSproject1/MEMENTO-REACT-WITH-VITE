@@ -1,10 +1,11 @@
 import { fn } from "storybook/test";
-import SelectBar from "@/components/common/SelectBar";
+
+import CertificationRegister from "@/pages/Mentos/CertificationRegister";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 export default {
-  title: "Common/SelectBar",
-  component: SelectBar,
+  title: "Mentos/CertificationRegister",
+  component: CertificationRegister,
   parameters: {
     // Optional parameter to center the component in the Canvas. More info: https://storybook.js.org/docs/configure/story-layout
     layout: "centered",
@@ -24,7 +25,7 @@ export const Default = {
   args: {
     // 멘토스 카드에 필요한 props를 여기에 추가합니다.
     // 예: title, description, image, etc.
-    title: "selected bar 테스트",
+    title: "CertificationRegister 테스트",
     description: "Default에서 확인 요망...",
   },
 };

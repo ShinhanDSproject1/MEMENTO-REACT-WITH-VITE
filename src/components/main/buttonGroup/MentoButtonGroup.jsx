@@ -14,7 +14,9 @@ function MentoButtonGroup() {
         }}>
         멘토링 생성하기
       </MainButton>
-      <MainButton className={style}>멘토링 관리</MainButton>
+      <MainButton className={style} onClick={() => navigate("/mento/my-list")}>
+        멘토링 관리
+      </MainButton>
       <MainButton className={style} onClick={() => navigate("/chat")}>
         멘티 관리
       </MainButton>

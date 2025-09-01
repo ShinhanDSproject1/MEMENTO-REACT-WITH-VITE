@@ -1,3 +1,5 @@
+import MentosList from "@/pages/Mentos/MentosList";
+import MyMentosList from "./pages/MyProfile/MyMentosList";
 import MemberReport from "./pages/Admin/MemberReport";
 import ReportList from "./pages/Admin/ReportList";
 import ChatListPage from "./pages/Chat/ChatListPage";
@@ -53,7 +55,9 @@ export default function App() {
 
       {/* 그 외 공통 레이아웃 */}
       <Route element={<AppLayout />}>
-        {/* 내 프로필 */}
+        <Route path="/mentos/category/:category_seq" element={<MentosList />} />
+        <Route path="/menti/my-mentos-list" element={<MyMentosList role={"menti"} />} />
+        <Route path="/mento/my-list" element={<MyMentosList role={"mento"} />} />
         <Route path="/mento" element={<MentorProfile />} />
         <Route path="/login" element={<Login />} />
         <Route path="/myprofile" element={<MyProfile />} />
