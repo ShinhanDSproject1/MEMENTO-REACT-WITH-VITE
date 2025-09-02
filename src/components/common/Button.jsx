@@ -6,7 +6,7 @@ import { clsx } from "clsx";
 
 // cva를 사용하여 variant와 size를 체계적으로 관리
 const buttonVariants = cva(
-  "max-w-[360px] rounded-[10px] font-semibold  transition-colors flex justify-center items-center whitespace-pre-wrap",
+  "max-w-[360px] rounded-[10px] font-semibold flex justify-center items-center whitespace-pre-wrap",
   {
     variants: {
       variant: {

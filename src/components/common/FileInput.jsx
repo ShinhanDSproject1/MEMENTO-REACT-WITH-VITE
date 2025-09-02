@@ -1,9 +1,10 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import UploadIcon from "@/assets/icons/upload-icon.svg";
 
-function FileInput({ accept, onFileChange }) {
+function FileInput({ accept, ...props }) {
   // 실제 input 엘리먼트에 접근하기 위한 ref 생성
+  const [text, setText] = useState("파일 선택");
   const fileInputRef = useRef(null);
 
   // 버튼 클릭 시 숨겨진 input을 클릭
@@ -14,8 +15,15 @@ function FileInput({ accept, onFileChange }) {
   // 파일이 선택되었을 때 실행될 핸들러
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    if (file && onFileChange) {
-      onFileChange(file);
+    if (file) {
+      setText(file.name);
+      // ✅ 이 부분에 파일 처리 로직을 직접 작성
+      // 예시: 파일을 서버로 전송하는 API 호출
+      // uploadFileToServer(file).then(response => {
+      //   console.log("파일 업로드 성공:", response);
+      // }).catch(error => {
+      //   console.error("파일 업로드 실패:", error);
+      // });
     }
   };
 
@@ -34,7 +42,7 @@ function FileInput({ accept, onFileChange }) {
         type="button"
         onClick={handleButtonClick}
         className="flex h-[8vh] max-h-[50px] min-h-[30px] w-full items-center justify-between rounded-[10px] border-[1px] border-[#E6E7EA] bg-white px-4 py-2 text-[#6C747E] hover:border-blue-400">
-        <span>파일 선택</span>
+        <span className="text-sm">{text}</span>
         <img src={UploadIcon} alt="upload-icon" />
       </button>
     </div>

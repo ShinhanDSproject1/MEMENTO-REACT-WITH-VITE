@@ -5,6 +5,7 @@ import { StarRating } from "@/components/common/StarRating";
 import SelectBar from "@/components/common/SelectBar";
 import FileInput from "@/components/common/FileInput";
 import TitleTextComponent from "@/components/common/TitleTextComponent";
+import questionIcon from "@/assets/icons/question-icon.svg";
 
 export const MODAL_CONFIG = {
   // '확인/결정' 모달 케이스
@@ -36,10 +37,10 @@ export const MODAL_CONFIG = {
   },
 
   refundMentos: {
-    icon: deleteIcon,
+    icon: questionIcon,
     message: "정말 환불하시겠습니까?",
     buttons: [
-      { text: "확인", variant: "danger", size: "lg", actionType: "confirm" },
+      { text: "확인", variant: "primary", size: "lg", actionType: "confirm" },
       { text: "취소", variant: "cancelWhite", size: "lg", actionType: "close" },
     ],
   },
@@ -56,9 +57,14 @@ export const MODAL_CONFIG = {
     buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
   },
   reportComplete: {
-    icon: checkBlueIcon,
-    message: "신고가 완료되었습니다.",
-    buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
+    icon: checkRedIcon,
+    message: "신고가 접수되었습니다.",
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
+  },
+  reportReject: {
+    icon: deleteIcon,
+    message: "신고를 거절했습니다",
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
   },
   reviewComplete: {
     icon: checkBlueIcon,
@@ -66,7 +72,7 @@ export const MODAL_CONFIG = {
     buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
   },
   refundComplete: {
-    icon: checkRedIcon,
+    icon: checkBlueIcon,
     message: "환불이 완료되었습니다.",
     buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
   },
@@ -79,6 +85,11 @@ export const MODAL_CONFIG = {
     icon: checkRedIcon,
     message: "제명이 완료되었습니다.",
     buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
+  },
+  reportAgree: {
+    icon: checkBlueIcon,
+    message: "신고를 승인했습니다.",
+    buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
   },
 
   // '폼(form)' 모달 케이스
@@ -109,7 +120,7 @@ export const MODAL_CONFIG = {
       </div>
     ),
     buttons: [
-      { text: "등록", variant: "primary", size: "lg", actionType: "submit" },
+      { text: "신고", variant: "danger", size: "lg", actionType: "submit" },
       { text: "취소", variant: "cancelWhite", size: "lg", actionType: "close" },
     ],
   },
@@ -126,7 +137,7 @@ export const MODAL_CONFIG = {
     ),
     buttons: [
       { text: "승인", variant: "primary", size: "md", actionType: "submit" },
-      { text: "거부", variant: "danger", size: "md", actionType: "close" },
+      { text: "거부", variant: "danger", size: "md", actionType: "confirm" },
       { text: "취소", variant: "cancelWhite", size: "md", actionType: "close" },
     ],
   },

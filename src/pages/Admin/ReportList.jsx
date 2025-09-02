@@ -16,7 +16,13 @@ export default function ReportList() {
 
   const handleSubmit = () => {
     if (modalType === "reportDetail") {
-      openModal("dismissSuccess");
+      openModal("reportAgree");
+    }
+  };
+
+  const handleConfirm = () => {
+    if (modalType === "reportDetail") {
+      openModal("reportReject");
     }
   };
 
@@ -81,15 +87,16 @@ export default function ReportList() {
           </table>
         </div>
       </div>
-
-      <CommonModal
-        type={modalType}
-        isOpen={isOpen}
-        onConfirm={closeModal}
-        onCancel={closeModal}
-        onSubmit={handleSubmit}
-        modalData={modalData}
-      />
+      {isOpen && (
+        <CommonModal
+          type={modalType}
+          isOpen={isOpen}
+          onConfirm={handleConfirm}
+          onCancel={closeModal}
+          onSubmit={handleSubmit}
+          modalData={modalData}
+        />
+      )}
     </div>
   );
 }
