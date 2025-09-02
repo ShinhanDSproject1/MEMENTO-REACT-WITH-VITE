@@ -1,4 +1,3 @@
-import React from "react";
 import PropTypes from "prop-types";
 import { createPortal } from "react-dom";
 import { MODAL_CONFIG } from "@/utils/modal-config";
@@ -17,9 +16,11 @@ export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, modal
   }
 
   const modal = (
-    <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/50">
+    <div
+      style={{ scrollbarWidth: "none" }}
+      className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/50">
       <div
-        className={`flex w-full max-w-[250px] flex-col ${config.type === "form" ? "gap-3 p-4" : "gap-5 p-4"} max-h-[80vh] overflow-y-auto rounded-lg bg-white break-words`}>
+        className={`flex w-full max-w-[270px] flex-col ${config.type === "form" ? "gap-3" : "gap-5 p-4"} max-h-[80vh] overflow-y-auto rounded-[10px] bg-white break-words`}>
         {/* ⭐️ 모달 타입에 따라 다른 콘텐츠 렌더링 */}
         {config.type === "form" ? (
           // 폼 모달 (리뷰 작성 등)

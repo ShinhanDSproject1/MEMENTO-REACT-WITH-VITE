@@ -5,6 +5,7 @@ import SectionCard from "@/components/profile/CardSection";
 import FieldRow from "@/components/profile/FieldRow";
 import DateField from "@/components/profile/BirthDate";
 import CommonInput from "@/components/profile/CommonInput";
+import { useNavigate } from "react-router-dom";
 
 const toDate = (v) => {
   if (!v) return null;
@@ -32,6 +33,7 @@ const fmtKOR = (v) => {
 };
 
 export default function MentorProfile() {
+  const navigate = useNavigate("");
   const [user, setUser] = useState({
     name: "안가연",
     phone: "010-1111-2222",
@@ -66,9 +68,7 @@ export default function MentorProfile() {
 
   // 멘토 전용 핸들러
   const handleEditIntro = () => {
-    // const next = window.prompt("소개글을 입력하세요", user.intro || "");
-    if (next === null) return;
-    setUser((prev) => ({ ...prev, intro: next }));
+    navigate("/mento/introduce");
   };
   const handleAddCert = () => {
     const cert = window.prompt("추가할 자격증 이름을 입력하세요");
@@ -233,7 +233,7 @@ export default function MentorProfile() {
                 </button>
                 <button
                   className="cursor-pointer rounded-lg bg-[#1068F9] px-5 py-2 text-sm font-semibold text-white"
-                  onClick={handleAddCert}>
+                  onClick={() => navigate("/mento/certification")}>
                   자격증 추가
                 </button>
               </div>

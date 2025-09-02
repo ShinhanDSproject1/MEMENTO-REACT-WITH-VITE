@@ -125,7 +125,7 @@ export const MODAL_CONFIG = {
       </div>
     ),
     buttons: [
-      { text: "등록", variant: "primary", size: "md", actionType: "submit" },
+      { text: "승인", variant: "primary", size: "md", actionType: "submit" },
       { text: "거부", variant: "danger", size: "md", actionType: "close" },
       { text: "취소", variant: "cancelWhite", size: "md", actionType: "close" },
     ],
