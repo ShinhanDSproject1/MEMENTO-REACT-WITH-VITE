@@ -1,6 +1,6 @@
 import { fn } from "storybook/test";
 
-import MentoIntroduce from "@/pages/Mentos/MentoIntroduce";
+import MentoIntroduce from "@/pages/mentos/MentoIntroduce";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 export default {

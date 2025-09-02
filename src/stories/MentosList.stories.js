@@ -1,6 +1,6 @@
 import { fn } from "storybook/test";
 
-import MentosList from "@/pages/Mentos/MentosList";
+import MentosList from "@/pages/mentos/MentosList";
 
 export default {
   title: "Mentos/MentosList",

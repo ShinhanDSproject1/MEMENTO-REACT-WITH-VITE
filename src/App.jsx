@@ -1,24 +1,25 @@
-import MentosList from "@/pages/Mentos/MentosList";
-import MyMentosList from "./pages/MyProfile/MyMentosList";
-import MemberReport from "./pages/Admin/MemberReport";
-import ReportList from "./pages/Admin/ReportList";
-import ChatListPage from "./pages/Chat/ChatListPage";
-import ChatRoomPage from "./pages/Chat/ChatRoomPage";
-import MentorProfile from "./pages/MyProfile/MentoProfile";
+import MentosList from "@/pages/mentos/MentosList";
+import MyMentosList from "./pages/myProfile/MyMentosList";
+import MemberReport from "./pages/admin/MemberReport";
+import ReportList from "./pages/admin/ReportList";
+import ChatListPage from "./pages/chat/ChatListPage";
+import ChatRoomPage from "./pages/chat/ChatRoomPage";
+import MentorProfile from "./pages/myProfile/MentoProfile";
 import "./index.css"; // 반드시 먼저: @import "tailwindcss" 들어있어야 함
 import { Outlet, Route, Routes } from "react-router-dom";
-import MyProfile from "./pages/MyProfile/MyProfile";
-import CreateMentos from "./pages/Mentor/CreateMentos";
+import MyProfile from "./pages/myProfile/MyProfile";
+import CreateMentos from "./pages/mentor/CreateMentos";
 import Home from "./pages/Home/Home";
 import CommonHeader from "./components/common/CommonHeader";
 import MainHeader from "./components/main/mainHeader/MainHeader";
 import Login from "./pages/Login/Login";
-import EditMentos from "@/pages/Mentor/EditMentos.jsx";
-import Reviews from "@/pages/Mentor/Review.jsx";
+import EditMentos from "@/pages/mentor/EditMentos.jsx";
+import Reviews from "@/pages/mentor/Review.jsx";
 import SignupComplete from "./pages/Login/SignUpComplete";
 import MentorSignup from "./pages/Login/MentorSignup";
 import MenteeSignup from "./pages/Login/MenteeSignup";
 import SignupSelect from "./pages/Login/SignupSelect";
+import AnalyticsPage from "./pages/chat/AnalyticsPage";
 
 const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 
@@ -71,6 +72,8 @@ export default function App() {
         <Route path="/chat" element={<ChatListPage />} />
         <Route path="/chat/:roomId" element={<ChatRoomPage />} />
         <Route path="/reviews" element={<Reviews />} />
+
+        <Route path="/analytics" element={<AnalyticsPage />} />
       </Route>
     </Routes>
   );

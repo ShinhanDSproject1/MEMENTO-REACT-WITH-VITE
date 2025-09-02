@@ -1,6 +1,6 @@
 import { fn } from "storybook/test";
 
-import CertificationResultPage from "@/pages/Mentos/CertificationPage";
+import CertificationResultPage from "@/pages/mentos/CertificationPage";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 export default {
