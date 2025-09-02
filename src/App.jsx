@@ -23,6 +23,7 @@ import SignupComplete from "@/pages/login/SignUpComplete";
 import MentorSignup from "@/pages/login/MentorSignup";
 import MenteeSignup from "@/pages/login/MenteeSignup";
 import SignupSelect from "@/pages/login/SignupSelect";
+import AnalyticsPage from "./pages/chat/AnalyticsPage";
 
 const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 
@@ -76,6 +77,7 @@ export default function App() {
         <Route path="/chat" element={<ChatListPage />} />
         <Route path="/chat/:roomId" element={<ChatRoomPage />} />
         <Route path="/reviews" element={<Reviews />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/mento/certification" element={<CertificationRegister />} />
         <Route path="/mento/introduce" element={<MentoIntroduce />} />
         <Route path="/mento/certification/:result" element={<CertificationPage />} />

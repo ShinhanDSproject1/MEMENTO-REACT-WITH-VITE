@@ -1,6 +1,6 @@
 import { fn } from "storybook/test";
 import { BrowserRouter } from "react-router-dom";
-import MyMentosList from "@/pages/MyProfile/MyMentosList";
+import MyMentosList from "@/pages/myProfile/MyMentosList";
 
 export default {
   title: "Mentos/MyMentosList",
