@@ -5,7 +5,7 @@ import Footer from "@/components/main/mainFooter/MainFooter";
 import CharacterAni from "@/components/main/mainHeader/CharacterAni";
 import HelpCard from "@/components/main/cardGroup/HelpCard";
 import { useLocation } from "react-router-dom";
-import RecomendBox from "../../components/main/cardGroup/RecomendBox";
+import RecomendBox from "@/components/main/cardGroup/RecomendBox";
 
 export default function Home({ userType, userName, userProfileImage, recommend }) {
   const { state } = useLocation();

@@ -1,7 +1,7 @@
 // src/components/SplashGateHome.jsx
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import Splash from "../../components/common/Splash";
+import Splash from "@/components/common/Splash";
 
 const HOLD_MS = 2000; // 스플래시 유지
 const FADE_MS = 500; // 페이드아웃

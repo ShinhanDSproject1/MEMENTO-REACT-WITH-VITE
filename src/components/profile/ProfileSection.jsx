@@ -3,7 +3,7 @@ import SectionCard from "./CardSection.jsx";
 import FieldRow from "./FieldRow.jsx";
 import CommonInput from "./CommonInput.jsx";
 import DateField from "./BirthDate.jsx";
-import { toDate, toISO, fmtKOR } from "../../utils/date.js";
+import { toDate, toISO, fmtKOR } from "@/utils/date.js";
 import { useState } from "react";
 
 export default function ProfileSection({ user, onSave }) {

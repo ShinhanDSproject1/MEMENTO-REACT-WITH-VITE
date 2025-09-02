@@ -1,9 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
-import App from "./App.jsx";
+import "@/index.css";
+import App from "@/App.jsx";
 import { BrowserRouter } from "react-router-dom";
-import SplashGate from "./pages/Home/SplashGate";
+import SplashGate from "@/pages/home/SplashGate";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
