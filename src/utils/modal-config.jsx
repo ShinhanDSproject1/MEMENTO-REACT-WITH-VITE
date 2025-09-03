@@ -71,6 +71,27 @@ export const MODAL_CONFIG = {
       },
     ],
   },
+
+  paySuccess: {
+    icon: checkBlueIcon,
+    message: "결제가 완료되었습니다!",
+    buttons: [
+      {
+        text: "나의 멘토스 내역으로 이동",
+        variant: "primary",
+        size: "lg",
+        actionType: "close",
+        to: "/mentee/mymentos",
+      },
+    ],
+  },
+
+  refundSuccess: {
+    icon: checkBlueIcon,
+    message: "환불이 완료되었습니다!",
+    buttons: [{ variant: "primary", size: "lg", actionType: "close" }],
+  },
+
   reportComplete: {
     icon: checkBlueIcon,
     message: "신고가 완료되었습니다.",
@@ -95,12 +116,6 @@ export const MODAL_CONFIG = {
     icon: checkRedIcon,
     message: "제명이 완료되었습니다.",
     buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
-  },
-
-  PaySuccess: {
-    icon: checkBlueIcon,
-    message: "결제가 완료되었습니다!",
-    buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
   },
 
   // '폼(form)' 모달 케이스
