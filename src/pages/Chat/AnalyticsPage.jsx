@@ -1,7 +1,5 @@
-// src/pages/Chat/AnalyticsPage.jsx
 import { useEffect, useState } from "react";
 import { Search, BarChart, PieChart, LineChart } from "lucide-react";
-// alias를 안 쓴다면 아래 경로 유지
 import dogFront from "../../assets/images/dog-front.png";
 
 export default function AnalyticsPage() {
@@ -47,9 +45,7 @@ export default function AnalyticsPage() {
         className="animate-wiggle w-[260px] drop-shadow-2xl select-none"
         draggable={false}
       />
-      <p
-        key={idx} // 메시지 바뀔 때 애니메이션 재적용
-        className="animate-fade mt-8 text-xl font-semibold text-gray-700">
+      <p key={idx} className="animate-fade mt-8 text-xl font-semibold text-gray-700">
         {messages[idx].icon}
         {messages[idx].text}
       </p>

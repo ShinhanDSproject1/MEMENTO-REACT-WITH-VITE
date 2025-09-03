@@ -48,12 +48,28 @@ export const MODAL_CONFIG = {
   createMentos: {
     icon: checkBlueIcon,
     message: "생성이 완료되었습니다!",
-    buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
+    buttons: [
+      {
+        text: "닫기",
+        variant: "primary",
+        size: "lg",
+        actionType: "close",
+        to: "/mentee/consumption",
+      },
+    ],
   },
   updateMentos: {
     icon: checkBlueIcon,
     message: "수정이 완료되었습니다!",
-    buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
+    buttons: [
+      {
+        text: "닫기",
+        variant: "primary",
+        size: "lg",
+        actionType: "close",
+        to: "/mentee/consumption",
+      },
+    ],
   },
   reportComplete: {
     icon: checkBlueIcon,

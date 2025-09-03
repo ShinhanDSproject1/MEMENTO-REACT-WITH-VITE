@@ -6,11 +6,9 @@ import { BrowserRouter } from "react-router-dom";
 import SplashGate from "@/pages/home/SplashGate";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <SplashGate>
-      <BrowserRouter basename="/memento-finance">
-        <App />
-      </BrowserRouter>
-    </SplashGate>
-  </React.StrictMode>,
+  <SplashGate>
+    <BrowserRouter basename="/memento-finance">
+      <App />
+    </BrowserRouter>
+  </SplashGate>,
 );
