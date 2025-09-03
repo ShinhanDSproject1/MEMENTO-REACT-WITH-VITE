@@ -66,61 +66,71 @@ function MyMentosList({ role, ...props }) {
 
   if (role === "mento") {
     return (
-      <div className="flex h-full w-full min-w-[375px] flex-col gap-4 overflow-y-scroll bg-white pb-4">
-        <MentosMainTitleComponent mainTitle={"멘토링 관리"} />
-        <div className="flex w-full justify-end px-6">
-          <Button variant="primary" size="lg" onClick={() => navigate("/create-mentos")}>
-            멘토링 생성하기
-          </Button>
-        </div>
-        <section className="flex w-full flex-col items-center justify-center gap-4">
-          <MentosCard
-            title="React 강의"
-            price={50000}
-            location="연남동"
-            status="mento"
-            onUpdateClick={onUpdateClick}
-            onDeleteClick={onDeleteClick}
-          />
-          <MentosCard
-            title="React 강의"
-            price={50000}
-            location="연남동"
-            status="mento"
-            onUpdateClick={onUpdateClick}
-            onDeleteClick={onDeleteClick}
-          />
-          <MentosCard
-            title="React 강의"
-            price={50000}
-            location="연남동"
-            status="mento"
-            onUpdateClick={onUpdateClick}
-            onDeleteClick={onDeleteClick}
-          />
-          <MentosCard
-            title="React 강의"
-            price={50000}
-            location="연남동"
-            status="mento"
-            onUpdateClick={onUpdateClick}
-            onDeleteClick={onDeleteClick}
+      <div className="flex min-h-screen w-full justify-center overflow-x-hidden bg-[#f5f6f8] antialiased">
+        <section className="w-full overflow-x-hidden bg-white px-4 py-5 shadow">
+          <div className="mt-6 mb-15 flex w-full items-baseline justify-between">
+            <h1 className="font-WooridaumB pl-2 text-[20px] leading-[30px] font-bold">
+              멘토링 관리
+            </h1>
+
+            <Button
+              variant="primary"
+              size="sm"
+              className="-mt-[1px] !h-[32px] !rounded-[8px] !px-3 !text-[13px] !leading-[30px] whitespace-nowrap"
+              onClick={() => navigate("/create-mentos")}>
+              멘토링 생성하기
+            </Button>
+          </div>
+
+          <section className="flex w-full flex-col items-center justify-center gap-4">
+            <MentosCard
+              title="React 강의"
+              price={50000}
+              location="연남동"
+              status="mento"
+              onUpdateClick={onUpdateClick}
+              onDeleteClick={onDeleteClick}
+            />
+            <MentosCard
+              title="React 강의"
+              price={50000}
+              location="연남동"
+              status="mento"
+              onUpdateClick={onUpdateClick}
+              onDeleteClick={onDeleteClick}
+            />
+            <MentosCard
+              title="React 강의"
+              price={50000}
+              location="연남동"
+              status="mento"
+              onUpdateClick={onUpdateClick}
+              onDeleteClick={onDeleteClick}
+            />
+            <MentosCard
+              title="React 강의"
+              price={50000}
+              location="연남동"
+              status="mento"
+              onUpdateClick={onUpdateClick}
+              onDeleteClick={onDeleteClick}
+            />
+          </section>
+          <CommonModal
+            type={modalType}
+            onConfirm={handleConfirmAction}
+            onCancel={handleCancelAction} // 취소 함수 전달
+            isOpen={isOpen}
+            onSubmit={handleSubmit}
+            modalData={modalData} // ⭐️ CommonModal에 modalData 전달
           />
         </section>
-        <CommonModal
-          type={modalType}
-          onConfirm={handleConfirmAction}
-          onCancel={handleCancelAction} // 취소 함수 전달
-          isOpen={isOpen}
-          onSubmit={handleSubmit}
-          modalData={modalData} // ⭐️ CommonModal에 modalData 전달
-        />
       </div>
     );
   }
 
   return (
-    <div className="flex h-full w-full min-w-[375px] flex-col gap-4 overflow-y-scroll bg-white pb-4">
+    <div className="no-scrollbar flex h-full w-full min-w-[375px] flex-col gap-4 overflow-y-auto bg-white pb-4">
       <MentosMainTitleComponent mainTitle={"나의 멘토링 내역"} />
       <section className="flex w-full flex-col items-center justify-center gap-3">
         <MentosCard
@@ -154,6 +164,7 @@ function MyMentosList({ role, ...props }) {
           onRefundClick={onRefundClick}
         />
       </section>
+
       <CommonModal
         type={modalType}
         onConfirm={handleConfirmAction}

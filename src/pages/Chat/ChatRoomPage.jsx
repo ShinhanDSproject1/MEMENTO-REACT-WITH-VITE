@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { Send } from "lucide-react";
-import { getMessages, sendMessage } from "./services/chat";
+import { getMessages, sendMessage, getRooms } from "./services/chat";
 import defaultimage from "@/assets/images/gom.png";
 
 export default function ChatRoomPage() {
   const { roomId } = useParams();
+  const { state } = useLocation();
+  const [room, setRoom] = useState(state?.room || null);
   const [msgs, setMsgs] = useState([]);
   const [input, setInput] = useState("");
   const scrollRef = useRef(null);
@@ -15,7 +17,15 @@ export default function ChatRoomPage() {
   }, [roomId]);
 
   useEffect(() => {
-    // 새 메시지 오면 하단으로
+    if (room) return;
+    (async () => {
+      const rooms = await getRooms();
+      const found = rooms.find((r) => String(r.id) === String(roomId));
+      if (found) setRoom(found);
+    })();
+  }, [room, roomId]);
+
+  useEffect(() => {
     if (!scrollRef.current) return;
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [msgs.length]);
@@ -29,14 +39,12 @@ export default function ChatRoomPage() {
   };
 
   return (
-    // 전체 뷰포트 꽉 채움 (overflow-hidden 제거)
     <div className="flex h-dvh w-full flex-col overscroll-none rounded-[18px] bg-white">
-      {/* 헤더: 줄어들지 않게 + 상단 고정 */}
       <div className="sticky top-0 z-10 flex h-12 shrink-0 items-center border-b border-[#f1f3f6] bg-white px-4 pt-[env(safe-area-inset-top)]">
-        <div className="text-[18px] font-bold text-[#4B4E51]">추천 챗봇과 대화 중</div>
+        <div className="text-[18px] font-bold text-[#4B4E51]">
+          {room ? `${room.group} · ${room.name}` : "채팅"}
+        </div>
       </div>
-
-      {/* 메시지: 유일한 스크롤 영역 (min-h-0 꼭!) */}
       <div
         ref={scrollRef}
         className="min-h-0 flex-1 space-y-4 overflow-hidden overscroll-none bg-[#E6EDFF]/[0.22] px-4 py-5">
@@ -57,7 +65,6 @@ export default function ChatRoomPage() {
         ))}
       </div>
 
-      {/* 입력: 하단 고정 + 줄어들지 않게 */}
       <form
         onSubmit={onSend}
         className="sticky bottom-0 z-10 flex min-h-[60px] shrink-0 items-center gap-3 border-t border-[#e9eef4] bg-white px-4 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_6px_rgba(0,0,0,0.08)]">

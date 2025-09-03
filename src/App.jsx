@@ -15,7 +15,7 @@ import MainHeader from "@/components/main/mainHeader/MainHeader";
 import Login from "@/pages/login/Login";
 import EditMentos from "@/pages/mentor/EditMentos";
 import Reviews from "@/pages/mentor/Review.jsx";
-import MentosDetail from "@/pages/myProfile/MyMentosList";
+import MentosDetail from "@/pages/mentos/MentosDetail";
 import CertificationRegister from "@/pages/mentos/CertificationRegister";
 import MentoIntroduce from "@/pages/mentos/MentoIntroduce";
 import CertificationPage from "@/pages/mentos/CertificationPage";
