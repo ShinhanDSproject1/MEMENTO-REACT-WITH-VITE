@@ -97,6 +97,12 @@ export const MODAL_CONFIG = {
     buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
   },
 
+  PaySuccess: {
+    icon: checkBlueIcon,
+    message: "결제가 완료되었습니다!",
+    buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
+  },
+
   // '폼(form)' 모달 케이스
   reviewMentos: {
     type: "form", // 새로운 type 속성 추가

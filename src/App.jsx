@@ -24,6 +24,7 @@ import MentorSignup from "@/pages/login/MentorSignup";
 import MenteeSignup from "@/pages/login/MenteeSignup";
 import SignupSelect from "@/pages/login/SignupSelect";
 import AnalyticsPage from "./pages/chat/AnalyticsPage";
+import MentoIntroduce2 from "./pages/book/MentoIntroduce2";
 
 const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 
@@ -81,6 +82,7 @@ export default function App() {
         <Route path="/mento/certification" element={<CertificationRegister />} />
         <Route path="/mento/introduce" element={<MentoIntroduce />} />
         <Route path="/mento/certification/:result" element={<CertificationPage />} />
+        <Route path="/mento/introduce2" element={<MentoIntroduce2 />} />
       </Route>
     </Routes>
   );
