@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@/styles/common/_variables.scss";
+@import "@/styles/common/_keyframe-animations.scss";
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;

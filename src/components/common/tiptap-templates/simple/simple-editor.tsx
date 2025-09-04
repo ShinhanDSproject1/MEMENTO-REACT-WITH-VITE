@@ -16,7 +16,6 @@ import { Selection } from "@tiptap/extensions";
 
 // --- UI Primitives ---
 import { Button } from "@/components/common/tiptap-ui-primitive/button";
-import { Spacer } from "@/components/common/tiptap-ui-primitive/spacer";
 import {
   Toolbar,
   ToolbarGroup,
@@ -37,16 +36,13 @@ import "@/components/common/tiptap-node/paragraph-node/paragraph-node.scss";
 // --- Tiptap UI ---
 import { HeadingDropdownMenu } from "@/components/common/tiptap-ui/heading-dropdown-menu";
 import { ImageUploadButton } from "@/components/common/tiptap-ui/image-upload-button";
-import { ListDropdownMenu } from "@/components/common/tiptap-ui/list-dropdown-menu";
-import { BlockquoteButton } from "@/components/common/tiptap-ui/blockquote-button";
 import { CodeBlockButton } from "@/components/common/tiptap-ui/code-block-button";
 import {
   ColorHighlightPopover,
   ColorHighlightPopoverContent,
-  ColorHighlightPopoverButton,
 } from "@/components/common/tiptap-ui/color-highlight-popover";
-import { LinkPopover, LinkContent, LinkButton } from "@/components/common/tiptap-ui/link-popover";
-import { MarkButton } from "@/components/common/tiptap-ui/mark-button";
+import { LinkContent } from "@/components/common/tiptap-ui/link-popover";
+
 import { TextAlignButton } from "@/components/common/tiptap-ui/text-align-button";
 import { UndoRedoButton } from "@/components/common/tiptap-ui/undo-redo-button";
 
@@ -59,19 +55,14 @@ import { LinkIcon } from "@/components/common/tiptap-icons/link-icon";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useWindowSize } from "@/hooks/use-window-size";
 import { useCursorVisibility } from "@/hooks/use-cursor-visibility";
-
-// --- Components ---
-import { ThemeToggle } from "@/components/common/tiptap-templates/simple/theme-toggle";
-
 // --- Lib ---
 import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 
 // --- Styles ---
 import "@/components/common/tiptap-templates/simple/simple-editor.scss";
+import content from "@/components/common/tiptap-templates/simple/data/content.json";
 
 const MainToolbarContent = ({
-  onHighlighterClick,
-  onLinkClick,
   isMobile,
 }: {
   onHighlighterClick: () => void;
@@ -80,8 +71,6 @@ const MainToolbarContent = ({
 }) => {
   return (
     <>
-      <Spacer />
-
       <ToolbarGroup>
         <UndoRedoButton action="undo" />
         <UndoRedoButton action="redo" />
@@ -91,32 +80,11 @@ const MainToolbarContent = ({
 
       <ToolbarGroup>
         <HeadingDropdownMenu levels={[1, 2, 3, 4]} portal={isMobile} />
-        <ListDropdownMenu types={["bulletList", "orderedList", "taskList"]} portal={isMobile} />
-        <BlockquoteButton />
         <CodeBlockButton />
       </ToolbarGroup>
 
-      <ToolbarSeparator />
-
       <ToolbarGroup>
-        <MarkButton type="bold" />
-        <MarkButton type="italic" />
-        <MarkButton type="strike" />
-        <MarkButton type="code" />
-        <MarkButton type="underline" />
-        {!isMobile ? (
-          <ColorHighlightPopover />
-        ) : (
-          <ColorHighlightPopoverButton onClick={onHighlighterClick} />
-        )}
-        {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
-      </ToolbarGroup>
-
-      <ToolbarSeparator />
-
-      <ToolbarGroup>
-        <MarkButton type="superscript" />
-        <MarkButton type="subscript" />
+        <ColorHighlightPopover />
       </ToolbarGroup>
 
       <ToolbarSeparator />
@@ -125,21 +93,12 @@ const MainToolbarContent = ({
         <TextAlignButton align="left" />
         <TextAlignButton align="center" />
         <TextAlignButton align="right" />
-        <TextAlignButton align="justify" />
       </ToolbarGroup>
 
       <ToolbarSeparator />
 
       <ToolbarGroup>
         <ImageUploadButton text="Add" />
-      </ToolbarGroup>
-
-      <Spacer />
-
-      {isMobile && <ToolbarSeparator />}
-
-      <ToolbarGroup>
-        <ThemeToggle />
       </ToolbarGroup>
     </>
   );
@@ -214,7 +173,7 @@ export function SimpleEditor() {
         onError: (error) => console.error("Upload failed:", error),
       }),
     ],
-    content: "",
+    content,
   });
 
   const rect = useCursorVisibility({

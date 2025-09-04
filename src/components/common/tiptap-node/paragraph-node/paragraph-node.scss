@@ -38,7 +38,7 @@
     font-size: 1rem;
     line-height: 1.6;
     font-weight: normal;
-    margin-top: 20px;
+    margin-top: 4px;
   }
 
   // Selection styles
@@ -121,7 +121,7 @@
       line-height: 1;
       padding: 0.125rem 0.375rem;
       position: absolute;
-      top: -1.3em;
+      top: -0.5em;
       user-select: none;
       white-space: nowrap;
     }
@@ -228,22 +228,16 @@
 /* =====================
      PLACEHOLDER
      ===================== */
-.is-empty:not(.with-slash)[data-placeholder]:has(
-    > .ProseMirror-trailingBreak:only-child
-  )::before {
+.is-empty:not(.with-slash)[data-placeholder]:has(> .ProseMirror-trailingBreak:only-child)::before {
   content: attr(data-placeholder);
 }
 
-.is-empty.with-slash[data-placeholder]:has(
-    > .ProseMirror-trailingBreak:only-child
-  )::before {
+.is-empty.with-slash[data-placeholder]:has(> .ProseMirror-trailingBreak:only-child)::before {
   content: "Write, type '/' for commands…";
   font-style: italic;
 }
 
-.is-empty[data-placeholder]:has(
-    > .ProseMirror-trailingBreak:only-child
-  ):before {
+.is-empty[data-placeholder]:has(> .ProseMirror-trailingBreak:only-child):before {
   pointer-events: none;
   height: 0;
   position: absolute;
