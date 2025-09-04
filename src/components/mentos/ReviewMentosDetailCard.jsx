@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 
 function ReviewMentosDetailCard({ value, context, name, ...props }) {
   return (
-    <div className="flex w-full max-w-[150px] flex-col gap-2 rounded-[10px] border-[1px] border-[#E5E7ED] p-3">
+    <div className="flex h-[100px] w-full max-w-[350px] flex-col gap-2 overflow-hidden rounded-[10px] border-[1px] border-[#E5E7ED] p-3">
       <div className="flex w-full">
         <StaticStars value={value} className="w-[80%]" />
       </div>

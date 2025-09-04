@@ -207,7 +207,13 @@ export default function MentorProfile() {
                   </FieldRow>
                   <div className="mt-1 flex justify-end">
                     <button
-                      className={`cursor-pointerrounded-lg px-4 py-2 text-sm font-semibold text-white md:text-base ${canSubmit ? "bg-[#005EF9]" : "cursor-not-allowed bg-gray-300"}`}
+                      type="button"
+                      className={[
+                        "rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors md:text-base",
+                        canSubmit
+                          ? "cursor-pointer bg-[#005EF9] hover:bg-[#0C2D62]"
+                          : "cursor-not-allowed bg-gray-300",
+                      ].join(" ")}
                       disabled={!canSubmit}
                       onClick={handleInfoSave}>
                       변경 완료

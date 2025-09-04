@@ -15,7 +15,7 @@ import MainHeader from "@/components/main/mainHeader/MainHeader";
 import Login from "@/pages/login/Login";
 import EditMentos from "@/pages/mentor/EditMentos";
 import Reviews from "@/pages/mentor/Review.jsx";
-import MentosDetail from "@/pages/myProfile/MyMentosList";
+import MentosDetail from "@/pages/mentos/MentosDetail";
 import CertificationRegister from "@/pages/mentos/CertificationRegister";
 import MentoIntroduce from "@/pages/mentos/MentoIntroduce";
 import CertificationPage from "@/pages/mentos/CertificationPage";
@@ -29,6 +29,7 @@ import Error400 from "@/pages/home/Error400";
 import Error500 from "@/pages/home/Error500";
 import Error404 from "@/pages/home/Error404";
 import HomeVideo from "./pages/Home/HomeVideo";
+import MentoIntroduce2 from "./pages/book/MentoIntroduce2";
 
 const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 
@@ -91,6 +92,7 @@ export default function App() {
         <Route path="/mento/introduce" element={<MentoIntroduce />} />
         <Route path="/mento/certification/:result" element={<CertificationPage />} />
         <Route path="/ready" element={<Ready />} />
+        <Route path="/mento/introduce2" element={<MentoIntroduce2 />} />
       </Route>
       <Route path="*" element={<Error404 />} />
       <Route path="/video" element={<HomeVideo />} />

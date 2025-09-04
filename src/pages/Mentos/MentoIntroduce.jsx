@@ -5,6 +5,7 @@ import { SimpleEditor } from "@/components/common/tiptap-templates/simple/simple
 
 function MentoIntroduce() {
   const [profileImage, setProfileImage] = useState(kogiriFace);
+  const [text, setText] = useState("사진을 추가하세요");
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -12,6 +13,7 @@ function MentoIntroduce() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result);
+        setText(file.name);
       };
       reader.readAsDataURL(file);
     }
@@ -36,7 +38,7 @@ function MentoIntroduce() {
           className="hidden"
           onChange={handleImageChange}
         />
-        <p className="font-WooridaumB text-gray-500">사진을 추가하세요</p>
+        <p className="font-WooridaumB text-gray-500">{text}</p>
       </div>
       <p className="font-WooridaumB ml-4 text-lg font-bold">소개글 입력</p>
       <div className="flex max-w-[90vw] items-center justify-center rounded-[5px] border-[1px] border-gray-200">
@@ -45,7 +47,7 @@ function MentoIntroduce() {
 
       <div className="flex w-full justify-center">
         <Button className="w-full" size="lg" variant="primary">
-          등록
+          다음
         </Button>
       </div>
     </div>
