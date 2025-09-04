@@ -24,17 +24,17 @@ export default function Footer() {
           {/* 회사 정보: 고객센터 밑으로 이동 */}
           <div className="text-sm leading-6 text-[#768297]">
             <div className="flex gap-3">
-              <span className="font-WooridaumB w-16 shrink-0 text-[#201f1f]">프로젝트명 </span>
+              <span className="font-WooridaumB w-18 shrink-0 text-[#201f1f]">프로젝트명 </span>
               <span className="font-WooridaumB text-[#768297]">메멘토</span>
             </div>
             <div className="flex gap-3">
-              <span className="font-WooridaumB w-16 shrink-1 text-[#201f1f]">팀원 </span>
+              <span className="font-WooridaumB w-18 shrink-1 text-[#201f1f]">팀원 </span>
               <span className="font-WooridaumB mt-1 shrink-2 text-xs text-[#768297]">
                 김기도/김대현/김정은/조상호/안가연/최다희
               </span>
             </div>
             <div className="flex gap-3">
-              <span className="font-WooridaumB w-16 shrink-0 text-[#201f1f]">주소</span>
+              <span className="font-WooridaumB w-18 shrink-0 text-[#201f1f]">주소</span>
               <span className="font-WooridaumB text-[#768297]">
                 서울 마포구 월드컵북로 4길 77 1층
               </span>

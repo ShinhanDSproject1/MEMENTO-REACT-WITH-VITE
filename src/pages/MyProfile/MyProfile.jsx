@@ -207,7 +207,7 @@ export default function MyProfile() {
           </section>
 
           <div className="mb-12 flex w-full justify-end">
-            <button className="cursor-pointer rounded-lg bg-[#DF001F] px-5 py-2 text-sm font-semibold text-white hover:bg-[#DF001F] md:text-base">
+            <button className="w-fit cursor-pointer rounded-lg py-15 text-sm font-semibold text-black underline">
               계정 탈퇴
             </button>
           </div>

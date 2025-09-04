@@ -10,7 +10,7 @@ export default function HelpCard() {
             도움이 필요 하신가요?
           </h2>
           <Link
-            to="notification"
+            to="ready"
             className="block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -25,7 +25,7 @@ export default function HelpCard() {
             </div>
           </Link>
           <Link
-            to="qa"
+            to="ready"
             className="block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
             <div className="flex items-start justify-between gap-4">
               <div>
