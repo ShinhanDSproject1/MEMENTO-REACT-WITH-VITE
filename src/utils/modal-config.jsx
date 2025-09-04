@@ -99,7 +99,7 @@ export const MODAL_CONFIG = {
       <div className="flex flex-col px-4">
         <StarRating onRatingChange={modalData.onRatingChange} />
         <textarea
-          className="h-24 w-full resize-none rounded-[10px] border-[1px] border-solid border-[#E6E7EA] p-2"
+          className="h-24 w-full resize-none rounded-[10px] border-[1px] border-solid border-[#E6E7EA] p-2 outline-none focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
           placeholder="내용을 입력하세요"
         />
       </div>
@@ -129,10 +129,10 @@ export const MODAL_CONFIG = {
     type: "form", // 새로운 type 속성 추가
     content: (modalData) => (
       <div className="flex flex-col gap-3 px-4">
-        <TitleTextComponent subtitle={"신고자"} context={"안가연"} />
+        <TitleTextComponent subtitle={"신고자"} context={modalData.reporter} />
         <TitleTextComponent subtitle={"멘토링"} context={"인생한방"} />
-        <TitleTextComponent subtitle={"신고항목"} context={"부적절한 언행"} />
-        <TitleTextComponent subtitle={"파일"} context={"안가연의 언행.pdf"} />
+        <TitleTextComponent subtitle={"신고항목"} context={modalData.category} />
+        <TitleTextComponent subtitle={"파일"} context={modalData.file} />
       </div>
     ),
     buttons: [
