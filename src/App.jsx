@@ -23,7 +23,12 @@ import SignupComplete from "@/pages/login/SignUpComplete";
 import MentorSignup from "@/pages/login/MentorSignup";
 import MenteeSignup from "@/pages/login/MenteeSignup";
 import SignupSelect from "@/pages/login/SignupSelect";
-import AnalyticsPage from "./pages/chat/AnalyticsPage";
+import AnalyticsPage from "@/pages/chat/AnalyticsPage";
+import Ready from "@/pages/home/Ready";
+import Error400 from "@/pages/home/Error400";
+import Error500 from "@/pages/home/Error500";
+import Error404 from "@/pages/home/Error404";
+import HomeVideo from "./pages/Home/HomeVideo";
 
 const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 
@@ -52,12 +57,16 @@ function AppLayout() {
 export default function App() {
   return (
     <Routes>
-      {/* 홈 전용 레이아웃 + 스플래시 */}
+      {/* 홈 페이지 */}
       <Route element={<HomeLayout />}>
         <Route index element={<Home />} />
       </Route>
 
-      {/* 그 외 공통 레이아웃 */}
+      {/* 에러 페이지 */}
+      <Route path="/400" element={<Error400 />} />
+      <Route path="/500" element={<Error500 />} />
+
+      {/* 일반 페이지 */}
       <Route element={<AppLayout />}>
         <Route path="/mentee/:category" element={<MentosList />} />
         <Route path="/mentee/mentos-detail/:id" element={<MentosDetail />} />
@@ -81,7 +90,10 @@ export default function App() {
         <Route path="/mento/certification" element={<CertificationRegister />} />
         <Route path="/mento/introduce" element={<MentoIntroduce />} />
         <Route path="/mento/certification/:result" element={<CertificationPage />} />
+        <Route path="/ready" element={<Ready />} />
       </Route>
+      <Route path="*" element={<Error404 />} />
+      <Route path="/video" element={<HomeVideo />} />
     </Routes>
   );
 }

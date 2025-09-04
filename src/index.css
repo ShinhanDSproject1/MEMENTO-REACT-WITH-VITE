@@ -24,28 +24,34 @@
 @font-face {
   font-family: "WooridaumB";
   src: url("./assets/fonts/WooridaumB.ttf") format("truetype");
-  font-weight: normal;
+  font-weight: 700;
+  /* 굵기 명시 권장 */
   font-style: normal;
+  font-display: swap;
+  /* LCP 깜빡임 방지 */
 }
 
 @font-face {
   font-family: "WooridaumL";
   src: url("./assets/fonts/WooridaumL.ttf") format("truetype");
-  font-weight: normal;
+  font-weight: 300;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: "WooridaumR";
   src: url("./assets/fonts/WooridaumR.ttf") format("truetype");
-  font-weight: normal;
+  font-weight: 400;
   font-style: normal;
+  font-display: swap;
 }
 
+/* ⬇️ 오타 없이 정확히 매핑 (Tailwind v4) */
 @theme {
-  --font-WooridaumB: "WooridaumnB", sans-serif;
-  --font-WooridaumL: "WooridaumnL", sans-serif;
-  --font-WooridaumR: "WooridaumnR", sans-serif;
+  --font-WooridaumB: "WooridaumB", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-WooridaumL: "WooridaumL", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-WooridaumR: "WooridaumR", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* 살짝 둥둥 떠다니기 */
@@ -65,6 +71,7 @@
 
 /* 버튼 은은한 펄스(그림자+살짝 위로) */
 @keyframes btnPulse {
+
   0%,
   100% {
     transform: translateY(0);
@@ -94,14 +101,17 @@ select {
 }
 
 @keyframes wiggle {
+
   0%,
   100% {
     transform: rotate(-2deg);
   }
+
   50% {
     transform: rotate(2deg);
   }
 }
+
 .animate-wiggle {
   animation: wiggle 1.2s ease-in-out infinite;
 }
@@ -110,16 +120,20 @@ select {
   0% {
     opacity: 0;
   }
+
   15% {
     opacity: 1;
   }
+
   85% {
     opacity: 1;
   }
+
   100% {
     opacity: 0;
   }
 }
+
 .animate-fade {
   animation: fade 2.5s ease-in-out infinite;
 }
