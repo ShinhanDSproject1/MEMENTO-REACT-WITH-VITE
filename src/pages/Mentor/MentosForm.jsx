@@ -52,6 +52,29 @@ export default function MentosForm({ mode = "create", initialValues = {}, onSubm
           required
         />
       </div>
+      <div className="grid grid-cols-[56px_1fr] items-start gap-3">
+        <label htmlFor="category" className="pl-2 leading-7 font-bold whitespace-pre text-[#333]">
+          분류
+        </label>
+        <input
+          id="category"
+          name="category"
+          value={form.category}
+          onChange={handleChange}
+          className="w-full rounded-lg border border-slate-200 px-2 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
+          required
+        />
+      </div>
+      <div className="grid grid-cols-[56px_1fr] items-start gap-3">
+        <label className="pl-2 leading-7 font-bold text-[#333]">내용</label>
+      </div>
+
+      <div className="h-80 w-full overflow-hidden rounded-lg border border-[#e5e7ed]">
+        <SimpleEditor
+          value={form.content}
+          onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
+        />
+      </div>
 
       <div className="grid grid-cols-[56px_1fr] items-start gap-3">
         <span className="pl-2 leading-7 font-bold text-[#333]">사진</span>
@@ -105,15 +128,7 @@ export default function MentosForm({ mode = "create", initialValues = {}, onSubm
           required
         />
       </div>
-      <div className="grid grid-cols-[56px_1fr] items-start gap-3">
-        <label className="pl-2 leading-7 font-bold text-[#333]">내용</label>
-      </div>
-      <div className="h-80 w-full overflow-hidden rounded-lg border border-[#e5e7ed]">
-        <SimpleEditor
-          value={form.content}
-          onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
-        />
-      </div>
+
       <div className="mt-6 flex justify-center">
         <Button type="submit" variant="primary" size="lg" className="w-full">
           {mode === "edit" ? "수정완료" : "생성하기"}
