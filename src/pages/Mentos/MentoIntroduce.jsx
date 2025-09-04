@@ -45,7 +45,7 @@ function MentoIntroduce() {
 
       <div className="flex w-full justify-center">
         <Button className="w-full" size="lg" variant="primary">
-          등록
+          다음
         </Button>
       </div>
     </div>
