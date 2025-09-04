@@ -75,10 +75,10 @@ function Login() {
     <div className="mx-10 mt-8 pb-10">
       {/* 로고/안내 텍스트 */}
       <img src={logo} alt="memento logo" className="w-[150px]" />
-      <p className="[font-WooridaumB] mt-5 text-left text-[1.5rem] font-semibold text-[#121418]">
+      <p className="font-WooridaumB mt-5 text-left text-[1.4rem] font-semibold text-[#121418]">
         안녕하세요 me:mento 입니다.
       </p>
-      <p className="[font-WooridaumB] text-left text-[1rem] text-[#757575]">
+      <p className="font-WooridaumB text-left text-[0.9rem] text-[#757575]">
         저희와 함께 제테크 멘토링을 시작해보세요!
       </p>
 

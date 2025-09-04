@@ -13,9 +13,9 @@ export const useModal = () => {
   };
 
   const closeModal = () => {
-    setIsOpen(false);
     setModalType(null); // 모달 닫을 때 타입 초기화
     setModalData({}); // 상태 초기화
+    setIsOpen(false);
   };
 
   return {

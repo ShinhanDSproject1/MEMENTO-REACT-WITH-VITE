@@ -244,7 +244,7 @@ export default function MentorProfile() {
                 </button>
               </div>
 
-              <button className="cursor-pointer rounded-lg bg-[#DF001F] px-5 py-2 text-sm font-semibold text-white">
+              <button className="w-fit cursor-pointer rounded-lg py-15 text-sm font-semibold text-black underline">
                 계정 탈퇴
               </button>
             </div>
