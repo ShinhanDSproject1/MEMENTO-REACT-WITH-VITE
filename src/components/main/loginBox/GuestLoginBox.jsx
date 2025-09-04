@@ -6,7 +6,7 @@ export default function GuestLoginBox() {
   const navigate = useNavigate();
 
   return (
-    <div className="mx-auto w-full space-y-2 bg-[#F0F4FA] pb-3 text-center">
+    <div className="mx-auto w-full space-y-2 border-y border-[#76829718] bg-[#F0F4FA] pb-5 text-center">
       <p className="font-WooridaumB mb-4 pt-4 text-base text-[#23272E]">
         회원가입하고 더 많은 서비스를 이용하세요!
       </p>

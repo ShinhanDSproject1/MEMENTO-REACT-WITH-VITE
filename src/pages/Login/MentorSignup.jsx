@@ -104,7 +104,7 @@ export default function MentorSignup() {
             placeholder="ID입력"
             value={id}
             onChange={(e) => setId(e.target.value)}
-            className="w-full rounded-2xl border border-[#5B8BFF] bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
           />
         </label>
 
