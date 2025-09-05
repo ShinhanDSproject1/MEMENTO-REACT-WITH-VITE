@@ -1,10 +1,10 @@
 export type SlotsByDate = Record<string, string[]>;
 
 export interface BookingRequest {
-  mentosSeq: number; // 멘토스(클래스) 식별자
-  memberSeq: number; // 로그인 회원 식별자
-  date: string; // YYYY-MM-DD
-  time: string; // HH:mm
+  mentosSeq: number;
+  memberSeq: number;
+  date: string;
+  time: string;
 }
 
 export interface BookingResponse {
