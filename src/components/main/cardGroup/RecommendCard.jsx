@@ -82,7 +82,7 @@ export default function RecommendCard({
     ];
   }, [idx, count]);
   return (
-    <section className="relative mx-auto mt-10 w-85 rounded-3xl border-3 border-[#E5E7ED] bg-white pt-4 pb-4">
+    <section className="relative mx-auto mt-3 w-85 rounded-3xl border-3 border-[#E5E7ED] bg-white pt-4 pb-4">
       <h3 className="[font-WooridaumB] text-center text-sm font-extrabold text-slate-500 underline">
         {title}
       </h3>

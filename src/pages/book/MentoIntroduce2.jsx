@@ -6,7 +6,7 @@ import { useState } from "react";
 
 export default function MentoIntroduce2() {
   const [selectedDays, setSelectedDays] = useState([]);
-  const [hours, setHours] = useState({ start: 9, end: 18 });
+  const [hours, setHours] = useState({ start: 10, end: 18 });
   const [location, setLocation] = useState({ zonecode: "", address: "", detail: "", location: "" });
 
   const payload = { days: selectedDays, ...hours, ...location };

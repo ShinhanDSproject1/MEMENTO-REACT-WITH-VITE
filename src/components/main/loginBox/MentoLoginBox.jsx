@@ -6,17 +6,18 @@ import { useNavigate } from "react-router-dom";
 function MentoLoginBox({ userName, userProfileImage }) {
   const navigate = useNavigate();
 
-  const profileImg = userProfileImage || kogiri;
+  // const profileImg = userProfileImage || kogiri;
   return (
-    <div className="mx-auto w-full space-y-2 bg-[#F0F4FA] pb-3 text-center">
+    <div className="mx-auto w-full space-y-2 border-y border-[#76829718] bg-[#F0F4FA] pb-5 text-center">
       <div className="mb-4 flex items-center justify-center gap-3 pt-4">
-        <img
+        <img src={kogiri} />
+        {/* <img
           src={profileImg}
           alt={`${userName} 프로필`}
           className="h-10 w-10 rounded-full border-2 border-gray-300 bg-white object-cover"
-        />
+        /> */}
         <div className="font-WooridaumB text-base font-bold">
-          <span className="text-[#23272E] underline">{userName}</span>
+          <span className="text-[#23272E] underline underline-offset-3">{userName}</span>
           <span className="text-[#768297]"> 멘토님 안녕하세요!</span>
         </div>
       </div>

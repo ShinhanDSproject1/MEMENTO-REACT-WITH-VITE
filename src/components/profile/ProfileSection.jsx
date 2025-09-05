@@ -51,9 +51,14 @@ export default function ProfileSection({ user, onSave }) {
           <div className="flex justify-end">
             {edit ? (
               <button
-                className="rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white hover:bg-[#005EF9] md:text-base"
-                onClick={save}>
-                수정 완료
+                onClick={handleReservation}
+                disabled={!selectedDate || !selectedTime}
+                className={`rounded-lg px-4 py-2 text-sm font-semibold text-white md:text-base ${
+                  selectedDate && selectedTime
+                    ? "bg-[#005EF9] hover:bg-[#005EF9]"
+                    : "cursor-not-allowed bg-gray-300 text-gray-500"
+                }`}>
+                예약하기
               </button>
             ) : (
               <button
