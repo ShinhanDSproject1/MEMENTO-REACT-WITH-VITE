@@ -39,15 +39,10 @@ export default function BookingConfirm() {
   };
 
   return (
-    <div className="min-h-screen p-4">
-      <div className="mx-auto w-full max-w-[360px] overflow-hidden rounded-2xl bg-white">
-        {/* 헤더 */}
-        <div className="border-b border-gray-100 px-6 py-4 text-left">
-          <h1 className="font-WooridaumB text-gray-600">예약내역</h1>
-        </div>
-
-        {/* 본문 */}
-        <div className="p-6">
+    <div className="flex min-h-full w-full justify-center overflow-x-hidden bg-[#f5f6f8] font-sans antialiased">
+      <section className="w-full overflow-x-hidden bg-white px-4 py-5 shadow">
+        <h1 className="font-WooridaumB mt-6 mb-15 pl-2 text-[20px] font-bold">예약내역</h1>
+        <div className="px-2">
           <p className="font-WooridaumR mb-4 text-[16px] text-[#000008]">
             선택하신 항목이 맞는지 확인해주세요.
           </p>
@@ -111,7 +106,7 @@ export default function BookingConfirm() {
             취소하기
           </button>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
