@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import ReviewMentosDetailCard from "@/components/mentos/ReviewMentosDetailCard";
 import locationIcon from "@/assets/icons/location-icon.svg";
 import clockIcon from "@/assets/icons/clock-icon.svg";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import starIcon from "@/assets/icons/star-icon.svg";
 import mapDummyimg from "@/assets/images/mapdummyimg.svg";
 import kogiri from "@/assets/images/character-kogiri.svg";
@@ -10,13 +10,26 @@ import Button from "@/components/common/Button";
 import HorizontalDragScroll from "@/components/common/HorizontalDragScroll";
 
 function MentosDetail(props) {
-  const mentosSeq = useParams();
+  const navigate = useNavigate();
+  const { id } = useParams();
 
+  const mentosSeq = useParams();
+  const title = "[홍대] 하루에 100만원 벌고 부자되는 비법 공유!!!";
   const exReviews = 2000;
   const reviewCount = exReviews.toLocaleString();
 
   const exPrice = 8000;
   const priceText = exPrice.toLocaleString();
+
+  const handleGoBooking = () => {
+    navigate("/booking", {
+      state: {
+        mentorId: Number(id) || 1, // 적절히 세팅
+        title,
+        price: exPrice,
+      },
+    });
+  };
 
   return (
     <div className="flex w-full flex-col gap-2 bg-white">
@@ -144,9 +157,9 @@ function MentosDetail(props) {
       </section>
       <div className="flex w-full flex-row items-center justify-center gap-4 border-t-[1px] border-t-zinc-100 p-4">
         <div className="flex-1 text-center">
-          <span className="font-WooridaumB font-bold">{priceText}원</span>
+          <span className="font-WooridaumB font-bold">{exPrice.toLocaleString()}원</span>
         </div>
-        <Button variant="primary" size="lg" className="flex-1">
+        <Button variant="primary" size="lg" className="flex-1" onClick={handleGoBooking}>
           예약하기
         </Button>
       </div>
