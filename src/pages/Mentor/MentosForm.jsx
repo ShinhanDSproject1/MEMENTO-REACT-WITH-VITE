@@ -114,6 +114,7 @@ export default function MentosForm({ mode = "create", initialValues = {}, onSubm
           placeholder="가격을 입력해주세요."
         />
       </div>
+
       <div className="grid grid-cols-[56px_1fr] items-start gap-3">
         <label htmlFor="location" className="pl-2 leading-7 font-bold text-[#333]">
           장소
