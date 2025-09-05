@@ -4,6 +4,7 @@ import TimeGrid from "../../components/booking/TimeGrid";
 import { useCalendar } from "../../hooks/useCalendar";
 import { useKoreanHolidays } from "../../hooks/useKoreanHolidays";
 import { toYMD, toYM } from "../../utils/datetime";
+import { useNavigate } from "react-router-dom";
 
 interface Booking {
   mentorId: number;
@@ -22,6 +23,7 @@ export default function BookingPage({
   defaultMonth = new Date(),
   onReserve,
 }: BookingPageProps) {
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("");
 
@@ -63,9 +65,16 @@ export default function BookingPage({
 
   const handleReservation = () => {
     if (!selectedDate || !selectedTime) return;
-    const booking: Booking = { mentorId, date: toYMD(selectedDate), time: selectedTime };
-    onReserve?.(booking);
-    alert(`(Mock) 예약 완료: ${booking.date} ${booking.time}`);
+    const payload = {
+      title: "인생 한방, 공격투자 멘토링",
+      date: toYMD(selectedDate), // "YYYY-MM-DD"
+      time: selectedTime, // "HH:mm"
+      price: 50000,
+      mentorId,
+    };
+    onReserve?.({ mentorId, date: payload.date, time: payload.time });
+
+    navigate("confirm", { state: payload });
   };
 
   const canReserve = !!selectedDate && !!selectedTime;

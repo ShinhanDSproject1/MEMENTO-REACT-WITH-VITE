@@ -30,7 +30,8 @@ import Error500 from "@/pages/home/Error500";
 import Error404 from "@/pages/home/Error404";
 import HomeVideo from "./pages/Home/HomeVideo";
 import MentoIntroduce2 from "./pages/book/MentoIntroduce2";
-import BookingPage from "./pages/book/booking";
+import BookingPage from "./pages/book/Booking";
+import BookingConfirm from "./pages/book/BookingConfirm";
 
 const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 
@@ -96,6 +97,7 @@ export default function App() {
         <Route path="/mento/introduce2" element={<MentoIntroduce2 />} />
 
         <Route path="/booking" element={<BookingPage />} />
+        <Route path="/booking/confirm" element={<BookingConfirm />} />
       </Route>
       <Route path="*" element={<Error404 />} />
       <Route path="/video" element={<HomeVideo />} />
