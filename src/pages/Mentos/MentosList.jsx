@@ -29,13 +29,15 @@ function MentosList(props) {
   }, [category]); // 렌더링이 아니라, category 값이 변경될 때만 실행됩니다.
 
   return (
-    <div className="scroll-hidden flex h-full w-full min-w-[375px] flex-col gap-4 overflow-y-scroll bg-white pb-4">
-      <MentosMainTitleComponent mainTitle={mainTitle} />
-      <section className="flex w-full flex-col items-center justify-center gap-4">
-        <MentosCard mentosSeq={1} title="React 강의" price={50000} location="연남동" />
-        <MentosCard mentosSeq={1} title="React 강의" price={50000} location="연남동" />
-        <MentosCard mentosSeq={1} title="React 강의" price={50000} location="연남동" />
-        <MentosCard mentosSeq={1} title="React 강의" price={50000} location="연남동" />
+    <div className="flex min-h-screen w-full justify-center overflow-x-hidden bg-[#f5f6f8] font-sans antialiased">
+      <section className="w-full overflow-x-hidden bg-white px-4 py-5">
+        <MentosMainTitleComponent mainTitle={mainTitle} />
+        <section className="flex w-full flex-col items-center space-y-4 overflow-x-hidden bg-white px-4 py-5">
+          <MentosCard mentosSeq={1} title="React 강의" price={50000} location="연남동" />
+          <MentosCard mentosSeq={1} title="React 강의" price={50000} location="연남동" />
+          <MentosCard mentosSeq={1} title="React 강의" price={50000} location="연남동" />
+          <MentosCard mentosSeq={1} title="React 강의" price={50000} location="연남동" />
+        </section>
       </section>
     </div>
   );

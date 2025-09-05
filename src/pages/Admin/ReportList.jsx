@@ -52,7 +52,7 @@ export default function ReportList() {
             <thead className="sticky top-0 z-10">
               <tr className="text-[13px] font-extrabold text-white">
                 <th className="h-10 border-r border-white/35 bg-[#0b76ff] px-3 text-center first:rounded-tl-[12px]">
-                  사용자
+                  신고자
                 </th>
                 <th className="h-10 border-r border-white/35 bg-[#0b76ff] px-3 text-center">
                   역할

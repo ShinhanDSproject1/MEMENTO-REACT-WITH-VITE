@@ -8,6 +8,7 @@ import mapDummyimg from "@/assets/images/mapdummyimg.svg";
 import kogiri from "@/assets/images/character-kogiri.svg";
 import Button from "@/components/common/Button";
 import HorizontalDragScroll from "@/components/common/HorizontalDragScroll";
+import SnapCarousel from "@/components/common/SnapCarousel";
 
 function MentosDetail(props) {
   const mentosSeq = useParams();
@@ -43,19 +44,28 @@ function MentosDetail(props) {
                 src={starIcon}
                 alt="star"
               />
-              <span className="font-WooridaumB text-[0.6rem] leading-3 font-bold text-gray-900 dark:text-white">
+              <span className="font-WooridaumB text-[0.6rem] leading-3 font-bold text-gray-900">
                 4.95
               </span>
             </div>
             <span className="mx-1.5 h-1 w-1 rounded-full bg-gray-500 dark:bg-gray-400" />
-            <span className="font-WooridaumB text-[0.6rem] leading-3 font-medium text-gray-900 underline dark:text-white">
+            <span className="font-WooridaumB text-[0.6rem] leading-3 font-medium text-gray-900 underline">
               {reviewCount}건 리뷰
             </span>
           </div>
         </div>
       </section>
-      <HorizontalDragScroll className="no-scrollbar flex w-full snap-x snap-mandatory scroll-px-4 gap-3 pt-6">
-        <div className="w-[85%] flex-none snap-start">
+      <SnapCarousel className="flex w-full pt-6">
+        <div className="snap-item w-[85%] flex-none snap-center">
+          <ReviewMentosDetailCard
+            value={3}
+            context={`안녕하세요 저는 집에안가연 입니다
+                      도대체 집을 왜안가는지 모르겠습니다
+                      감사합니다`}
+            name="안가연"
+          />
+        </div>
+        <div className="snap-item w-[85%] flex-none snap-center">
           <ReviewMentosDetailCard
             value={5}
             context={`안녕하세요 저는 집에안가연 입니다
@@ -64,28 +74,16 @@ function MentosDetail(props) {
             name="안가연"
           />
         </div>
-        {/* 카드 2 */}
-        <div className="w-[85%] flex-none snap-start">
+        <div className="snap-item w-[85%] flex-none snap-center">
           <ReviewMentosDetailCard
-            value={5}
+            value={1}
             context={`안녕하세요 저는 집에안가연 입니다
                       도대체 집을 왜안가는지 모르겠습니다
                       감사합니다`}
             name="안가연"
           />
         </div>
-        {/* 카드 3 */}
-        <div className="w-[85%] flex-none snap-start">
-          <ReviewMentosDetailCard
-            value={5}
-            context={`안녕하세요 저는 집에안가연 입니다
-                      도대체 집을 왜안가는지 모르겠습니다
-                      감사합니다`}
-            name="안가연"
-          />
-        </div>
-        <div aria-hidden className="w-4 flex-none sm:w-6 md:w-8" />
-      </HorizontalDragScroll>
+      </SnapCarousel>
 
       <section className="flex h-[20%] w-full justify-center border-b-[1px] border-b-zinc-100 py-2">
         <img className="w-full" src={mapDummyimg} alt="map image" />

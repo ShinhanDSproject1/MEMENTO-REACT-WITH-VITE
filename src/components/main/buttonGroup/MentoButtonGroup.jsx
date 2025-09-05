@@ -18,7 +18,7 @@ function MentoButtonGroup() {
         멘토링 관리
       </MainButton>
       <MainButton className={style} onClick={() => navigate("/chat")}>
-        멘티 관리
+        멘티 채팅
       </MainButton>
       <MainButton
         className={style}
