@@ -1,10 +1,9 @@
-// src/components/common/HourRangePicker.jsx
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import HourSelect from "./HourSelect";
 
 export default function HourRangePicker({ value, onChange }) {
-  const [startH, setStartH] = useState(value?.start ?? 9);
+  const [startH, setStartH] = useState(value?.start ?? 10);
   const [endH, setEndH] = useState(value?.end ?? 18);
 
   useEffect(() => onChange?.({ start: startH, end: endH }), [startH, endH, onChange]);
