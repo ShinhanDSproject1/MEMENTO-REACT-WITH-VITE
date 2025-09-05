@@ -41,7 +41,7 @@ function MentoIntroduce() {
         <p className="font-WooridaumB text-gray-500">{text}</p>
       </div>
       <p className="font-WooridaumB ml-4 text-lg font-bold">소개글 입력</p>
-      <div className="flex max-w-[90vw] items-center justify-center rounded-[5px] border-[1px] border-gray-200">
+      <div className="flex h-80 max-w-[90vw] items-center justify-center overflow-hidden rounded-[5px] border-[1px] border-gray-200">
         <SimpleEditor className="flex items-center justify-center" />
       </div>
 
