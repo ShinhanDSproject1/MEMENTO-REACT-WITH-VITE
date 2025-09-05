@@ -7,7 +7,6 @@ import starIcon from "@/assets/icons/star-icon.svg";
 import mapDummyimg from "@/assets/images/mapdummyimg.svg";
 import kogiri from "@/assets/images/character-kogiri.svg";
 import Button from "@/components/common/Button";
-import HorizontalDragScroll from "@/components/common/HorizontalDragScroll";
 import SnapCarousel from "@/components/common/SnapCarousel";
 
 function MentosDetail(props) {
