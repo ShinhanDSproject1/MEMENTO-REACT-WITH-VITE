@@ -15,7 +15,7 @@ export default function HourSelect({
   label = "Start with",
   value,
   onChange,
-  startHour = 9,
+  startHour = 10,
   endHour = 22,
 }) {
   const [open, setOpen] = useState(false);
