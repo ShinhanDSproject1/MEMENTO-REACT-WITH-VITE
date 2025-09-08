@@ -76,6 +76,7 @@ export function CommonModal({ type, isOpen, onCancel, onConfirm, onSubmit, modal
           })}
         </div>
       </div>
+      const hande
     </div>
   );
   return createPortal(modal, document.body);
