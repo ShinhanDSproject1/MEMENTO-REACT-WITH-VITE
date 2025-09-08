@@ -5,6 +5,7 @@ import { useCalendar } from "../../hooks/useCalendar";
 import { useKoreanHolidays } from "../../hooks/useKoreanHolidays";
 import { toYMD, toYM } from "../../utils/datetime";
 import { useNavigate } from "react-router-dom";
+import { Section } from "lucide-react";
 
 interface Booking {
   mentorId: number;
@@ -67,8 +68,8 @@ export default function BookingPage({
     if (!selectedDate || !selectedTime) return;
     const payload = {
       title: "인생 한방, 공격투자 멘토링",
-      date: toYMD(selectedDate), // "YYYY-MM-DD"
-      time: selectedTime, // "HH:mm"
+      date: toYMD(selectedDate),
+      time: selectedTime,
       price: 50000,
       mentorId,
     };
@@ -80,15 +81,13 @@ export default function BookingPage({
   const canReserve = !!selectedDate && !!selectedTime;
 
   return (
-    <div className="min-h-screen p-4">
-      <div className="mx-auto w-full max-w-[360px] overflow-hidden rounded-2xl bg-white">
-        <div className="border-b border-gray-100 px-6 py-4 text-left">
-          <h1 className="font-WooridaumB text-base font-medium text-gray-600">
-            인생 역전, 공격투자 멘토링
-          </h1>
-        </div>
+    <div className="flex min-h-full w-full justify-center overflow-x-hidden bg-[#f5f6f8] font-sans antialiased">
+      <section className="w-full overflow-x-hidden bg-white px-4 py-5 shadow">
+        <h1 className="font-WooridaumB mt-6 mb-[50px] pl-2 text-[20px] font-bold">
+          인생 역전, 공격투자 멘토링
+        </h1>
 
-        <div className="p-6">
+        <div className="px-2">
           <Calendar
             currentMonth={currentMonth}
             days={generateCalendar(currentMonth)}
@@ -120,7 +119,7 @@ export default function BookingPage({
             예약하기
           </button>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

@@ -115,21 +115,6 @@ export default function MentosForm({ mode = "create", initialValues = {}, onSubm
         />
       </div>
 
-      <div className="grid grid-cols-[56px_1fr] items-start gap-3">
-        <label htmlFor="location" className="pl-2 leading-7 font-bold text-[#333]">
-          장소
-        </label>
-        <input
-          id="location"
-          name="location"
-          value={form.location}
-          onChange={handleChange}
-          className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
-          placeholder="시/군/구"
-          required
-        />
-      </div>
-
       <div className="mt-6 flex justify-center">
         <Button type="submit" variant="primary" size="lg" className="w-full">
           {mode === "edit" ? "수정완료" : "생성하기"}
