@@ -5,11 +5,13 @@ import MentosMainTitleComponent from "@/components/mentos/MentosMainTitleCompone
 import { useModal } from "@/hooks/common/useModal";
 import { CommonModal } from "@/components/common/CommonModal";
 import Button from "@/components/common/Button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function MyMentosList({ role, ...props }) {
   const { isOpen, modalType, openModal, closeModal, modalData } = useModal();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromPayment = location.state?.fromPaymentSuccess === true;
 
   const handleConfirmAction = () => {
     closeModal();
@@ -60,8 +62,8 @@ function MyMentosList({ role, ...props }) {
     openModal("reportMentos", { title: "신고하기" });
   };
 
-  const onRefundClick = () => {
-    openModal("refundMentos");
+  const onRefundClick = (mentosId) => {
+    openModal("refundMentos", { mentosId });
   };
 
   if (role === "mento") {
@@ -154,14 +156,14 @@ function MyMentosList({ role, ...props }) {
           price={50000}
           location="연남동"
           status="pending"
-          onRefundClick={onRefundClick}
+          onRefundClick={() => onRefundClick(101)}
         />
         <MentosCard
           title="React 강의"
           price={50000}
           location="연남동"
           status="pending"
-          onRefundClick={onRefundClick}
+          onRefundClick={() => onRefundClick(102)}
         />
       </section>
 

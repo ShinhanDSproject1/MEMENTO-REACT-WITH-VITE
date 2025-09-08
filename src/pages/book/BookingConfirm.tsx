@@ -44,13 +44,13 @@ export default function BookingConfirm() {
 
     if (!USE_REAL_TOSS) {
       navigate(`/booking/success?orderId=dummy-order&amount=${booking.price}`, {
-        state: { title: booking.title },
+        state: { title: booking.title, date: booking.date, time: booking.time },
         replace: true,
       });
       return;
     }
 
-    navigate("/book/payment", {
+    navigate("/booking/payment", {
       state: { ...booking, reservationSeq },
       replace: true,
     });

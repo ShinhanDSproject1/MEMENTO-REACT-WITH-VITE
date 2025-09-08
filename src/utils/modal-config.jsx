@@ -72,17 +72,14 @@ export const MODAL_CONFIG = {
       },
     ],
   },
-
   paySuccess: {
     icon: checkBlueIcon,
-    message: "결제가 완료되었습니다!",
     buttons: [
       {
-        text: "나의 멘토스 내역으로 이동",
+        text: "확인",
         variant: "primary",
         size: "lg",
         actionType: "close",
-        to: "/mentee/mymentos",
       },
     ],
   },
