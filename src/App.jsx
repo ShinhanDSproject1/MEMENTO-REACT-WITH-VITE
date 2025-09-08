@@ -33,6 +33,8 @@ import MentoIntroduce2 from "./pages/book/MentoIntroduce2";
 import BookingPage from "./pages/book/Booking";
 import BookingConfirm from "./pages/book/BookingConfirm";
 
+import PaySuccess from "@/pages/book/PaySuccess";
+
 const layoutStyle = "mx-auto min-h-screen w-full max-w-100 rounded-xl bg-white";
 
 function HomeLayout() {
@@ -98,6 +100,7 @@ export default function App() {
 
         <Route path="/booking" element={<BookingPage />} />
         <Route path="/booking/confirm" element={<BookingConfirm />} />
+        <Route path="/booking/success" element={<PaySuccess />} />
       </Route>
       <Route path="*" element={<Error404 />} />
       <Route path="/video" element={<HomeVideo />} />
