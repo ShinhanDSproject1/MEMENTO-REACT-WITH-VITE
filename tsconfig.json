@@ -1,12 +1,10 @@
+// tsconfig.json (루트)
 {
+  "extends": "./config/ts/tsconfig.base.json",
   "compilerOptions": {
-    "target": "es2020",
-    "jsx": "react-jsx",
-    "checkJs": false,
-    "baseUrl": ".",
-    "moduleResolution": "bundler",
-    "paths": { "@/*": ["src/*"] }
+    "baseUrl": ".", // ⬅️ 루트 기준
+    "paths": { "@/*": ["src/*"] } // ⬅️ 루트/src 기준
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "**/node_modules", "dist"]
+  "include": ["src", "test", "config", "vite.config.ts", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }

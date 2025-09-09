@@ -1,11 +1,11 @@
 {
   "recommendations": [
-    "bradlc.vscode-tailwindcss",
-    "formulahendry.auto-close-tag",
-    "formulahendry.auto-rename-tag",
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "usernamehw.errorlens",
-    "dsznajder.es7-react-js-snippets"
+    "bradlc.vscode-tailwindcss", // TailwindCSS 지원
+    "formulahendry.auto-close-tag", // 태그 자동 닫기
+    "formulahendry.auto-rename-tag", // 태그 이름 바꾸면 자동으로 짝 태그도 변경
+    "dbaeumer.vscode-eslint", // ESLint 확장 (저장 시 린트 실행)
+    "esbenp.prettier-vscode", // Prettier 확장 (저장 시 코드 자동 포맷)
+    "usernamehw.errorlens", // 에러/경고를 코드 줄에 바로 표시
+    "dsznajder.es7-react-js-snippets" // React 개발용 코드 스니펫
   ]
 }
