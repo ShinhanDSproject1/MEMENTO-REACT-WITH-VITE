@@ -133,7 +133,9 @@ function MyMentosList({ role, ...props }) {
 
   return (
     <div className="no-scrollbar flex h-full w-full min-w-[375px] flex-col gap-4 overflow-y-auto bg-white pb-4">
-      <MentosMainTitleComponent mainTitle={"나의 멘토링 내역"} />
+      <section className="px-4 py-5">
+        <MentosMainTitleComponent mainTitle="나의 멘토링 내역" />
+      </section>
       <section className="flex w-full flex-col items-center justify-center gap-3">
         <MentosCard
           title="React 강의"

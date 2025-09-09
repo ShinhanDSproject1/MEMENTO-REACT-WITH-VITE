@@ -102,8 +102,8 @@ function MentosDetail(props) {
       </section>
 
       <section className="flex w-full flex-col items-center justify-center gap-4 px-4 pt-[26%]">
-        <div className="relative flex w-full max-w-sm flex-col items-center justify-center rounded-[20px] bg-[#F4F4F4] p-4">
-          <div className="absolute -top-[26%] flex w-full">
+        <div className="mb- relative flex w-full max-w-sm flex-col items-center justify-center rounded-[20px] bg-[#F4F4F4] p-4">
+          <div className="absolute -top-[30%] flex w-full">
             <div className="relative flex w-full flex-col items-center justify-center">
               <span className="font-WooridaumB py-1 text-xl font-bold">멘토소개</span>
               <div className="z-10 h-auto w-[40%] overflow-hidden rounded-full bg-radial from-[white] via-[#E4EDFF] to-[#AEC8FF] p-1">
