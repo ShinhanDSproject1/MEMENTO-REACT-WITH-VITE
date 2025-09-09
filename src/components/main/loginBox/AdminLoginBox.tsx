@@ -1,5 +1,5 @@
 // src/components/AdminLoginBox.tsx
-import kogiri from "@/assets/images/character-fox.svg";
+import kogiri from "@assets/images/character-fox.svg";
 
 export interface AdminLoginBoxProps {
   userName?: string;

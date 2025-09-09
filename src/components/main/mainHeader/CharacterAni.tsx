@@ -1,4 +1,4 @@
-import characterFull from "@/assets/images/character-full.svg";
+import characterFull from "@/shared/assets/images/character-full.svg";
 
 function CharacterAni() {
   return (

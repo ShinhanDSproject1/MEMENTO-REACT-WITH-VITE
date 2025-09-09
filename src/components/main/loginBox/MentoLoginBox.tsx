@@ -1,5 +1,5 @@
 // src/components/MentoLoginBox.tsx
-import kogiri from "@/assets/images/character-kogiri.svg";
+import kogiri from "@assets/images/character-kogiri.svg";
 import { useNavigate } from "react-router-dom";
 
 export interface MentoLoginBoxProps {

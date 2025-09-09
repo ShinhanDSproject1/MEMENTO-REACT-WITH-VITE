@@ -1,7 +1,7 @@
 // src/components/common/CommonHeader.tsx
-import backIcon from "@/assets/icons/backIcon.png";
-import loginIcon from "@/assets/images/login-icon.svg";
-import homeIcon from "@/assets/images/move-home-icon.svg";
+import backIcon from "@assets/icons/backIcon.png";
+import loginIcon from "@assets/images/login-icon.svg";
+import homeIcon from "@assets/images/move-home-icon.svg";
 import { useNavigate } from "react-router-dom";
 
 interface CommonHeaderProps {

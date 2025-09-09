@@ -3,13 +3,13 @@ import AdminButtonGroup from "./AdminButtonGroup";
 import MenteeButtonGroup from "./MenteeButtonGroup";
 import MentoButtonGroup from "./MentoButtonGroup";
 
-export type UserType = "mentor" | "mentee" | "admin";
+export type UserType = "mentor" | "mentee" | "admin" | "guest";
 
 export interface ButtonGroupProps {
-  userType?: UserType; // 옵셔널 → 기본값은 mentee
+  userType?: UserType;
 }
 
-export default function ButtonGroup({ userType = "mentee" }: ButtonGroupProps) {
+export default function ButtonGroup({ userType }: ButtonGroupProps) {
   if (userType === "mentor") {
     return <MentoButtonGroup />;
   } else if (userType === "admin") {

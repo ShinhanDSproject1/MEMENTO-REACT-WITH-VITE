@@ -1,6 +1,6 @@
 // src/components/MenteeLoginBox.tsx
-import characterDog from "@/assets/images/character-dog.svg";
 import NeonButton from "@/components/common/NeonButton";
+import characterDog from "@assets/images/character-dog.svg";
 import { useNavigate } from "react-router-dom";
 
 export interface MenteeLoginBoxProps {

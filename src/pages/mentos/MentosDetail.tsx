@@ -1,12 +1,12 @@
 // src/pages/MentosDetail.tsx
-import clockIcon from "@/assets/icons/clock-icon.svg";
-import locationIcon from "@/assets/icons/location-icon.svg";
-import starIcon from "@/assets/icons/star-icon.svg";
-import kogiri from "@/assets/images/character-kogiri.svg";
-import mapDummyimg from "@/assets/images/mapdummyimg.svg";
 import Button from "@/components/common/Button";
 import SnapCarousel from "@/components/common/SnapCarousel";
 import ReviewMentosDetailCard from "@/components/mentos/ReviewMentosDetailCard";
+import clockIcon from "@assets/icons/clock-icon.svg";
+import locationIcon from "@assets/icons/location-icon.svg";
+import starIcon from "@assets/icons/star-icon.svg";
+import kogiri from "@assets/images/character-kogiri.svg";
+import mapDummyimg from "@assets/images/mapdummyimg.svg";
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function MentosDetail() {

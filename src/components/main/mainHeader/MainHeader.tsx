@@ -1,7 +1,7 @@
 // src/components/MainHeader.tsx
-import loginIcon from "@/assets/images/login-icon.svg";
-import logo from "@/assets/images/memento-logo.svg";
-import homeIcon from "@/assets/images/move-home-icon.svg";
+import loginIcon from "@assets/images/login-icon.svg";
+import logo from "@assets/images/memento-logo.svg";
+import homeIcon from "@assets/images/move-home-icon.svg";
 import { useNavigate } from "react-router-dom";
 
 export interface MainHeaderProps {

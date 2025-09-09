@@ -3,7 +3,7 @@
   "extends": "./config/ts/tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".", // ⬅️ 루트 기준
-    "paths": { "@/*": ["src/*"] } // ⬅️ 루트/src 기준
+    "paths": { "@/*": ["src/*"], "@assets/*": ["src/shared/assets/*"] } // ⬅️ 루트/src 기준
   },
   "include": ["src", "test", "config", "vite.config.ts", "vitest.config.ts"],
   "exclude": ["node_modules", "dist"]
