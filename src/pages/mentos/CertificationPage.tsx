@@ -1,6 +1,6 @@
-import certificationFail from "@/assets/images/certification-fail.svg";
-import certificationSuccess from "@/assets/images/certification-success.svg";
-import Button from "@/components/common/Button";
+import Button from "@/widgets/common/Button";
+import certificationFail from "@assets/images/certification/certification-fail.svg";
+import certificationSuccess from "@assets/images/certification/certification-success.svg";
 import { Progress, Spinner } from "flowbite-react";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";

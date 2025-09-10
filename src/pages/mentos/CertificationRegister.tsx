@@ -1,5 +1,5 @@
 // src/pages/CertificationRegister.tsx
-import Button from "@/components/common/Button";
+import Button from "@/widgets/common/Button";
 import { FileInput, Label } from "flowbite-react";
 import { useNavigate } from "react-router-dom";
 

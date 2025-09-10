@@ -1,9 +1,9 @@
 // src/pages/Profile/MentorProfile.tsx
-import DateField from "@/components/profile/BirthDate";
-import SectionCard from "@/components/profile/CardSection";
-import CommonInput from "@/components/profile/CommonInput";
-import FieldRow from "@/components/profile/FieldRow";
-import PageContainer from "@/components/profile/PageContainer";
+import DateField from "@/widgets/profile/BirthDate";
+import SectionCard from "@/widgets/profile/CardSection";
+import CommonInput from "@/widgets/profile/CommonInput";
+import FieldRow from "@/widgets/profile/FieldRow";
+import PageContainer from "@/widgets/profile/PageContainer";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 

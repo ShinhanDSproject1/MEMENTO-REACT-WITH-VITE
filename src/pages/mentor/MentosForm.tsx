@@ -1,5 +1,5 @@
-import Button from "@/components/common/Button";
-import { SimpleEditor } from "@/components/common/tiptap-templates/simple/simple-editor";
+import Button from "@/widgets/common/Button";
+import { SimpleEditor } from "@/widgets/common/tiptap-templates/simple/simple-editor";
 import type { ChangeEvent, FormEvent } from "react";
 import { useEffect, useState } from "react";
 

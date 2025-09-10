@@ -1,6 +1,6 @@
 // src/pages/SignupSelect.tsx
-import gom from "@assets/images/character-Gom.svg";
-import kogiri from "@assets/images/character-kogiri.svg";
+import gom from "@assets/images/character/character-Gom.svg";
+import kogiri from "@assets/images/character/character-kogiri.svg";
 import { useNavigate } from "react-router-dom";
 
 export interface SignupSelectProps {

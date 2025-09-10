@@ -1,6 +1,6 @@
 // ✅ 훅은 값 임포트
-import { CommonModal } from "@/components/common/CommonModal";
-import { useModal } from "@/hooks/common/useModal";
+import { CommonModal } from "@/widgets/common/CommonModal";
+import { useModal } from "@hooks/common";
 import { useMemo, useState } from "react";
 
 // ---- 타입 정의 ----

@@ -1,6 +1,6 @@
 // src/pages/admin/ReportList.tsx
-import { CommonModal } from "@/components/common/CommonModal";
-import { useModal } from "@/hooks/common/useModal";
+import { CommonModal } from "@/widgets/common/CommonModal";
+import { useModal } from "@hooks/ui/useModal";
 import { useState } from "react";
 
 // ---- 타입 정의 ----

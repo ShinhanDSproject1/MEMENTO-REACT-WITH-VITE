@@ -1,7 +1,7 @@
 // src/pages/MentosDetail.tsx
-import Button from "@/components/common/Button";
-import SnapCarousel from "@/components/common/SnapCarousel";
-import ReviewMentosDetailCard from "@/components/mentos/ReviewMentosDetailCard";
+import Button from "@/widgets/common/Button";
+import SnapCarousel from "@/widgets/common/SnapCarousel";
+import ReviewMentosDetailCard from "@/widgets/mentos/ReviewMentosDetailCard";
 import clockIcon from "@assets/icons/clock-icon.svg";
 import locationIcon from "@assets/icons/location-icon.svg";
 import starIcon from "@assets/icons/star-icon.svg";

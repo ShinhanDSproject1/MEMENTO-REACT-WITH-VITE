@@ -1,10 +1,10 @@
 // src/pages/home/Home.tsx
-import Index from "@/components/main/buttonGroup/index";
-import HelpCard from "@/components/main/cardGroup/HelpCard";
-import RecomendBox from "@/components/main/cardGroup/RecomendBox";
-import LoginBox from "@/components/main/loginBox/LoginBox";
-import Footer from "@/components/main/mainFooter/MainFooter";
-import CharacterAni from "@/components/main/mainHeader/CharacterAni";
+import Index from "@/widgets/main/buttonGroup/index";
+import HelpCard from "@/widgets/main/cardGroup/HelpCard";
+import RecomendBox from "@/widgets/main/cardGroup/RecomendBox";
+import LoginBox from "@/widgets/main/loginBox/LoginBox";
+import Footer from "@/widgets/main/mainFooter/MainFooter";
+import CharacterAni from "@/widgets/main/mainHeader/CharacterAni";
 import { useLocation } from "react-router-dom";
 
 type UserType = "mentee" | "mentor" | "admin" | "guest";

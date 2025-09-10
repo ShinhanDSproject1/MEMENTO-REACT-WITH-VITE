@@ -1,10 +1,43 @@
-// tsconfig.json (루트)
+// tsconfig.json (root 단일 버전)
 {
-  "extends": "./config/ts/tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".", // ⬅️ 루트 기준
-    "paths": { "@/*": ["src/*"], "@assets/*": ["src/shared/assets/*"] } // ⬅️ 루트/src 기준
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@app/*": ["src/app/*"],
+      "@pages/*": ["src/pages/*"],
+      "@widgets/*": ["src/widgets/*"],
+      "@features/*": ["src/features/*"],
+      "@entities/*": ["src/entities/*"],
+      "@shared/*": ["src/shared/*"],
+
+      "@assets/*": ["src/shared/assets/*"],
+      "@hooks/*": ["src/shared/hooks/*"],
+      "@lib/*": ["src/shared/lib/*"],
+      "@ui/*": ["src/shared/ui/*"],
+      "@api/*": ["src/shared/api/*"]
+    },
+    "types": ["vite/client", "node", "vitest/globals", "react", "react-dom"],
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true
   },
-  "include": ["src", "test", "config", "vite.config.ts", "vitest.config.ts"],
+  "include": [
+    "src",
+    "test",
+    "config",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "config/**/*.ts",
+    "config/**/*.tsx"
+  ],
   "exclude": ["node_modules", "dist"]
 }

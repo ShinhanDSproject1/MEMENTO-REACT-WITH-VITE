@@ -1,9 +1,9 @@
 // src/pages/MyMentosList.tsx
-import Button from "@/components/common/Button";
-import { CommonModal } from "@/components/common/CommonModal";
-import MentosCard from "@/components/common/MentosCard";
-import MentosMainTitleComponent from "@/components/mentos/MentosMainTitleComponent";
 import { useModal } from "@/hooks/common/useModal";
+import Button from "@/widgets/common/Button";
+import { CommonModal } from "@/widgets/common/CommonModal";
+import MentosCard from "@/widgets/common/MentosCard";
+import MentosMainTitleComponent from "@/widgets/mentos/MentosMainTitleComponent";
 import type { FC } from "react";
 import { useNavigate } from "react-router-dom";
 

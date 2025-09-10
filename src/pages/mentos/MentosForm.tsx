@@ -1,7 +1,7 @@
 // src/pages/MentosForm.tsx
-import Button from "@/components/common/Button";
-import { CommonModal } from "@/components/common/CommonModal";
-import { SimpleEditor } from "@/components/common/tiptap-templates/simple/simple-editor";
+import Button from "@/widgets/common/Button";
+import { CommonModal } from "@/widgets/common/CommonModal";
+import { SimpleEditor } from "@/widgets/common/tiptap-templates/simple/simple-editor";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 
 // 폼 값 타입

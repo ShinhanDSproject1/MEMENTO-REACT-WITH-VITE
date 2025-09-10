@@ -1,12 +1,12 @@
 // src/pages/MentoIntroduce2.tsx
-import Button from "@/components/common/Button";
-import DayChips, { type Day } from "@/components/common/DayChips";
+import Button from "@/widgets/common/Button";
+import DayChips, { type Day } from "@/widgets/common/DayChips";
 import HourRangePicker, {
   type HourRange,
-} from "@/components/common/HourRangePicker";
+} from "@/widgets/common/HourRangePicker";
 import LocationField, {
   type LocationFieldValue,
-} from "@/components/common/LocationField";
+} from "@/widgets/common/LocationField";
 import { useState } from "react";
 
 export default function MentoIntroduce2() {

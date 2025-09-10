@@ -1,5 +1,5 @@
 // src/pages/MentorSignup.tsx
-import logo from "@/assets/images/memento-logo.svg";
+import logo from "@assets/images/logo/memento-logo.svg";
 import { ko } from "date-fns/locale";
 import React, {
   forwardRef,

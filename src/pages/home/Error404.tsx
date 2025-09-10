@@ -1,5 +1,5 @@
-import character from "@assets/images/character-rabbit.svg";
-import logo from "@assets/images/memento-logo.svg";
+import character from "@assets/images/character/character-rabbit.svg";
+import logo from "@assets/images/logo/memento-logo.svg";
 import { useNavigate } from "react-router-dom";
 
 function Error404() {

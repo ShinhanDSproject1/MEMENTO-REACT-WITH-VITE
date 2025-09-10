@@ -1,5 +1,5 @@
-import character from "@assets/images/character-full-dance.svg";
-import logo from "@assets/images/memento-logo.svg";
+import character from "@assets/images/character/character-full-dance.svg";
+import logo from "@assets/images/logo/memento-logo.svg";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 

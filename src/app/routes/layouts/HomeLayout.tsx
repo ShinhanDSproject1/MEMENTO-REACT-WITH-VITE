@@ -1,5 +1,5 @@
 // src/app/routes/layouts/HomeLayout.tsx
-import MainHeader from "@/components/main/mainHeader/MainHeader";
+import MainHeader from "@/widgets/main/mainHeader/MainHeader";
 import { Outlet } from "react-router-dom";
 
 export default function HomeLayout() {

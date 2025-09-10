@@ -1,6 +1,6 @@
 // src/pages/chat/ChatRoomPage.tsx
-import defaultimage from "@/assets/images/gom.png";
 import { getMessages, getRooms, sendMessage } from "@/pages/chat/services/chat";
+import defaultimage from "@assets/images/character/character-gom.svg";
 import { Send } from "lucide-react";
 import {
   useEffect,

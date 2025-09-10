@@ -1,5 +1,5 @@
 // src/app/routes/layouts/AppLayout.tsx
-import CommonHeader from "@/components/common/CommonHeader";
+import CommonHeader from "@/widgets/common/CommonHeader";
 import { Outlet } from "react-router-dom";
 
 export default function AppLayout() {

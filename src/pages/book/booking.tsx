@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Calendar from "../../components/booking/Calendar";
-import TimeGrid from "../../components/booking/TimeGrid";
 import { useCalendar } from "../../hooks/useCalendar";
 import { useKoreanHolidays } from "../../hooks/useKoreanHolidays";
-import { toYM, toYMD } from "../../utils/datetime";
+import { toYM, toYMD } from "../../shared/lib/datetime";
+import Calendar from "../../widgets/booking/Calendar";
+import TimeGrid from "../../widgets/booking/TimeGrid";
 
 interface Booking {
   mentorId: number;

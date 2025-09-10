@@ -1,5 +1,5 @@
 // src/components/SplashGateHome.tsx
-import Splash from "@/components/common/Splash";
+import Splash from "@/widgets/common/Splash";
 import { useEffect, useState, type ReactNode } from "react";
 
 type SplashGateProps = {

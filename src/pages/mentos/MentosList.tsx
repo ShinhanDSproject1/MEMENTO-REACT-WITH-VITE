@@ -1,6 +1,6 @@
 // src/pages/MentosList.tsx
-import MentosCard from "@/components/common/MentosCard";
-import MentosMainTitleComponent from "@/components/mentos/MentosMainTitleComponent";
+import MentosCard from "@/widgets/common/MentosCard";
+import MentosMainTitleComponent from "@/widgets/mentos/MentosMainTitleComponent";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 

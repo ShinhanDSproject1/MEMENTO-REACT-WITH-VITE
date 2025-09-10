@@ -1,5 +1,5 @@
-import defaultimage from "@/assets/images/gom.png";
 import { getRooms } from "@/pages/chat/services/chat";
+import defaultimage from "@assets/images/character/character-gom.svg";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 

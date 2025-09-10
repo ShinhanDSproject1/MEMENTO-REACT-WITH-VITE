@@ -1,5 +1,4 @@
 // EditMentosPage.tsx
-import { CommonModal } from "@/components/common/CommonModal";
 import { useModal } from "@/hooks/common/useModal";
 import MentosForm from "@/pages/mentor/MentosForm";
 import {
@@ -7,6 +6,7 @@ import {
   updateMentos,
   type MentosItem,
 } from "@/services/mentos.api"; // ⬅️ .js 제거
+import { CommonModal } from "@/widgets/common/CommonModal";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 

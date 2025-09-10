@@ -1,6 +1,6 @@
 // src/pages/Review.tsx
-import PageContainer from "@/components/profile/PageContainer";
-import ReviewCard from "@/components/profile/ReviewCard";
+import PageContainer from "@/widgets/profile/PageContainer";
+import ReviewCard from "@/widgets/profile/ReviewCard";
 import { useEffect, useRef, useState } from "react";
 
 type ReviewItem = {

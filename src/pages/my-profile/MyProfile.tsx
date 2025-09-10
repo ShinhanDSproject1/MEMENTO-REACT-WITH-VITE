@@ -1,9 +1,9 @@
 // src/pages/MyProfile.tsx
-import DateField from "@/components/profile/BirthDate"; // DateField: selected/onChange 타입 정의되어 있어야 함
-import SectionCard from "@/components/profile/CardSection";
-import CommonInput from "@/components/profile/CommonInput";
-import FieldRow from "@/components/profile/FieldRow";
-import PageContainer from "@/components/profile/PageContainer";
+import DateField from "@/widgets/profile/BirthDate"; // DateField: selected/onChange 타입 정의되어 있어야 함
+import SectionCard from "@/widgets/profile/CardSection";
+import CommonInput from "@/widgets/profile/CommonInput";
+import FieldRow from "@/widgets/profile/FieldRow";
+import PageContainer from "@/widgets/profile/PageContainer";
 import { type ChangeEvent, useState } from "react";
 
 // ── 유틸 함수들 타입 안전하게 정리 ──────────────────────────

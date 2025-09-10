@@ -1,7 +1,7 @@
 // src/pages/MentoIntroduce.tsx
-import kogiriFace from "@/assets/images/kogiri-face.svg";
-import Button from "@/components/common/Button";
-import { SimpleEditor } from "@/components/common/tiptap-templates/simple/simple-editor";
+import Button from "@/widgets/common/Button";
+import { SimpleEditor } from "@/widgets/common/tiptap-templates/simple/simple-editor";
+import kogiriFace from "@assets/images/character/character-kogiri-face.svg";
 import { useState, type ChangeEvent } from "react";
 
 export default function MentoIntroduce() {
