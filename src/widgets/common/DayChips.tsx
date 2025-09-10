@@ -8,10 +8,7 @@ export interface DayChipsProps {
   onChange?: (days: Day[]) => void;
 }
 
-export default function DayChips({
-  defaultDays = [],
-  onChange,
-}: DayChipsProps) {
+export default function DayChips({ defaultDays = [], onChange }: DayChipsProps) {
   const [days, setDays] = useState<Set<Day>>(new Set(defaultDays));
 
   const toggle = (d: Day) => {
@@ -38,8 +35,7 @@ export default function DayChips({
                 : "border-[#E5E7ED] bg-white text-[#667085] hover:bg-[#F2F5FA]"
             }`}
             aria-pressed={active}
-            aria-label={d}
-          >
+            aria-label={d}>
             {d}
           </button>
         );

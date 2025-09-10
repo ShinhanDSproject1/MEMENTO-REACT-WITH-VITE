@@ -1,4 +1,3 @@
-// tsconfig.json (root 단일 버전)
 {
   "compilerOptions": {
     "target": "ES2020",
@@ -8,17 +7,34 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+
       "@app/*": ["src/app/*"],
       "@pages/*": ["src/pages/*"],
+
+      "@widgets": ["src/widgets/index.ts"],
       "@widgets/*": ["src/widgets/*"],
+
+      "@features": ["src/features/index.ts"],
       "@features/*": ["src/features/*"],
+
+      "@entities": ["src/entities/index.ts"],
       "@entities/*": ["src/entities/*"],
+
+      "@shared": ["src/shared/index.ts"],
       "@shared/*": ["src/shared/*"],
 
       "@assets/*": ["src/shared/assets/*"],
+
+      "@hooks": ["src/shared/hooks/index.ts"],
       "@hooks/*": ["src/shared/hooks/*"],
+
+      "@lib": ["src/shared/lib/index.ts"],
       "@lib/*": ["src/shared/lib/*"],
+
+      "@ui": ["src/shared/ui/index.ts"],
       "@ui/*": ["src/shared/ui/*"],
+
+      "@api": ["src/shared/api/index.ts"],
       "@api/*": ["src/shared/api/*"]
     },
     "types": ["vite/client", "node", "vitest/globals", "react", "react-dom"],
@@ -37,7 +53,9 @@
     "vite.config.ts",
     "vitest.config.ts",
     "config/**/*.ts",
-    "config/**/*.tsx"
+    "config/**/*.tsx",
+    "eslint.config.ts",
+    "prettier.config.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }

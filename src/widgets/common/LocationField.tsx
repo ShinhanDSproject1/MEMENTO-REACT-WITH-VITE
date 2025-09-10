@@ -61,8 +61,7 @@ export default function LocationField({ onChange }: LocationFieldProps) {
               loaded
                 ? "bg-[#005EF9] text-white hover:brightness-95"
                 : "cursor-not-allowed bg-slate-200 text-white"
-            }`}
-          >
+            }`}>
             주소검색
           </button>
         </div>

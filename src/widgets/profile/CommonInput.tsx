@@ -4,8 +4,7 @@ import { forwardRef, type InputHTMLAttributes } from "react";
 type ValidationState = "ok" | "error" | undefined;
 type Tone = "default" | "light";
 
-export interface CommonInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "disabled"> {
+export interface CommonInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "disabled"> {
   className?: string;
   editable?: boolean;
   /** 유효성 상태에 따라 강조 색 변경 */
@@ -15,10 +14,7 @@ export interface CommonInputProps
 }
 
 const CommonInput = forwardRef<HTMLInputElement, CommonInputProps>(
-  (
-    { className = "", editable = true, validation, tone = "default", ...props },
-    ref
-  ) => {
+  ({ className = "", editable = true, validation, tone = "default", ...props }, ref) => {
     const base = "w-full rounded-lg px-3 py-2 text-sm outline-none";
     const stateCls = editable
       ? "border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500"
@@ -37,12 +33,10 @@ const CommonInput = forwardRef<HTMLInputElement, CommonInputProps>(
         {...props}
         disabled={!editable}
         aria-invalid={validation === "error" ? true : undefined}
-        className={[base, stateCls, toneCls, valCls, className]
-          .join(" ")
-          .trim()}
+        className={[base, stateCls, toneCls, valCls, className].join(" ").trim()}
       />
     );
-  }
+  },
 );
 
 export default CommonInput;

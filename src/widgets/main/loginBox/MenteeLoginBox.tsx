@@ -26,14 +26,12 @@ export default function MenteeLoginBox({ userName }: MenteeLoginBoxProps) {
         <div className="flex justify-center">
           <button
             className="cursor-pointer rounded-full bg-[#005EF9] p-2 px-6 text-sm font-semibold text-white hover:bg-[#0C2D62] hover:shadow"
-            onClick={() => navigate("/mentee/mymentos")}
-          >
+            onClick={() => navigate("pages/mentee/mymentos")}>
             나의 멘토링내역
           </button>
           <button
             className="ml-5 cursor-pointer rounded-full bg-[#005EF9] p-2 px-6 text-sm font-semibold text-white hover:bg-[#0C2D62] hover:shadow"
-            onClick={() => navigate("/myprofile")}
-          >
+            onClick={() => navigate("/myprofile")}>
             나의 정보관리
           </button>
         </div>
@@ -45,8 +43,7 @@ export default function MenteeLoginBox({ userName }: MenteeLoginBoxProps) {
             bgColor="#00BBA8"
             bgHoverColor="#008578"
             className="w-70 rounded-3xl"
-            onClick={() => navigate("/chat")}
-          >
+            onClick={() => navigate("/chat")}>
             멘토와 채팅하기
           </NeonButton>
         </div>

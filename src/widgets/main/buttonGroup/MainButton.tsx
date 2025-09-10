@@ -3,8 +3,7 @@ import { ArrowRight } from "lucide-react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { forwardRef } from "react";
 
-export interface MainButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface MainButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   className?: string;
 }
@@ -15,11 +14,10 @@ export const MainButton = forwardRef<HTMLButtonElement, MainButtonProps>(
       <button
         ref={ref}
         className={`group relative w-auto cursor-pointer overflow-hidden rounded-full border p-2 px-6 text-center font-semibold ${className}`}
-        {...props}
-      >
+        {...props}>
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-[#0C2D62] transition-all duration-300 group-hover:scale-[100.8]" />
-          <span className="transition-all inline-block duration-300 group-hover:translate-x-12 group-hover:opacity-0">
+          <span className="inline-block transition-all duration-300 group-hover:translate-x-12 group-hover:opacity-0">
             {children}
           </span>
         </div>
@@ -29,7 +27,7 @@ export const MainButton = forwardRef<HTMLButtonElement, MainButtonProps>(
         </div>
       </button>
     );
-  }
+  },
 );
 
 MainButton.displayName = "MainButton";

@@ -24,7 +24,7 @@ const toISO = (date: Date | null): string =>
   !date
     ? ""
     : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
-        date.getDate()
+        date.getDate(),
       ).padStart(2, "0")}`;
 
 const fmtKOR = (v: string | null | undefined): string => {
@@ -87,10 +87,8 @@ export default function MentorProfile() {
     confirm: "",
   });
 
-  const isCurrentOk =
-    infoDraft.current === user.pw && infoDraft.current.length > 0;
-  const isNewMatch =
-    infoDraft.next.length > 0 && infoDraft.next === infoDraft.confirm;
+  const isCurrentOk = infoDraft.current === user.pw && infoDraft.current.length > 0;
+  const isNewMatch = infoDraft.next.length > 0 && infoDraft.next === infoDraft.confirm;
   const canSubmit = isCurrentOk && isNewMatch;
 
   const handleProfileSave = () => {
@@ -130,7 +128,7 @@ export default function MentorProfile() {
     "mb-6 text-left text-[24px] leading-[28px] tracking-tight font-bold text-[#121418]";
 
   return (
-    <div className="font-WooridaumB flex min-h-dvh  justify-center bg-[#f5f6f8] antialiased">
+    <div className="font-WooridaumB flex min-h-dvh justify-center bg-[#f5f6f8] antialiased">
       <main className="min-h-dvh w-full bg-white px-4 py-8 shadow">
         <PageContainer>
           {/* 내 프로필 */}
@@ -138,12 +136,7 @@ export default function MentorProfile() {
           <section className="mb-8">
             <SectionCard>
               <FieldRow label="이름" htmlFor="name">
-                <CommonInput
-                  id="name"
-                  value={user.name}
-                  editable={false}
-                  tone="default"
-                />
+                <CommonInput id="name" value={user.name} editable={false} tone="default" />
               </FieldRow>
 
               <FieldRow label="전화번호" htmlFor="phone">
@@ -151,9 +144,7 @@ export default function MentorProfile() {
                   id="phone"
                   value={editProfile ? profileDraft.phone : user.phone}
                   editable={editProfile}
-                  onChange={(e) =>
-                    setProfileDraft((d) => ({ ...d, phone: e.target.value }))
-                  }
+                  onChange={(e) => setProfileDraft((d) => ({ ...d, phone: e.target.value }))}
                   placeholder={editProfile ? "전화번호를 입력하세요" : ""}
                 />
               </FieldRow>
@@ -162,16 +153,10 @@ export default function MentorProfile() {
                 {editProfile ? (
                   <DateField
                     selected={toDate(profileDraft.dob)}
-                    onChange={(date) =>
-                      setProfileDraft((d) => ({ ...d, dob: toISO(date) }))
-                    }
+                    onChange={(date) => setProfileDraft((d) => ({ ...d, dob: toISO(date) }))}
                   />
                 ) : (
-                  <CommonInput
-                    id="dob"
-                    value={fmtKOR(user.dob)}
-                    editable={false}
-                  />
+                  <CommonInput id="dob" value={fmtKOR(user.dob)} editable={false} />
                 )}
               </FieldRow>
 
@@ -179,15 +164,13 @@ export default function MentorProfile() {
                 {editProfile ? (
                   <button
                     className="rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white md:text-base"
-                    onClick={handleProfileSave}
-                  >
+                    onClick={handleProfileSave}>
                     수정 완료
                   </button>
                 ) : (
                   <button
                     className="cursor-pointer rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white md:text-base"
-                    onClick={() => setEditProfile(true)}
-                  >
+                    onClick={() => setEditProfile(true)}>
                     프로필 수정
                   </button>
                 )}
@@ -200,12 +183,7 @@ export default function MentorProfile() {
           <section className="mb-8">
             <SectionCard>
               <FieldRow label="아이디" htmlFor="userid">
-                <CommonInput
-                  id="userid"
-                  value={user.userid}
-                  editable={false}
-                  tone="light"
-                />
+                <CommonInput id="userid" value={user.userid} editable={false} tone="light" />
               </FieldRow>
 
               {!editInfo ? (
@@ -221,8 +199,7 @@ export default function MentorProfile() {
                   <div className="flex justify-end">
                     <button
                       className="cursor-pointer rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white md:text-base"
-                      onClick={() => setEditInfo(true)}
-                    >
+                      onClick={() => setEditInfo(true)}>
                       기본정보 변경
                     </button>
                   </div>
@@ -234,16 +211,10 @@ export default function MentorProfile() {
                       id="currentPw"
                       type="password"
                       value={infoDraft.current}
-                      onChange={(e) =>
-                        setInfoDraft((d) => ({ ...d, current: e.target.value }))
-                      }
+                      onChange={(e) => setInfoDraft((d) => ({ ...d, current: e.target.value }))}
                       editable
                       validation={
-                        infoDraft.current.length === 0
-                          ? undefined
-                          : isCurrentOk
-                            ? "ok"
-                            : "error"
+                        infoDraft.current.length === 0 ? undefined : isCurrentOk ? "ok" : "error"
                       }
                       placeholder={
                         infoDraft.current.length > 0 && !isCurrentOk
@@ -257,9 +228,7 @@ export default function MentorProfile() {
                       id="newPw"
                       type="password"
                       value={infoDraft.next}
-                      onChange={(e) =>
-                        setInfoDraft((d) => ({ ...d, next: e.target.value }))
-                      }
+                      onChange={(e) => setInfoDraft((d) => ({ ...d, next: e.target.value }))}
                       editable
                       placeholder="8자 이상 권장"
                     />
@@ -269,16 +238,10 @@ export default function MentorProfile() {
                       id="confirmPw"
                       type="password"
                       value={infoDraft.confirm}
-                      onChange={(e) =>
-                        setInfoDraft((d) => ({ ...d, confirm: e.target.value }))
-                      }
+                      onChange={(e) => setInfoDraft((d) => ({ ...d, confirm: e.target.value }))}
                       editable
                       validation={
-                        infoDraft.confirm.length === 0
-                          ? undefined
-                          : isNewMatch
-                            ? "ok"
-                            : "error"
+                        infoDraft.confirm.length === 0 ? undefined : isNewMatch ? "ok" : "error"
                       }
                       placeholder={
                         infoDraft.confirm.length > 0 && !isNewMatch
@@ -297,8 +260,7 @@ export default function MentorProfile() {
                           : "cursor-not-allowed bg-gray-300",
                       ].join(" ")}
                       disabled={!canSubmit}
-                      onClick={handleInfoSave}
-                    >
+                      onClick={handleInfoSave}>
                       변경 완료
                     </button>
                   </div>
@@ -318,14 +280,12 @@ export default function MentorProfile() {
               <div className="flex flex-col gap-2">
                 <button
                   className="cursor-pointer rounded-lg bg-[#6DA4FF] px-5 py-2 text-sm font-semibold text-white"
-                  onClick={handleEditIntro}
-                >
+                  onClick={handleEditIntro}>
                   소개글 수정
                 </button>
                 <button
                   className="cursor-pointer rounded-lg bg-[#1068F9] px-5 py-2 text-sm font-semibold text-white"
-                  onClick={() => navigate("/mento/certification")}
-                >
+                  onClick={() => navigate("/mento/certification")}>
                   자격증 추가
                 </button>
               </div>

@@ -8,10 +8,7 @@ interface CommonHeaderProps {
   onClickHome?: () => void;
 }
 
-export default function CommonHeader({
-  onClickLogin,
-  onClickHome,
-}: CommonHeaderProps) {
+export default function CommonHeader({ onClickLogin, onClickHome }: CommonHeaderProps) {
   const navigate = useNavigate();
 
   const goBack = () => navigate(-1);

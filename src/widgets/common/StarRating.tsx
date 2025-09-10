@@ -11,8 +11,7 @@ const StarIcon = ({ colorClass }: StarIconProps) => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     fill="currentColor"
-    viewBox="0 0 22 20"
-  >
+    viewBox="0 0 22 20">
     <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
   </svg>
 );
@@ -26,11 +25,7 @@ export type StarRatingProps = {
   totalStars?: number;
 };
 
-export function StarRating({
-  onRatingChange,
-  initialRating = 3,
-  totalStars = 5,
-}: StarRatingProps) {
+export function StarRating({ onRatingChange, initialRating = 3, totalStars = 5 }: StarRatingProps) {
   const [rating, setRating] = useState<number>(initialRating);
   const [hoverRating, setHoverRating] = useState<number>(0);
 
@@ -48,17 +43,11 @@ export function StarRating({
   };
 
   return (
-    <div
-      className="my-3 flex items-center justify-around"
-      role="radiogroup"
-      aria-label="별점"
-    >
+    <div className="my-3 flex items-center justify-around" role="radiogroup" aria-label="별점">
       {Array.from({ length: totalStars }, (_, index) => {
         const starValue = index + 1;
         const active = starValue <= (hoverRating || rating);
-        const colorClass = active
-          ? "text-yellow-300"
-          : "text-gray-300 dark:text-gray-500";
+        const colorClass = active ? "text-yellow-300" : "text-gray-300 dark:text-gray-500";
 
         return (
           <button
@@ -70,8 +59,7 @@ export function StarRating({
             onClick={() => handleClick(starValue)}
             onMouseEnter={() => handleMouseEnter(starValue)}
             onMouseLeave={handleMouseLeave}
-            className="cursor-pointer"
-          >
+            className="cursor-pointer">
             <StarIcon colorClass={colorClass} />
           </button>
         );

@@ -80,10 +80,8 @@ export default function MyProfile() {
     confirm: "",
   });
 
-  const isCurrentOk =
-    infoDraft.current === user.pw && infoDraft.current.length > 0;
-  const isNewMatch =
-    infoDraft.next.length > 0 && infoDraft.next === infoDraft.confirm;
+  const isCurrentOk = infoDraft.current === user.pw && infoDraft.current.length > 0;
+  const isNewMatch = infoDraft.next.length > 0 && infoDraft.next === infoDraft.confirm;
   const canSubmit = isCurrentOk && isNewMatch;
 
   const handleProfileSave = () => {
@@ -145,16 +143,10 @@ export default function MyProfile() {
                 {editProfile ? (
                   <DateField
                     selected={toDate(profileDraft.dob)}
-                    onChange={(date) =>
-                      setProfileDraft((d) => ({ ...d, dob: toISO(date) }))
-                    }
+                    onChange={(date) => setProfileDraft((d) => ({ ...d, dob: toISO(date) }))}
                   />
                 ) : (
-                  <CommonInput
-                    id="dob"
-                    value={fmtKOR(user.dob)}
-                    editable={false}
-                  />
+                  <CommonInput id="dob" value={fmtKOR(user.dob)} editable={false} />
                 )}
               </FieldRow>
 
@@ -163,16 +155,14 @@ export default function MyProfile() {
                   <button
                     className="cursor-pointer rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white hover:bg-[#005EF9] md:text-base"
                     onClick={handleProfileSave}
-                    type="button"
-                  >
+                    type="button">
                     수정 완료
                   </button>
                 ) : (
                   <button
                     className="cursor-pointer rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white hover:bg-[#005EF9] md:text-base"
                     onClick={() => setEditProfile(true)}
-                    type="button"
-                  >
+                    type="button">
                     프로필 수정
                   </button>
                 )}
@@ -202,8 +192,7 @@ export default function MyProfile() {
                     <button
                       className="cursor-pointer rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white hover:bg-[#005EF9] md:text-base"
                       onClick={() => setEditInfo(true)}
-                      type="button"
-                    >
+                      type="button">
                       기본정보 변경
                     </button>
                   </div>
@@ -261,8 +250,7 @@ export default function MyProfile() {
                       }`}
                       disabled={!canSubmit}
                       onClick={handleInfoSave}
-                      type="button"
-                    >
+                      type="button">
                       변경 완료
                     </button>
                   </div>
@@ -274,8 +262,7 @@ export default function MyProfile() {
           <div className="mb-12 flex w-full justify-end">
             <button
               className="w-fit cursor-pointer rounded-lg py-15 text-sm font-semibold text-black underline"
-              type="button"
-            >
+              type="button">
               계정 탈퇴
             </button>
           </div>

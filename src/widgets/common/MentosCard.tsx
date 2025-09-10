@@ -48,61 +48,34 @@ export default function MentosCard({
 }: MentosCardProps) {
   const statusClassName = statusStyles[status] ?? "";
   const statusText = statusTextMap[status] ?? "";
-  const formattedPrice = Number.isFinite(price)
-    ? price.toLocaleString()
-    : String(price);
+  const formattedPrice = Number.isFinite(price) ? price.toLocaleString() : String(price);
 
   const actionButton = (() => {
     switch (status) {
       case "completed":
         return (
           <>
-            <Button
-              className="text-xs"
-              variant="lightBlue"
-              size="sm"
-              onClick={onReviewClick}
-            >
+            <Button className="text-xs" variant="lightBlue" size="sm" onClick={onReviewClick}>
               리뷰작성
             </Button>
-            <Button
-              className="text-xs"
-              variant="danger"
-              size="sm"
-              onClick={onReportClick}
-            >
+            <Button className="text-xs" variant="danger" size="sm" onClick={onReportClick}>
               신고하기
             </Button>
           </>
         );
       case "pending":
         return (
-          <Button
-            className="text-xs"
-            variant="refund"
-            size="sm"
-            onClick={onRefundClick}
-          >
+          <Button className="text-xs" variant="refund" size="sm" onClick={onRefundClick}>
             환불하기
           </Button>
         );
       case "mento":
         return (
           <>
-            <Button
-              className="text-xs"
-              variant="lightBlue"
-              size="sm"
-              onClick={onUpdateClick}
-            >
+            <Button className="text-xs" variant="lightBlue" size="sm" onClick={onUpdateClick}>
               수정하기
             </Button>
-            <Button
-              className="text-xs"
-              variant="danger"
-              size="sm"
-              onClick={onDeleteClick}
-            >
+            <Button className="text-xs" variant="danger" size="sm" onClick={onDeleteClick}>
               삭제하기
             </Button>
           </>
@@ -124,8 +97,7 @@ export default function MentosCard({
           {/* 진행 상태 배지 (멘토 상태는 텍스트 없으면 렌더 생략) */}
           {statusText && (
             <div
-              className={`${statusClassName} absolute top-2 right-2 rounded-[65px] px-2 py-1 text-xs text-white`}
-            >
+              className={`${statusClassName} absolute top-2 right-2 rounded-[65px] px-2 py-1 text-xs text-white`}>
               {statusText}
             </div>
           )}

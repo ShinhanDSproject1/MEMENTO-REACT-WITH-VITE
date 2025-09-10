@@ -43,9 +43,7 @@ export default function ProfileSection({ user, onSave }: ProfileSectionProps) {
               id="phone"
               value={edit ? draft.phone : user.phone}
               editable={edit}
-              onChange={(e) =>
-                setDraft((d) => ({ ...d, phone: e.target.value }))
-              }
+              onChange={(e) => setDraft((d) => ({ ...d, phone: e.target.value }))}
               placeholder={edit ? "전화번호를 입력하세요" : ""}
             />
           </FieldRow>
@@ -54,9 +52,7 @@ export default function ProfileSection({ user, onSave }: ProfileSectionProps) {
             {edit ? (
               <DateField
                 selected={toDate(draft.dob)}
-                onChange={(date) =>
-                  setDraft((d) => ({ ...d, dob: date ? toISO(date) : "" }))
-                }
+                onChange={(date) => setDraft((d) => ({ ...d, dob: date ? toISO(date) : "" }))}
               />
             ) : (
               <CommonInput id="dob" value={fmtKOR(user.dob)} editable={false} />
@@ -67,15 +63,13 @@ export default function ProfileSection({ user, onSave }: ProfileSectionProps) {
             {edit ? (
               <button
                 onClick={save}
-                className="rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0046c7] md:text-base"
-              >
+                className="rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0046c7] md:text-base">
                 저장
               </button>
             ) : (
               <button
                 className="rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0046c7] md:text-base"
-                onClick={() => setEdit(true)}
-              >
+                onClick={() => setEdit(true)}>
                 프로필 수정
               </button>
             )}

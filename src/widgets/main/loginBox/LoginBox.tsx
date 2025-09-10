@@ -10,20 +10,11 @@ export interface LoginBoxProps {
   userProfileImage?: string;
 }
 
-export default function LoginBox({
-  userType,
-  userName,
-  userProfileImage,
-}: LoginBoxProps) {
+export default function LoginBox({ userType, userName, userProfileImage }: LoginBoxProps) {
   if (userType === "mentee") {
     return <MenteeLoginBox userName={userName ?? ""} />;
   } else if (userType === "mentor") {
-    return (
-      <MentoLoginBox
-        userName={userName ?? ""}
-        userProfileImage={userProfileImage ?? ""}
-      />
-    );
+    return <MentoLoginBox userName={userName ?? ""} userProfileImage={userProfileImage ?? ""} />;
   } else if (userType === "admin") {
     return <AdminLoginBox />;
   } else {

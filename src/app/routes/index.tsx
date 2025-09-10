@@ -21,26 +21,16 @@ const SignupComplete = React.lazy(() => import("@/pages/login/SignupComplete"));
 const MentosList = React.lazy(() => import("@/pages/mentos/MentosList"));
 const MentosDetail = React.lazy(() => import("@/pages/mentos/MentosDetail"));
 
-const MyMentosList = React.lazy(
-  () => import("@/pages/my-profile/MyMentosList")
-);
-const MentorProfile = React.lazy(
-  () => import("@/pages/my-profile/MentoProfile")
-);
+const MyMentosList = React.lazy(() => import("@/pages/my-profile/MyMentosList"));
+const MentorProfile = React.lazy(() => import("@/pages/my-profile/MentoProfile"));
 const MyProfile = React.lazy(() => import("@/pages/my-profile/MyProfile"));
 
 const CreateMentos = React.lazy(() => import("@/pages/mentor/CreateMentos"));
 const EditMentos = React.lazy(() => import("@/pages/mentor/EditMentos"));
 
-const CertificationRegister = React.lazy(
-  () => import("@/pages/mentos/CertificationRegister")
-);
-const CertificationPage = React.lazy(
-  () => import("@/pages/mentos/CertificationPage")
-);
-const MentoIntroduce = React.lazy(
-  () => import("@/pages/mentos/MentoIntroduce")
-);
+const CertificationRegister = React.lazy(() => import("@/pages/mentos/CertificationRegister"));
+const CertificationPage = React.lazy(() => import("@/pages/mentos/CertificationPage"));
+const MentoIntroduce = React.lazy(() => import("@/pages/mentos/MentoIntroduce"));
 const Reviews = React.lazy(() => import("@/pages/mentor/Review"));
 const Ready = React.lazy(() => import("@/pages/home/Ready"));
 
@@ -54,16 +44,10 @@ const ReportList = React.lazy(() => import("@/pages/admin/ReportList"));
 const HomeVideo = React.lazy(() => import("@/pages/home/HomeVideo"));
 const BookingPage = React.lazy(() => import("@/pages/book/Booking"));
 const BookingConfirm = React.lazy(() => import("@/pages/book/BookingConfirm"));
-const MentoIntroduce2 = React.lazy(
-  () => import("@/pages/book/MentoIntroduce2")
-);
+const MentoIntroduce2 = React.lazy(() => import("@/pages/book/MentoIntroduce2"));
 
 const withSuspense = (el: React.ReactNode) => (
-  <Suspense
-    fallback={<div className="p-6 text-sm text-gray-500">로딩 중…</div>}
-  >
-    {el}
-  </Suspense>
+  <Suspense fallback={<div className="p-6 text-sm text-gray-500">로딩 중…</div>}>{el}</Suspense>
 );
 
 // ✅ named export 로 내보냄 (App에서 { router }로 가져올 수 있게)

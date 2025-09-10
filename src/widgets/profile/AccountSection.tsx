@@ -57,10 +57,7 @@ export default function AccountSection({ user }: AccountSectionProps) {
     } catch (error) {
       const err = error as UpdatePasswordError;
       if (err.code === "CURRENT_PASSWORD_INCORRECT") setCurrentError(true);
-      else
-        setServerError(
-          err.message || "변경에 실패했습니다. 다시 시도해 주세요."
-        );
+      else setServerError(err.message || "변경에 실패했습니다. 다시 시도해 주세요.");
     } finally {
       setLoading(false);
     }
@@ -78,18 +75,12 @@ export default function AccountSection({ user }: AccountSectionProps) {
           {!edit ? (
             <>
               <FieldRow label="비밀번호" htmlFor="pw">
-                <CommonInput
-                  id="pw"
-                  type="password"
-                  value={"********"}
-                  editable={false}
-                />
+                <CommonInput id="pw" type="password" value={"********"} editable={false} />
               </FieldRow>
               <div className="flex justify-end">
                 <button
                   className="rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white hover:bg-[#005EF9] md:text-base"
-                  onClick={() => setEdit(true)}
-                >
+                  onClick={() => setEdit(true)}>
                   기본정보 변경
                 </button>
               </div>
@@ -141,11 +132,7 @@ export default function AccountSection({ user }: AccountSectionProps) {
                     }
                     editable
                     validation={
-                      draft.confirm.length === 0
-                        ? undefined
-                        : isNewMatch
-                          ? "ok"
-                          : "error"
+                      draft.confirm.length === 0 ? undefined : isNewMatch ? "ok" : "error"
                     }
                     className="pr-44 md:pr-52"
                   />
@@ -157,22 +144,15 @@ export default function AccountSection({ user }: AccountSectionProps) {
                 </div>
               </FieldRow>
 
-              {serverError && (
-                <p className="mt-2 text-right text-xs text-red-500">
-                  {serverError}
-                </p>
-              )}
+              {serverError && <p className="mt-2 text-right text-xs text-red-500">{serverError}</p>}
 
               <div className="mt-1 flex justify-end">
                 <button
                   className={`rounded-lg px-4 py-2 text-sm font-semibold text-white md:text-base ${
-                    canSubmit
-                      ? "bg-[#005EF9]"
-                      : "cursor-not-allowed bg-gray-300"
+                    canSubmit ? "bg-[#005EF9]" : "cursor-not-allowed bg-gray-300"
                   }`}
                   disabled={!canSubmit}
-                  onClick={onSubmit}
-                >
+                  onClick={onSubmit}>
                   {loading ? "저장 중..." : "변경 완료"}
                 </button>
               </div>

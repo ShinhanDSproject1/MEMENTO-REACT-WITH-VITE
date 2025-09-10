@@ -31,7 +31,7 @@ const buttonVariants = cva(
       variant: "primary",
       size: "md",
     },
-  }
+  },
 );
 
 export interface ButtonProps
@@ -51,9 +51,7 @@ const Button: React.FC<ButtonProps> = ({
   actionType,
   ...props
 }) => {
-  const finalClassName = twMerge(
-    clsx(buttonVariants({ variant, size }), className)
-  );
+  const finalClassName = twMerge(clsx(buttonVariants({ variant, size }), className));
 
   return (
     <button className={finalClassName} onClick={onClick} {...props}>

@@ -22,11 +22,7 @@ interface Props {
   selectedTime: string;
   onSelectTime: (t: string) => void;
 }
-export default function TimeGrid({
-  selectedDate,
-  selectedTime,
-  onSelectTime,
-}: Props) {
+export default function TimeGrid({ selectedDate, selectedTime, onSelectTime }: Props) {
   const now = new Date();
 
   const availableTimes = useMemo(() => {
@@ -59,8 +55,7 @@ export default function TimeGrid({
                   ? "border-blue-500 bg-[#005EF9] text-white"
                   : "border-gray-200 bg-white text-[#4D4B4C] hover:border-gray-300"
                 : "border-[#E9E9EC] bg-gray-50 text-gray-400"
-            }`}
-          >
+            }`}>
             {timeStr}
           </button>
         );

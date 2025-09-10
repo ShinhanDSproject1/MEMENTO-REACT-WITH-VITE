@@ -1,12 +1,5 @@
 // src/components/ui/SnapCarousel.tsx
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-  type UIEvent,
-} from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode, type UIEvent } from "react";
 
 interface ArrowButtonProps {
   dir?: "left" | "right";
@@ -24,11 +17,8 @@ function ArrowButton({ dir = "left", onClick, disabled }: ArrowButtonProps) {
       className={[
         "grid h-9 w-9 place-items-center rounded-full border border-slate-300 bg-white/80 shadow-sm backdrop-blur",
         "hover:bg-white disabled:cursor-not-allowed disabled:opacity-40",
-      ].join(" ")}
-    >
-      <span className="text-slate-600 select-none">
-        {dir === "left" ? "‹" : "›"}
-      </span>
+      ].join(" ")}>
+      <span className="text-slate-600 select-none">{dir === "left" ? "‹" : "›"}</span>
     </button>
   );
 }
@@ -54,9 +44,7 @@ export default function SnapCarousel({
 
   const getNodes = (el: HTMLElement) => {
     const snapItems = el.querySelectorAll<HTMLElement>(".snap-item");
-    return snapItems.length
-      ? Array.from(snapItems)
-      : (Array.from(el.children) as HTMLElement[]);
+    return snapItems.length ? Array.from(snapItems) : (Array.from(el.children) as HTMLElement[]);
   };
 
   // 각 카드의 중심 스크롤 위치 계산
@@ -140,7 +128,7 @@ export default function SnapCarousel({
       });
       setIdx(nearest);
     },
-    [centers]
+    [centers],
   );
 
   const scrollToIndex = (i: number) => {
@@ -169,27 +157,16 @@ export default function SnapCarousel({
           WebkitOverflowScrolling: "touch",
           paddingLeft: gutter,
           paddingRight: gutter,
-        }}
-      >
+        }}>
         {children}
       </div>
 
       {/* 좌/우 화살표 */}
       <div className="pointer-events-none absolute inset-y-0 right-0 left-0 flex items-center justify-between">
-        <div
-          className="pointer-events-auto"
-          style={{ paddingLeft: arrowInset }}
-        >
-          <ArrowButton
-            dir="left"
-            onClick={prev}
-            disabled={!hasMulti || idx <= 0}
-          />
+        <div className="pointer-events-auto" style={{ paddingLeft: arrowInset }}>
+          <ArrowButton dir="left" onClick={prev} disabled={!hasMulti || idx <= 0} />
         </div>
-        <div
-          className="pointer-events-auto"
-          style={{ paddingRight: arrowInset }}
-        >
+        <div className="pointer-events-auto" style={{ paddingRight: arrowInset }}>
           <ArrowButton
             dir="right"
             onClick={next}

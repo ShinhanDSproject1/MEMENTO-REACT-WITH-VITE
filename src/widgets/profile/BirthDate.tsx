@@ -12,12 +12,7 @@ export interface DateFieldProps {
   restProps?: Omit<DatePicker, "selected" | "onChange" | "className">;
 }
 
-export default function DateField({
-  selected,
-  onChange,
-  className = "",
-  ...rest
-}: DateFieldProps) {
+export default function DateField({ selected, onChange, className = "", ...rest }: DateFieldProps) {
   const [active, setActive] = useState(false);
 
   const base =

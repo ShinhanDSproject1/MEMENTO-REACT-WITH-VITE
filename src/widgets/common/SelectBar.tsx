@@ -26,17 +26,14 @@ export default function SelectBar() {
     setIsOpen(false);
   };
 
-  const selectableOptions = options.filter(
-    (option) => option.value !== "default"
-  );
+  const selectableOptions = options.filter((option) => option.value !== "default");
 
   return (
     <div className="relative w-full min-w-[150px]">
       {/* 메인 버튼 */}
       <div
         className="text-md flex w-full min-w-[180px] cursor-pointer items-center justify-between rounded-[10px] border border-[#E6E7EA] bg-white p-2 text-center text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-        onClick={() => setIsOpen((prev) => !prev)}
-      >
+        onClick={() => setIsOpen((prev) => !prev)}>
         <span className="text-[#707070]">{selectedValue}</span>
         <img
           className={`h-4 w-4 transform transition-transform ${isOpen ? "rotate-180" : ""}`}
@@ -51,11 +48,10 @@ export default function SelectBar() {
           {selectableOptions.map((option, index) => (
             <li
               key={option.value}
-              className={`cursor-pointer border-b whitespace-pre p-2 hover:bg-gray-100 ${
+              className={`cursor-pointer border-b p-2 whitespace-pre hover:bg-gray-100 ${
                 index === selectableOptions.length - 1 ? "" : "border-gray-200"
               }`}
-              onClick={() => handleSelect(option)}
-            >
+              onClick={() => handleSelect(option)}>
               {option.text}
             </li>
           ))}

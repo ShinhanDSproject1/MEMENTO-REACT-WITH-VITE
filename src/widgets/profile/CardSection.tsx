@@ -6,14 +6,10 @@ interface CardSectionProps {
   children: ReactNode;
 }
 
-export default function CardSection({
-  className = "",
-  children,
-}: CardSectionProps) {
+export default function CardSection({ className = "", children }: CardSectionProps) {
   return (
     <div
-      className={`w-full min-w-0 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:p-6 ${className}`}
-    >
+      className={`w-full min-w-0 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:p-6 ${className}`}>
       {children}
     </div>
   );

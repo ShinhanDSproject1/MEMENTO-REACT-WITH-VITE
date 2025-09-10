@@ -1,9 +1,9 @@
 // src/pages/MyMentosList.tsx
-import { useModal } from "@/hooks/common/useModal";
 import Button from "@/widgets/common/Button";
 import { CommonModal } from "@/widgets/common/CommonModal";
 import MentosCard from "@/widgets/common/MentosCard";
 import MentosMainTitleComponent from "@/widgets/mentos/MentosMainTitleComponent";
+import { useModal } from "@hooks/ui/useModal";
 import type { FC } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -36,8 +36,7 @@ interface MyMentosListProps {
 }
 
 const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
-  const { isOpen, modalType, openModal, closeModal, modalData } =
-    useModal() as UseModalReturn;
+  const { isOpen, modalType, openModal, closeModal, modalData } = useModal() as UseModalReturn;
   const navigate = useNavigate();
 
   const handleConfirmAction = () => {
@@ -104,8 +103,7 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
               variant="primary"
               size="sm"
               className="-mt-[1px] !h-[32px] !rounded-[8px] !px-3 !text-[13px] !leading-[30px] whitespace-nowrap"
-              onClick={() => navigate("/create-mentos")}
-            >
+              onClick={() => navigate("/create-mentos")}>
               멘토링 생성하기
             </Button>
           </div>

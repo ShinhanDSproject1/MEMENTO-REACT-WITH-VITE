@@ -14,19 +14,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Link, useNavigate } from "react-router-dom";
 
 // ✅ DatePicker 등에 넘길 수 있는 숨김 input (지금은 사용 안 하지만 보관)
-const HiddenInput = forwardRef<
-  HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement>
->((props, ref: ForwardedRef<HTMLInputElement>) => (
-  <input
-    ref={ref}
-    {...props}
-    className="sr-only"
-    readOnly
-    aria-hidden="true"
-    tabIndex={-1}
-  />
-));
+const HiddenInput = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
+  (props, ref: ForwardedRef<HTMLInputElement>) => (
+    <input ref={ref} {...props} className="sr-only" readOnly aria-hidden="true" tabIndex={-1} />
+  ),
+);
 
 type Birth = { y: string; m: string; d: string };
 
@@ -63,9 +55,7 @@ export default function MentorSignup() {
     const m = Number(birth.m);
     const d = Number(birth.d);
     const dt = new Date(y, m - 1, d);
-    return (
-      dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d
-    );
+    return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d;
   }, [birth]);
 
   const canSubmit = useMemo(() => {
@@ -106,7 +96,7 @@ export default function MentorSignup() {
       <div className="mb-5 text-center">
         <div className="flex items-center justify-center">
           <img src={logo} className="w-40" />
-          <h1 className="mt-2 text-lg font-extrabold">
+          <h1 className="mt-2 text-sm font-extrabold">
             <span className="mx-2 text-slate-900">에 오신것을 환영합니다</span>
           </h1>
         </div>
@@ -134,7 +124,7 @@ export default function MentorSignup() {
             placeholder="PW입력"
             value={pw}
             onChange={(e) => setPw(e.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:bg-white"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
           />
         </label>
 
@@ -145,12 +135,10 @@ export default function MentorSignup() {
             placeholder="PW확인"
             value={pw2}
             onChange={(e) => setPw2(e.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:bg-white"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
           />
           {!pwOk && pw2 && (
-            <p className="mt-1 text-xs text-red-500">
-              비밀번호가 일치하지 않거나 너무 짧습니다.
-            </p>
+            <p className="mt-1 text-xs text-red-500">비밀번호가 일치하지 않거나 너무 짧습니다.</p>
           )}
         </label>
 
@@ -161,7 +149,7 @@ export default function MentorSignup() {
             placeholder="이름"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF]"
+            className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
           />
         </div>
 
@@ -182,7 +170,7 @@ export default function MentorSignup() {
               }
               setPhone(value);
             }}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF]"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
           />
           {!/^010-\d{4}-\d{4}$/.test(phone) && phone && (
             <p className="mt-1 text-xs text-red-500">
@@ -193,9 +181,7 @@ export default function MentorSignup() {
 
         {/* 생년월일 (인라인 DatePicker) */}
         <div>
-          <div className="mb-2 text-sm font-semibold text-slate-600">
-            생년월일
-          </div>
+          <div className="mb-2 text-sm font-semibold text-slate-600">생년월일</div>
 
           <div className="relative">
             <div className="grid grid-cols-4 gap-2">
@@ -221,18 +207,14 @@ export default function MentorSignup() {
                 type="button"
                 onClick={() => setIsCalOpen((v) => !v)}
                 className="flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#1161FF] shadow-sm hover:bg-slate-50"
-                aria-label="생년월일 선택"
-              >
+                aria-label="생년월일 선택">
                 📅 선택
               </button>
             </div>
 
             {isCalOpen && (
               <>
-                <div
-                  className="fixed inset-0 z-[9998]"
-                  onClick={() => setIsCalOpen(false)}
-                />
+                <div className="fixed inset-0 z-[9998]" onClick={() => setIsCalOpen(false)} />
                 <div className="absolute right-0 z-[9999] mt-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
                   <DatePicker
                     selected={selectedDate}
@@ -252,11 +234,7 @@ export default function MentorSignup() {
                     openToDate={
                       birth.y && birth.m
                         ? new Date(Number(birth.y), Number(birth.m) - 1, 1)
-                        : new Date(
-                            new Date().getFullYear(),
-                            new Date().getMonth(),
-                            1
-                          )
+                        : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
                     }
                   />
                 </div>
@@ -267,9 +245,7 @@ export default function MentorSignup() {
 
         {/* 자격증 여부 */}
         <div>
-          <div className="mb-2 text-sm font-semibold text-slate-600">
-            자격증 여부 확인
-          </div>
+          <div className="mb-2 text-sm font-semibold text-slate-600">자격증 여부 확인</div>
           <div className="flex gap-2">
             <button
               type="button"
@@ -279,8 +255,7 @@ export default function MentorSignup() {
                 certOwn === true
                   ? "bg-[#1161FF] text-white shadow-[0_6px_18px_rgba(17,97,255,0.25)]"
                   : "bg-slate-200 text-slate-700",
-              ].join(" ")}
-            >
+              ].join(" ")}>
               보유
             </button>
             <button
@@ -291,8 +266,7 @@ export default function MentorSignup() {
                 certOwn === false
                   ? "bg-[#1161FF] text-white shadow-[0_6px_18px_rgba(17,97,255,0.25)]"
                   : "bg-slate-200 text-slate-700",
-              ].join(" ")}
-            >
+              ].join(" ")}>
               미보유
             </button>
           </div>
@@ -331,23 +305,15 @@ export default function MentorSignup() {
           <input
             type="checkbox"
             checked={agree}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setAgree(e.target.checked)
-            }
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setAgree(e.target.checked)}
             className="h-5 w-5 rounded border-slate-300 text-[#1161FF] focus:ring-[#1161FF]"
           />
           <span className="text-sm">
-            <Link
-              to="/tos"
-              className="font-bold text-slate-600 underline underline-offset-2"
-            >
+            <Link to="/tos" className="font-bold text-slate-600 underline underline-offset-2">
               이용약관
             </Link>{" "}
             및{" "}
-            <Link
-              to="/privacy"
-              className="font-bold text-slate-600 underline underline-offset-2"
-            >
+            <Link to="/privacy" className="font-bold text-slate-600 underline underline-offset-2">
               개인정보처리방침
             </Link>
             에 동의합니다
@@ -361,18 +327,14 @@ export default function MentorSignup() {
             disabled={!canSubmit}
             className={[
               "h-14 rounded-2xl text-base font-extrabold text-white transition",
-              canSubmit
-                ? "bg-[#1161FF] hover:bg-[#0C2D62]"
-                : "cursor-not-allowed bg-[#9BB9FF]",
-            ].join(" ")}
-          >
+              canSubmit ? "bg-[#1161FF] hover:bg-[#0C2D62]" : "cursor-not-allowed bg-[#9BB9FF]",
+            ].join(" ")}>
             가입
           </button>
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="h-14 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-500 transition hover:bg-slate-300"
-          >
+            className="h-14 rounded-2xl bg-slate-200 text-base font-extrabold text-slate-500 transition hover:bg-slate-300">
             취소
           </button>
         </div>
@@ -380,10 +342,7 @@ export default function MentorSignup() {
         {/* 로그인 링크 */}
         <p className="mt-6 text-center text-sm text-slate-500">
           이미 계정이 있으신가요?{" "}
-          <Link
-            to="/login"
-            className="font-bold text-[#1161FF] underline underline-offset-2"
-          >
+          <Link to="/login" className="font-bold text-[#1161FF] underline underline-offset-2">
             로그인
           </Link>
         </p>

@@ -1,12 +1,8 @@
 // EditMentosPage.tsx
-import { useModal } from "@/hooks/common/useModal";
 import MentosForm from "@/pages/mentor/MentosForm";
-import {
-  getMentos,
-  updateMentos,
-  type MentosItem,
-} from "@/services/mentos.api"; // ⬅️ .js 제거
 import { CommonModal } from "@/widgets/common/CommonModal";
+import { getMentos, updateMentos, type MentosItem } from "@api/mentos";
+import { useModal } from "@hooks/ui/useModal";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -47,9 +43,7 @@ export default function EditMentosPage() {
   return (
     <div className="flex h-full w-full justify-center overflow-x-hidden bg-[#f5f6f8]">
       <section className="w-full bg-white px-4 py-5 shadow">
-        <h1 className="mt-6 mb-15 pl-2 text-[20px] font-bold">
-          멘토링 수정하기
-        </h1>
+        <h1 className="mt-6 mb-15 pl-2 text-[20px] font-bold">멘토링 수정하기</h1>
 
         <CommonModal
           type="updateMentos"

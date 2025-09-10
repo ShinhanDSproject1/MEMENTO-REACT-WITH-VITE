@@ -23,9 +23,7 @@ export default function MentosForm({
   initialValues = {},
   onSubmit,
 }: MentosFormProps) {
-  const [fileName, setFileName] = useState<string>(
-    initialValues.fileName ?? ""
-  );
+  const [fileName, setFileName] = useState<string>(initialValues.fileName ?? "");
   const [form, setForm] = useState<MentosFormValues>({
     title: initialValues.title ?? "",
     content: initialValues.content ?? "",
@@ -86,10 +84,7 @@ export default function MentosForm({
 
       {/* 분류 */}
       <div className="grid grid-cols-[56px_1fr] items-start gap-3">
-        <label
-          htmlFor="category"
-          className="pl-2 leading-7 font-bold whitespace-pre text-[#333]"
-        >
+        <label htmlFor="category" className="pl-2 leading-7 font-bold whitespace-pre text-[#333]">
           분류
         </label>
         <input
@@ -125,17 +120,14 @@ export default function MentosForm({
               className="sr-only"
               id="mentos-image"
             />
-            <span
-              className={`block truncate ${fileName ? "text-slate-700" : "text-slate-400"}`}
-            >
+            <span className={`block truncate ${fileName ? "text-slate-700" : "text-slate-400"}`}>
               {fileName || "이미지 업로드"}
             </span>
           </label>
 
           <label
             htmlFor="mentos-image"
-            className="cursor-pointer rounded-xl bg-[#1161FF] px-4 py-3 text-sm font-extrabold text-white transition-colors hover:bg-[#0C2D62]"
-          >
+            className="cursor-pointer rounded-xl bg-[#1161FF] px-4 py-3 text-sm font-extrabold text-white transition-colors hover:bg-[#0C2D62]">
             파일 선택
           </label>
         </div>

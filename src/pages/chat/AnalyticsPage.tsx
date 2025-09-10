@@ -1,5 +1,5 @@
+import { BarChart, LineChart, PieChart, Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Search, BarChart, PieChart, LineChart } from "lucide-react";
 import dogFront from "../../assets/images/dog-front.png";
 
 export default function AnalyticsPage() {

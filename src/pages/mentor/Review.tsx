@@ -119,7 +119,7 @@ export default function Review() {
           setPage((p) => p + 1);
         }
       },
-      { rootMargin: "200px", threshold: 0.01 }
+      { rootMargin: "200px", threshold: 0.01 },
     );
 
     io.observe(el);
@@ -129,9 +129,7 @@ export default function Review() {
   return (
     <div className="flex min-h-screen w-full justify-center overflow-x-hidden bg-[#f5f6f8] font-sans antialiased">
       <section className="w-full overflow-x-hidden bg-white px-4 py-5">
-        <h1 className="font-WooridaumB mt-6 mb-15 pl-2 text-[20px] font-bold">
-          리뷰 확인하기
-        </h1>
+        <h1 className="font-WooridaumB mt-6 mb-15 pl-2 text-[20px] font-bold">리뷰 확인하기</h1>
 
         <PageContainer className="space-y-4">
           {items.map((it) => (
@@ -152,16 +150,10 @@ export default function Review() {
             </div>
           )}
 
-          {loading && (
-            <div className="text-center text-sm text-gray-500">
-              불러오는 중…
-            </div>
-          )}
+          {loading && <div className="text-center text-sm text-gray-500">불러오는 중…</div>}
 
           {!hasMore && !loading && items.length > 0 && (
-            <div className="text-center text-xs text-gray-400">
-              마지막 페이지입니다
-            </div>
+            <div className="text-center text-xs text-gray-400">마지막 페이지입니다</div>
           )}
 
           <div ref={sentinelRef} />

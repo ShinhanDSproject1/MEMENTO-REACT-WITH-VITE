@@ -2,13 +2,7 @@
 import { getMessages, getRooms, sendMessage } from "@/pages/chat/services/chat";
 import defaultimage from "@assets/images/character/character-gom.svg";
 import { Send } from "lucide-react";
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type FormEvent,
-} from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useLocation, useParams } from "react-router-dom";
 
 // 공용 타입 (프로젝트에선 src/types/chat.ts 등으로 분리 권장)
@@ -90,13 +84,11 @@ export default function ChatRoomPage() {
 
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 space-y-4 overflow-hidden overscroll-none bg-[#E6EDFF]/[0.22] px-4 py-5"
-      >
+        className="min-h-0 flex-1 space-y-4 overflow-hidden overscroll-none bg-[#E6EDFF]/[0.22] px-4 py-5">
         {msgs.map((m) => (
           <div
             key={m.id}
-            className={`flex ${m.role === "me" ? "justify-end" : "items-start gap-2"}`}
-          >
+            className={`flex ${m.role === "me" ? "justify-end" : "items-start gap-2"}`}>
             {m.role !== "me" && (
               <div className="grid h-8 w-8 place-items-center rounded-full bg-[#565C63]">
                 <img src={defaultimage} alt="gom" />
@@ -111,8 +103,7 @@ export default function ChatRoomPage() {
 
       <form
         onSubmit={onSend}
-        className="sticky bottom-0 z-10 flex min-h-[60px] shrink-0 items-center gap-3 border-t border-[#e9eef4] bg-white px-4 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_6px_rgba(0,0,0,0.08)]"
-      >
+        className="sticky bottom-0 z-10 flex min-h-[60px] shrink-0 items-center gap-3 border-t border-[#e9eef4] bg-white px-4 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_6px_rgba(0,0,0,0.08)]">
         <div className="flex flex-1 items-center rounded-full border border-[#e6eaf0] bg-[#f9fafb] px-4 py-2">
           <textarea
             value={input}
@@ -121,16 +112,8 @@ export default function ChatRoomPage() {
             className="w-full resize-none bg-transparent text-[14px] outline-none placeholder:text-[#c0c7d2]"
             placeholder="채팅을 입력하세요"
           />
-          <button
-            type="submit"
-            className="ml-2 flex items-center justify-center hover:opacity-80"
-          >
-            <Send
-              size={20}
-              strokeWidth={2}
-              className="text-[#2563eb]"
-              fill="currentColor"
-            />
+          <button type="submit" className="ml-2 flex items-center justify-center hover:opacity-80">
+            <Send size={20} strokeWidth={2} className="text-[#2563eb]" fill="currentColor" />
           </button>
         </div>
       </form>

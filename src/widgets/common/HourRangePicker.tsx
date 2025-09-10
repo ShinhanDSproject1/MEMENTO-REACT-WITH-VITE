@@ -12,10 +12,7 @@ export interface HourRangePickerProps {
   onChange?: (range: HourRange) => void;
 }
 
-export default function HourRangePicker({
-  value,
-  onChange,
-}: HourRangePickerProps) {
+export default function HourRangePicker({ value, onChange }: HourRangePickerProps) {
   const [startH, setStartH] = useState<number>(value?.start ?? 10);
   const [endH, setEndH] = useState<number>(value?.end ?? 18);
 

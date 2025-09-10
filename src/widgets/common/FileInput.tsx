@@ -38,8 +38,7 @@ export default function FileInput({ accept, onFileChange }: FileInputProps) {
         type="button"
         onClick={handleButtonClick}
         aria-label="파일 선택"
-        className="flex h-[8vh] max-h-[50px] min-h-[30px] w-full items-center justify-between rounded-[10px] border-[1px] border-[#E6E7EA] bg-white px-4 py-2 text-[#6C747E] hover:border-blue-400"
-      >
+        className="flex h-[8vh] max-h-[50px] min-h-[30px] w-full items-center justify-between rounded-[10px] border-[1px] border-[#E6E7EA] bg-white px-4 py-2 text-[#6C747E] hover:border-blue-400">
         <span className="text-sm">{text}</span>
         <img src={UploadIcon} alt="upload-icon" />
       </button>

@@ -1,10 +1,9 @@
+import { useCalendar, useKoreanHolidays } from "@hooks";
+import { Calendar } from "@widgets";
+import TimeGrid from "@widgets/booking/TimeGrid";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCalendar } from "../../hooks/useCalendar";
-import { useKoreanHolidays } from "../../hooks/useKoreanHolidays";
 import { toYM, toYMD } from "../../shared/lib/datetime";
-import Calendar from "../../widgets/booking/Calendar";
-import TimeGrid from "../../widgets/booking/TimeGrid";
 
 interface Booking {
   mentorId: number;
@@ -41,9 +40,7 @@ export default function BookingPage({
   const monthKey = useMemo(() => toYM(currentMonth), [currentMonth]);
 
   // 공휴일
-  const { isHoliday, getHolidayName } = useKoreanHolidays(
-    currentMonth.getFullYear()
-  );
+  const { isHoliday, getHolidayName } = useKoreanHolidays(currentMonth.getFullYear());
 
   // 초기 오늘 선택 + 현재 달 세팅
   useEffect(() => {
@@ -116,8 +113,7 @@ export default function BookingPage({
               canReserve
                 ? "cursor-pointer bg-[#1161FF] hover:bg-[#0C2D62]"
                 : "cursor-not-allowed bg-gray-300 text-gray-500 hover:bg-gray-300"
-            }`}
-          >
+            }`}>
             예약하기
           </button>
         </div>

@@ -1,5 +1,5 @@
-import React, { useId, useMemo } from "react";
 import clsx from "clsx";
+import React, { useId, useMemo } from "react";
 
 type NeonButtonProps = {
   as?: "button" | "a";

@@ -24,11 +24,7 @@ export default function MainCard({ title, context }: MainCardProps) {
         <p className="text-[0.6rem]">{formattedContext}</p>
       </section>
       <div className="flex justify-end">
-        <Button
-          className="w-[30%] items-center text-[0.75rem]"
-          variant="light"
-          size="sm"
-        >
+        <Button className="w-[30%] items-center text-[0.75rem]" variant="light" size="sm">
           바로가기
         </Button>
       </div>
