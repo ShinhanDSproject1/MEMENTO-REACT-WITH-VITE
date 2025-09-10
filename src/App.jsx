@@ -32,6 +32,7 @@ import HomeVideo from "./pages/Home/HomeVideo";
 import MentoIntroduce2 from "./pages/book/MentoIntroduce2";
 import BookingPage from "./pages/book/Booking";
 import BookingConfirm from "./pages/book/BookingConfirm";
+import MentorMapNearbyPage from "./pages/mentos/MentorMapNearbyPage";
 
 import PaySuccess from "@/pages/book/PaySuccess";
 
@@ -101,6 +102,7 @@ export default function App() {
         <Route path="/booking" element={<BookingPage />} />
         <Route path="/booking/confirm" element={<BookingConfirm />} />
         <Route path="/booking/success" element={<PaySuccess />} />
+        <Route path="/mento/nearby" element={<MentorMapNearbyPage />} />
       </Route>
       <Route path="*" element={<Error404 />} />
       <Route path="/video" element={<HomeVideo />} />

@@ -1,4 +1,3 @@
-// 폼 + 모달
 import { useEffect, useState } from "react";
 import { CommonModal } from "@/components/common/CommonModal";
 import { SimpleEditor } from "@/components/common/tiptap-templates/simple/simple-editor";
