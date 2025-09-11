@@ -1,6 +1,6 @@
 // ✅ 훅은 값 임포트
-import { CommonModal } from "@/widgets/common/CommonModal";
-import { useModal } from "@hooks/common";
+import { useModal } from "@hooks/ui/useModal";
+import { CommonModal } from "@widgets/common";
 import { useMemo, useState } from "react";
 
 // ---- 타입 정의 ----
@@ -63,22 +63,16 @@ export default function MemberReport() {
   const [rows, setRows] = useState<Member[]>(MOCK);
 
   // ✅ 훅 실제 타입과 맞추기 (훅 제네릭을 지원하지 않는다면 as 캐스트 유지)
-  const { isOpen, modalType, openModal, closeModal, modalData } =
-    useModal() as UseModalReturn;
+  const { isOpen, modalType, openModal, closeModal, modalData } = useModal() as UseModalReturn;
 
   const [loadingId, setLoadingId] = useState<number | null>(null);
 
-  const selected = useMemo<Member | null>(
-    () => modalData?.member ?? null,
-    [modalData]
-  );
+  const selected = useMemo<Member | null>(() => modalData?.member ?? null, [modalData]);
 
   // 나중에 실제 API 호출로 교체
-  const reportMember = async (_memberId: number) =>
-    new Promise((r) => setTimeout(r, 400));
+  const reportMember = async (_memberId: number) => new Promise((r) => setTimeout(r, 400));
 
-  const onClickDismiss = (member: Member) =>
-    openModal("dismissUser", { member });
+  const onClickDismiss = (member: Member) => openModal("dismissUser", { member });
 
   const handleConfirmAction = async () => {
     if (modalType !== "dismissUser" || !selected) {
@@ -99,9 +93,7 @@ export default function MemberReport() {
   return (
     <div className="font-woori flex min-h-screen w-full items-start justify-center">
       <div className="mx-auto my-6 w-[375px] bg-white text-[#111]">
-        <h1 className="mb-3 text-left text-[28px] leading-[32px] font-bold">
-          회원 관리
-        </h1>
+        <h1 className="mb-3 text-left text-[28px] leading-[32px] font-bold">회원 관리</h1>
 
         <div className="max-h-[560px] overflow-auto rounded-[12px] border border-[#E5E7ED]">
           <table className="w-full table-fixed border-separate border-spacing-0">
@@ -118,18 +110,10 @@ export default function MemberReport() {
                 <th className="h-10 border-r border-white/35 px-2 text-center first:rounded-tl-[12px]">
                   사용자
                 </th>
-                <th className="h-10 border-r border-white/35 px-2 text-center">
-                  역할
-                </th>
-                <th className="h-10 border-r border-white/35 px-2 text-center">
-                  가입일
-                </th>
-                <th className="h-10 border-r border-white/35 px-2 text-center">
-                  전화번호
-                </th>
-                <th className="h-10 px-2 text-center last:rounded-tr-[12px]">
-                  회원제명
-                </th>
+                <th className="h-10 border-r border-white/35 px-2 text-center">역할</th>
+                <th className="h-10 border-r border-white/35 px-2 text-center">가입일</th>
+                <th className="h-10 border-r border-white/35 px-2 text-center">전화번호</th>
+                <th className="h-10 px-2 text-center last:rounded-tr-[12px]">회원제명</th>
               </tr>
             </thead>
 
@@ -146,8 +130,7 @@ export default function MemberReport() {
                         className="inline-flex h-6 min-w-[52px] cursor-pointer items-center justify-center rounded-full bg-[#df001f] px-3 text-[12px] leading-none whitespace-nowrap text-white hover:bg-[#b80019] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-[#df001f]"
                         disabled={loadingId === r.id}
                         onClick={() => onClickDismiss(r)}
-                        aria-label={`${r.name} 제명하기`}
-                      >
+                        aria-label={`${r.name} 제명하기`}>
                         {loadingId === r.id ? "처리 중" : "제명"}
                       </button>
                     </div>

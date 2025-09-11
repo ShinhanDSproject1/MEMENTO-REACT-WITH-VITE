@@ -1,5 +1,5 @@
 import { useCalendar, useKoreanHolidays } from "@hooks";
-import { Calendar } from "@widgets";
+import { Calendar } from "@widgets/booking";
 import TimeGrid from "@widgets/booking/TimeGrid";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";

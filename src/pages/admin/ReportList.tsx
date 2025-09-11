@@ -1,6 +1,6 @@
 // src/pages/admin/ReportList.tsx
-import { CommonModal } from "@/widgets/common/CommonModal";
 import { useModal } from "@hooks/ui/useModal";
+import { CommonModal } from "@widgets/common";
 import { useState } from "react";
 
 // ---- 타입 정의 ----
@@ -33,10 +33,7 @@ const MOCK: ReportRow[] = [
 export default function ReportList() {
   const [rows] = useState<ReportRow[]>(MOCK);
 
-  const { isOpen, modalType, openModal, closeModal, modalData } = useModal<
-    ModalType,
-    ModalData
-  >();
+  const { isOpen, modalType, openModal, closeModal, modalData } = useModal<ModalType, ModalData>();
 
   const handleSubmit = () => {
     if (modalType === "reportDetail") {
@@ -63,9 +60,7 @@ export default function ReportList() {
   return (
     <div className="font-woori flex min-h-screen w-full items-start justify-center">
       <div className="mx-auto my-6 w-[375px] bg-white text-[#111]">
-        <h1 className="mb-3 text-left text-[28px] leading-[32px] font-bold">
-          신고 확인
-        </h1>
+        <h1 className="mb-3 text-left text-[28px] leading-[32px] font-bold">신고 확인</h1>
 
         <div className="overflow-auto rounded-[12px] border border-[#E5E7ED]">
           <table className="w-full table-fixed border-separate border-spacing-0">
@@ -97,16 +92,13 @@ export default function ReportList() {
                 <tr key={r.id} className="bg-white">
                   <td>{r.name}</td>
                   <td>{r.role}</td>
-                  <td className="overflow-hidden text-ellipsis whitespace-nowrap">
-                    {r.category}
-                  </td>
+                  <td className="overflow-hidden text-ellipsis whitespace-nowrap">{r.category}</td>
                   <td>
                     <button
                       type="button"
                       className="inline-flex h-6 cursor-pointer items-center justify-center rounded-full bg-[#005EF9] px-3 text-[12px] leading-none whitespace-nowrap text-white hover:bg-[#0048C7] focus:ring-2 focus:ring-[#005EF9]/30 focus:outline-none"
                       onClick={() => onClickDetail(r)}
-                      aria-label={`${r.name} 신고 상세보기`}
-                    >
+                      aria-label={`${r.name} 신고 상세보기`}>
                       상세
                     </button>
                   </td>

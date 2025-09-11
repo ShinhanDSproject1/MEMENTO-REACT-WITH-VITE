@@ -1,8 +1,8 @@
 // EditMentosPage.tsx
 import MentosForm from "@/pages/mentor/MentosForm";
-import { CommonModal } from "@/widgets/common/CommonModal";
 import { getMentos, updateMentos, type MentosItem } from "@api/mentos";
 import { useModal } from "@hooks/ui/useModal";
+import { CommonModal } from "@widgets/common";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 

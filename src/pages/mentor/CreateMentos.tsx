@@ -1,6 +1,6 @@
 import MentosForm from "@/pages/mentor/MentosForm";
-import { CommonModal } from "@/widgets/common/CommonModal";
 import { useModal } from "@hooks/ui/useModal";
+import { CommonModal } from "@widgets/common";
 import { useNavigate } from "react-router-dom";
 
 export default function CreateMentos() {
