@@ -23,7 +23,7 @@ const MentosDetail = React.lazy(() => import("@/pages/mentos/MentosDetail"));
 
 const MyMentosList = React.lazy(() => import("@/pages/my-profile/MyMentosList"));
 const MentorProfile = React.lazy(() => import("@/pages/my-profile/MentoProfile"));
-const MyProfile = React.lazy(() => import("@/pages/my-profile/MyProfile"));
+// const MyProfile = React.lazy(() => import("@/pages/my-profile/MyProfile"));
 
 const CreateMentos = React.lazy(() => import("@/pages/mentor/CreateMentos"));
 const EditMentos = React.lazy(() => import("@/pages/mentor/EditMentos"));

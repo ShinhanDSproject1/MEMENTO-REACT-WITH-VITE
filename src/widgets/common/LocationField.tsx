@@ -1,5 +1,5 @@
 // src/components/common/LocationField.tsx
-import useDaumPostcode from "@/hooks/useDaumPostcode";
+import useDaumPostcode from "@hooks/intergrations/useDaumPostcode";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
 

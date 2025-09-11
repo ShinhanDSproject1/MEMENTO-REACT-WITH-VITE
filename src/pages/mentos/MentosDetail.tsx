@@ -122,11 +122,14 @@ export default function MentosDetail() {
 
           <div className="flex pt-22 text-center">
             <span className="font-WooridaumB">
-              Jelly sweet roll jelly beans biscuit pie macaroon chocolate donut. Carrot cake
-              caramels pie sweet apple pie tiramisu carrot cake. Marzipan marshmallow croissant
-              tootsie roll lollipop. Cupcake lemon drops bear claw gummies. Jelly bear claw gummi
-              bears lollipop cotton candy gummi bears chocolate bar cake cookie. Cupcake muffin
-              danish muffin cookie gummies.
+              이 멘토는 금융에서 겪은 시행착오를 토대로 현실적인 조언을 제공합니다.
+              <br />
+              멘토링은 **실습 중심**으로 운영되며 가계부 작성, 투자 기초, 신용 점검 등을 다룹니다.
+              <br />
+              참가자들은 작은 성공을 통해 자신감을 얻고 생활 속 변화를 경험합니다.
+              <br />
+              <br />
+              💡 “돈은 숫자가 아니라 삶을 지탱하는 자원입니다. 함께 성장해 보세요.
             </span>
           </div>
         </div>
