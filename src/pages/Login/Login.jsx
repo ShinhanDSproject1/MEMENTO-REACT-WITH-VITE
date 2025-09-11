@@ -79,7 +79,7 @@ function Login() {
         안녕하세요 me:mento 입니다.
       </p>
       <p className="font-WooridaumB text-left text-[0.9rem] text-[#757575]">
-        저희와 함께 제테크 멘토링을 시작해보세요!
+        나만의 재테크 멘토링을 시작해보세요!
       </p>
 
       {/*캐릭터 이미지*/}
@@ -103,7 +103,7 @@ function Login() {
             type="text"
             inputMode="email"
             autoComplete="username"
-            placeholder="ID입력"
+            placeholder="ID 입력"
             value={id}
             onChange={(e) => setId(e.target.value)}
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm ring-0 outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
@@ -114,7 +114,7 @@ function Login() {
           <input
             type="password"
             autoComplete="current-password"
-            placeholder="PW입력"
+            placeholder="PW 입력"
             value={pw}
             onChange={(e) => setPw(e.target.value)}
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"

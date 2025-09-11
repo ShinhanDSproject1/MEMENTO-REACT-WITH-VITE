@@ -25,9 +25,9 @@ export default function PaySuccess() {
   const line = `${title} · ${when} · ${amount.toLocaleString()}원 결제 완료!`;
   MODAL_CONFIG.paySuccess.message = (
     <div className="flex flex-col items-center gap-4 text-center">
-      <p className="font-WooridaumB text-lg">결제가 완료되었습니다</p>
+      <p className="font-WooridaumB text-lg">결제 완료</p>
       <div className="w-full max-w-xs rounded-lg border border-gray-200 bg-gray-50 p-3">
-        <p className="font-WooridaumB text-base text-[#222939]">{title}</p>
+        <p className="font-WooridaumB text-lg text-[#222939]">{title}</p>
         <p className="font-WooridaumR text-sm text-[#287EFF]">{when}</p>
         <p className="font-WooridaumR text-sm">{amount.toLocaleString()}원</p>
       </div>
