@@ -105,7 +105,7 @@ function MentosDetail(props) {
         <div className="mb- relative flex w-full max-w-sm flex-col items-center justify-center rounded-[20px] bg-[#F4F4F4] p-4">
           <div className="absolute -top-[30%] flex w-full">
             <div className="relative flex w-full flex-col items-center justify-center">
-              <span className="font-WooridaumB py-1 text-xl font-bold">멘토소개</span>
+              <span className="font-WooridaumB py-1 text-xl font-bold">멘토 소개</span>
               <div className="z-10 h-auto w-[40%] overflow-hidden rounded-full bg-radial from-[white] via-[#E4EDFF] to-[#AEC8FF] p-1">
                 <img src={kogiri} className="h-full w-full object-cover" alt="멘토 프로필" />
               </div>

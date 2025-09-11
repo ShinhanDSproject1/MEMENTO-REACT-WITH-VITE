@@ -15,10 +15,10 @@ function MentoButtonGroup() {
         멘토링 생성하기
       </MainButton>
       <MainButton className={style} onClick={() => navigate("/mento/my-list")}>
-        멘토링 관리
+        멘토링 관리하기
       </MainButton>
       <MainButton className={style} onClick={() => navigate("/chat")}>
-        멘티 채팅
+        멘티와 채팅하기
       </MainButton>
       <MainButton
         className={style}

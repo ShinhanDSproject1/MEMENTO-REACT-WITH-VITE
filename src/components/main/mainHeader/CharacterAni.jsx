@@ -4,7 +4,7 @@ function CharacterAni() {
   return (
     <div>
       <p className="px-7 text-left text-xs text-[#757575]">
-        당신의 소중한 제테크를 AI가 추천한 멘토와 함께하세요!
+        AI 추천 멘토링으로 당신의 자산을 현명하게 관리하세요!
       </p>
       <img
         src={characterFull}

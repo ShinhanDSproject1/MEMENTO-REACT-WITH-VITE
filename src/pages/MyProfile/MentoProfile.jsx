@@ -224,7 +224,7 @@ export default function MentorProfile() {
             </SectionCard>
           </section>
 
-          <h2 className={headingCls}>보유자격증</h2>
+          <h2 className={headingCls}>보유 자격증</h2>
           <section className="mb-8">
             <div className="rounded-xl border border-[#E5E7ED] bg-white px-5 py-4 text-sm leading-6 text-[#606264]">
               {user.certs.join("    ")}
