@@ -56,7 +56,7 @@ export default function MentosCard({
         return (
           <>
             <Button className="text-xs" variant="lightBlue" size="sm" onClick={onReviewClick}>
-              리뷰작성
+              리뷰 작성
             </Button>
             <Button className="text-xs" variant="danger" size="sm" onClick={onReportClick}>
               신고하기

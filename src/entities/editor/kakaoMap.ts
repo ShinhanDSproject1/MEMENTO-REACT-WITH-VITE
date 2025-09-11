@@ -21,6 +21,7 @@ const NEARBY_ENDPOINT = (lat: number, lon: number, distanceKm: number) =>
   `${API_HOST}/map/mentos?latitude=${lat}&longitude=${lon}&distance=${distanceKm}`;
 const BASE_IMAGE_PATH = "/uploads/";
 const FALLBACK_IMAGE = "/static/images/default-60.png";
+
 const BLUE_DOT = "/images/location.svg";
 const RED_PIN = "/images/location2.svg";
 

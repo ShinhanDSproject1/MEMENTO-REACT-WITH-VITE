@@ -26,8 +26,8 @@ export default function MenteeLoginBox({ userName }: MenteeLoginBoxProps) {
         <div className="flex justify-center">
           <button
             className="cursor-pointer rounded-full bg-[#005EF9] p-2 px-6 text-sm font-semibold text-white hover:bg-[#0C2D62] hover:shadow"
-            onClick={() => navigate("mentee/mymentos")}>
-            나의 멘토링내역
+            onClick={() => navigate("/mentee/mymentos")}>
+            나의 멘토링 내역
           </button>
           <button
             className="ml-5 cursor-pointer rounded-full bg-[#005EF9] p-2 px-6 text-sm font-semibold text-white hover:bg-[#0C2D62] hover:shadow"
