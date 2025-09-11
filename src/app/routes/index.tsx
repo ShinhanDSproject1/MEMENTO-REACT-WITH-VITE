@@ -2,11 +2,11 @@
 import React, { Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 
-// ✅ 레이아웃 경로 수정 (routes가 두 번 들어가던 문제 제거)
+// Layouts
 const HomeLayout = React.lazy(() => import("@/app/routes/layouts/HomeLayout"));
 const AppLayout = React.lazy(() => import("@/app/routes/layouts/AppLayout"));
 
-// 페이지들
+// Pages
 const Home = React.lazy(() => import("@/pages/home/Home"));
 const Error400 = React.lazy(() => import("@/pages/home/Error400"));
 const Error404 = React.lazy(() => import("@/pages/home/Error404"));
@@ -46,11 +46,14 @@ const BookingPage = React.lazy(() => import("@/pages/book/Booking"));
 const BookingConfirm = React.lazy(() => import("@/pages/book/BookingConfirm"));
 const MentoIntroduce2 = React.lazy(() => import("@/pages/book/MentoIntroduce2"));
 
+// ✅ 새로 추가된 페이지
+const PaySuccess = React.lazy(() => import("@/pages/book/PaySuccess"));
+const MentorMapNearbyPage = React.lazy(() => import("@/pages/mentos/MentorMapNearbyPage"));
+
 const withSuspense = (el: React.ReactNode) => (
   <Suspense fallback={<div className="p-6 text-sm text-gray-500">로딩 중…</div>}>{el}</Suspense>
 );
 
-// ✅ named export 로 내보냄 (App에서 { router }로 가져올 수 있게)
 export const router = createBrowserRouter([
   {
     element: withSuspense(<HomeLayout />),
@@ -71,30 +74,16 @@ export const router = createBrowserRouter([
       { path: "/signup-complete", element: withSuspense(<SignupComplete />) },
 
       { path: "/mentee/:category", element: withSuspense(<MentosList />) },
-      {
-        path: "/mentee/mentos-detail/:id",
-        element: withSuspense(<MentosDetail />),
-      },
-      {
-        path: "/mentee/mymentos",
-        element: withSuspense(<MyMentosList role="menti" />),
-      },
+      { path: "/mentee/mentos-detail/:id", element: withSuspense(<MentosDetail />) },
+      { path: "/mentee/mymentos", element: withSuspense(<MyMentosList role="menti" />) },
 
-      {
-        path: "/mento/my-list",
-        element: withSuspense(<MyMentosList role="mento" />),
-      },
+      { path: "/mento/my-list", element: withSuspense(<MyMentosList role="mento" />) },
       { path: "/mento", element: withSuspense(<MentorProfile />) },
+      { path: "/mento/nearby", element: withSuspense(<MentorMapNearbyPage />) }, // ← 추가
       { path: "/create-mentos", element: withSuspense(<CreateMentos />) },
       { path: "/edit/:id", element: withSuspense(<EditMentos />) },
-      {
-        path: "/mento/certification",
-        element: withSuspense(<CertificationRegister />),
-      },
-      {
-        path: "/mento/certification/:result",
-        element: withSuspense(<CertificationPage />),
-      },
+      { path: "/mento/certification", element: withSuspense(<CertificationRegister />) },
+      { path: "/mento/certification/:result", element: withSuspense(<CertificationPage />) },
       { path: "/mento/introduce", element: withSuspense(<MentoIntroduce />) },
       { path: "/mento/introduce2", element: withSuspense(<MentoIntroduce2 />) },
 
@@ -110,6 +99,7 @@ export const router = createBrowserRouter([
 
       { path: "/booking", element: withSuspense(<BookingPage />) },
       { path: "/booking/confirm", element: withSuspense(<BookingConfirm />) },
+      { path: "/booking/success", element: withSuspense(<PaySuccess />) }, // ← 추가
 
       { path: "/video", element: withSuspense(<HomeVideo />) },
     ],

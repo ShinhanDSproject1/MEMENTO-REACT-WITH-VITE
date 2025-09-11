@@ -1,6 +1,6 @@
+import { KakaoMapController } from "@entities/editor/kakaoMap";
+import { Info, Loader2, MapPin } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { KakaoMapController } from "@/lib/kakaoMap";
-import { MapPin, Loader2, Info } from "lucide-react";
 
 export default function MentoNearbyPage() {
   const mapDivRef = useRef<HTMLDivElement | null>(null);
