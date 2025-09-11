@@ -189,17 +189,15 @@
 
 @font-face {
   font-family: "WooridaumB";
-  src: url("./assets/fonts/WooridaumB.ttf") format("truetype");
+  src: url("./shared/assets/fonts/WooridaumB.ttf") format("truetype");
   font-weight: 700;
-  /* 굵기 명시 권장 */
   font-style: normal;
   font-display: swap;
-  /* LCP 깜빡임 방지 */
 }
 
 @font-face {
   font-family: "WooridaumL";
-  src: url("./assets/fonts/WooridaumL.ttf") format("truetype");
+  src: url("./shared/assets/fonts/WooridaumL.ttf") format("truetype");
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -207,7 +205,7 @@
 
 @font-face {
   font-family: "WooridaumR";
-  src: url("./assets/fonts/WooridaumR.ttf") format("truetype");
+  src: url("./shared/assets/fonts/WooridaumR.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;

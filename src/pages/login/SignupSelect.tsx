@@ -29,8 +29,7 @@ export default function SignupSelect({ onSelect }: SignupSelectProps) {
         <button
           type="button"
           onClick={() => handleSelect("mentee")}
-          className="group flex w-full items-center justify-between rounded-r-full bg-[#9BB9FF] px-6 py-6 text-left shadow-[0_10px_30px_rgba(155,185,255,0.35)] transition-transform hover:scale-[1.01] active:scale-[0.99]"
-        >
+          className="group flex w-full items-center justify-between rounded-r-full bg-[#9BB9FF] px-6 py-6 text-left shadow-[0_10px_30px_rgba(155,185,255,0.35)] transition-transform hover:scale-[1.01] active:scale-[0.99]">
           <span className="text-xl font-extrabold text-white">멘티</span>
           <div className="h-20 w-20 rounded-full bg-white/95 shadow-[0_6px_16px_rgba(0,0,0,0.1)]">
             <img src={gom} alt="멘티" className="h-20 w-20" />
@@ -41,8 +40,7 @@ export default function SignupSelect({ onSelect }: SignupSelectProps) {
         <button
           type="button"
           onClick={() => handleSelect("mentor")}
-          className="group flex w-full items-center justify-between rounded-r-full bg-[#1161FF] px-6 py-6 text-left shadow-[0_12px_32px_rgba(17,97,255,0.35)] transition-transform hover:scale-[1.01] active:scale-[0.99]"
-        >
+          className="group flex w-full items-center justify-between rounded-r-full bg-[#1161FF] px-6 py-6 text-left shadow-[0_12px_32px_rgba(17,97,255,0.35)] transition-transform hover:scale-[1.01] active:scale-[0.99]">
           <span className="text-xl font-extrabold text-white">멘토</span>
           <div className="h-20 w-20 rounded-full bg-white/95 shadow-[0_6px_16px_rgba(0,0,0,0.12)]">
             <img src={kogiri} alt="멘토" className="h-20 w-20" />

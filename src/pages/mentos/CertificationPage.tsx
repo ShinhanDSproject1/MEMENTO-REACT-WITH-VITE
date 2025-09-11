@@ -18,16 +18,11 @@ const CertificationPage: React.FC = () => {
       <div className="flex h-full w-full flex-col items-center justify-between gap-4 bg-white py-4">
         <div className="flex w-full">
           <p className="font-WooridaumB text-2xl text-black">
-            자격증 인증{" "}
-            <span className="font-WooridaumB text-[#005EF9]">진행중</span>...
+            자격증 인증 <span className="font-WooridaumB text-[#005EF9]">진행중</span>...
           </p>
         </div>
         <div className="flex w-full flex-col items-center justify-center gap-10">
-          <Spinner
-            aria-label="Extra large spinner example"
-            size="xl"
-            className="h-50 w-50"
-          />
+          <Spinner aria-label="Extra large spinner example" size="xl" className="h-50 w-50" />
           <Progress
             className="w-70"
             progress={45}
@@ -44,8 +39,7 @@ const CertificationPage: React.FC = () => {
           variant="cancelGray"
           onClick={() => navigate("/mento")}
           className="font-WooridaumB w-full px-8 py-4 font-bold"
-          size="lg"
-        >
+          size="lg">
           취소하기
         </Button>
       </div>
@@ -57,9 +51,7 @@ const CertificationPage: React.FC = () => {
       <div className="flex h-[80vh] w-full flex-col justify-between gap-4 bg-white p-4">
         <div className="flex w-full">
           <p className="font-WooridaumB text-2xl text-black">
-            자격증을{" "}
-            <span className="font-WooridaumB text-[#DF001F]">인증하지</span>{" "}
-            못했습니다
+            자격증을 <span className="font-WooridaumB text-[#DF001F]">인증하지</span> 못했습니다
           </p>
         </div>
 
@@ -70,8 +62,7 @@ const CertificationPage: React.FC = () => {
           onClick={() => navigate("/mento")}
           variant="danger"
           className="font-WooridaumB w-full px-8 py-4 font-bold"
-          size="lg"
-        >
+          size="lg">
           돌아가기
         </Button>
       </div>
@@ -93,8 +84,7 @@ const CertificationPage: React.FC = () => {
         onClick={() => navigate("/mento")}
         variant="primary"
         className="font-WooridaumB w-full px-8 py-4 font-bold"
-        size="lg"
-      >
+        size="lg">
         확인
       </Button>
     </div>

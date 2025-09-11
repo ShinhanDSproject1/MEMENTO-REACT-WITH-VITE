@@ -37,8 +37,7 @@ export default function SplashGate({
     <div
       className={`flex min-h-dvh items-center justify-center bg-[#f5f6f8] transition-opacity ease-out ${
         fadeOut ? "opacity-0 duration-[500ms]" : "opacity-100 duration-[1200ms]"
-      }`}
-    >
+      }`}>
       <Splash />
     </div>
   );

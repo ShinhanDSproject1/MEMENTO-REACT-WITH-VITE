@@ -6,8 +6,7 @@ function HomeVideo() {
         loop
         muted
         playsInline
-        className="absolute inset-0 h-full w-full scale-100 object-cover"
-      >
+        className="absolute inset-0 h-full w-full scale-100 object-cover">
         <source src="/mainVideo.mp4" type="video/mp4" />
       </video>
       <div className="relative z-10 flex flex-col items-center justify-center text-white">

@@ -6,10 +6,7 @@ export interface SignupCompleteProps {
   onHome?: () => void;
 }
 
-export default function SignupComplete({
-  onLogin,
-  onHome,
-}: SignupCompleteProps) {
+export default function SignupComplete({ onLogin, onHome }: SignupCompleteProps) {
   const navigate = useNavigate();
 
   const goLogin = onLogin ?? (() => navigate("/login"));
@@ -28,15 +25,12 @@ export default function SignupComplete({
           stroke="currentColor"
           strokeWidth="2.5"
           strokeLinecap="round"
-          strokeLinejoin="round"
-        >
+          strokeLinejoin="round">
           <path d="M20 6L9 17l-5-5" />
         </svg>
       </div>
 
-      <h1 className="font-WooridaumB text-3xl font-extrabold text-[#1161FF]">
-        환영합니다!
-      </h1>
+      <h1 className="font-WooridaumB text-3xl font-extrabold text-[#1161FF]">환영합니다!</h1>
       <p className="font-WooridaumB mt-1 text-center text-xl font-extrabold text-slate-600">
         <span className="font-semibold">me:mento</span> 가입이 완료되었습니다
       </p>
@@ -49,16 +43,14 @@ export default function SignupComplete({
         <button
           type="button"
           onClick={goLogin}
-          className="h-14 w-full rounded-2xl bg-[#1161FF] text-base font-extrabold text-white shadow transition hover:bg-[#0C2D62] active:scale-[0.99]"
-        >
+          className="h-14 w-full rounded-2xl bg-[#1161FF] text-base font-extrabold text-white shadow transition hover:bg-[#0C2D62] active:scale-[0.99]">
           로그인 하기
         </button>
 
         <button
           type="button"
           onClick={goHome}
-          className="h-14 w-full rounded-2xl bg-slate-200 text-base font-extrabold text-slate-500 transition hover:bg-slate-300 active:scale-[0.99]"
-        >
+          className="h-14 w-full rounded-2xl bg-slate-200 text-base font-extrabold text-slate-500 transition hover:bg-slate-300 active:scale-[0.99]">
           메인화면 가기
         </button>
       </div>

@@ -13,7 +13,7 @@ export const MainButton = forwardRef<HTMLButtonElement, MainButtonProps>(
     return (
       <button
         ref={ref}
-        className={`group relative w-auto cursor-pointer overflow-hidden rounded-full border p-2 px-6 text-center font-semibold ${className}`}
+        className={`group relative cursor-pointer overflow-hidden rounded-full border p-2 px-6 text-center font-semibold ${className}`}
         {...props}>
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-[#0C2D62] transition-all duration-300 group-hover:scale-[100.8]" />

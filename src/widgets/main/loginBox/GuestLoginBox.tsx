@@ -13,8 +13,7 @@ export default function GuestLoginBox() {
       <button
         type="button"
         className="mx-auto cursor-pointer rounded-full bg-[#AEC8EF] p-2 px-6 text-sm text-white hover:bg-[#657fa79d] hover:shadow"
-        onClick={() => navigate("/login")}
-      >
+        onClick={() => navigate("/login")}>
         로그인
       </button>
     </div>

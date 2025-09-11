@@ -1,7 +1,7 @@
 // src/pages/MentosForm.tsx
 import Button from "@/widgets/common/Button";
-import { CommonModal } from "@/widgets/common/CommonModal";
 import { SimpleEditor } from "@/widgets/common/tiptap-templates/simple/simple-editor";
+import { CommonModal } from "@widgets/common";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 
 // 폼 값 타입
@@ -26,9 +26,7 @@ export default function MentosForm({
   onSubmit,
 }: MentosFormProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [fileName, setFileName] = useState<string>(
-    initialValues.fileName ?? ""
-  );
+  const [fileName, setFileName] = useState<string>(initialValues.fileName ?? "");
   const [form, setForm] = useState<MentosFormValues>({
     title: initialValues.title ?? "",
     content: initialValues.content ?? "",
@@ -82,10 +80,7 @@ export default function MentosForm({
       <form className="space-y-3" onSubmit={handleSubmit}>
         {/* 제목 */}
         <div className="grid grid-cols-[56px_1fr] items-start gap-3">
-          <label
-            htmlFor="title"
-            className="pl-2 leading-7 font-bold text-[#333]"
-          >
+          <label htmlFor="title" className="pl-2 leading-7 font-bold text-[#333]">
             제목
           </label>
           <input
@@ -106,9 +101,7 @@ export default function MentosForm({
               // 만약 지원하지 않는다면: 현재 HTML을 setForm에서만 관리하지 말고,
               // 에디터 내부 content를 사용하거나, wrapper 컴포넌트를 만들어 주세요.
               value={form.content}
-              onChange={(html: string) =>
-                setForm((prev) => ({ ...prev, content: html }))
-              }
+              onChange={(html: string) => setForm((prev) => ({ ...prev, content: html }))}
             />
           </div>
         </div>
@@ -123,18 +116,13 @@ export default function MentosForm({
               onChange={handleFileChange}
               className="w-full rounded-lg border border-[#e5e7ed] px-2 py-2 text-sm"
             />
-            {fileName && (
-              <span className="text-sm text-gray-500">선택됨: {fileName}</span>
-            )}
+            {fileName && <span className="text-sm text-gray-500">선택됨: {fileName}</span>}
           </div>
         </div>
 
         {/* 가격 */}
         <div className="grid grid-cols-[56px_1fr] items-start gap-3">
-          <label
-            htmlFor="price"
-            className="pl-2 leading-7 font-bold text-[#333]"
-          >
+          <label htmlFor="price" className="pl-2 leading-7 font-bold text-[#333]">
             가격
           </label>
           <input
@@ -149,10 +137,7 @@ export default function MentosForm({
 
         {/* 장소 */}
         <div className="grid grid-cols-[56px_1fr] items-start gap-3">
-          <label
-            htmlFor="location"
-            className="pl-2 leading-7 font-bold text-[#333]"
-          >
+          <label htmlFor="location" className="pl-2 leading-7 font-bold text-[#333]">
             장소
           </label>
           <input

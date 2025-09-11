@@ -1,4 +1,3 @@
-// 버튼 그룹(내부에 index.tsx가 있으므로 통째로 재노출)
 export * from "./buttonGroup";
 
 // 카드 그룹

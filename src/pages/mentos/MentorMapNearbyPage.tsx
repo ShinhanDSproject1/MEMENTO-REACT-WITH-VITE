@@ -1,4 +1,4 @@
-import { KakaoMapController } from "@entities/editor/kakaoMap";
+import { KakaoMapController } from "@entities/editor";
 import { Info, Loader2, MapPin } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 

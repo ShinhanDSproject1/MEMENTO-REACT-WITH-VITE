@@ -45,10 +45,7 @@ export default function Home({
         userName={effectiveUserName ?? ""}
         userProfileImage={effectiveUserProfileImage}
       />
-      <RecomendBox
-        userType={effectiveUserType}
-        recommend={effectiveRecommend}
-      />
+      <RecomendBox userType={effectiveUserType} recommend={effectiveRecommend} />
       <Index userType={effectiveUserType} />
       <HelpCard />
       <Footer />
