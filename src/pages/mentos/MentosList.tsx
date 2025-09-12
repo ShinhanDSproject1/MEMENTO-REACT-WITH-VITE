@@ -5,7 +5,7 @@ import { useMentosListQuery } from "@features/mentos";
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 
-// 카테고리 슬러그 → 타이틀
+// 카테고리 타이틀
 const TITLE_MAP: Record<string, string> = {
   consumption: "소비패턴 멘토링",
   tips: "생활노하우 멘토링",
@@ -13,7 +13,7 @@ const TITLE_MAP: Record<string, string> = {
   growth: "자산증식 멘토링",
 };
 
-// 카테고리 슬러그 → 서버 categoryId (임시 매핑: 백엔드와 맞춰서 조정)
+// 서버 카테고리Id
 const CATEGORY_ID_MAP: Record<string, number> = {
   consumption: 1,
   tips: 2,
@@ -23,9 +23,7 @@ const CATEGORY_ID_MAP: Record<string, number> = {
 
 export default function MentosList() {
   const { category } = useParams<{ category?: string }>();
-
   const mainTitle = useMemo(() => (category ? (TITLE_MAP[category] ?? "") : ""), [category]);
-
   const categoryId = category ? CATEGORY_ID_MAP[category] : undefined;
 
   // 페이지네이션 파라미터 (초기)

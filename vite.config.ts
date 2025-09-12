@@ -47,7 +47,7 @@ export default defineConfig({
       "/api": {
         target: "https://memento.shinhanacademy.co.kr",
         changeOrigin: true,
-        secure: false,
+        secure: true,
       },
     },
   },

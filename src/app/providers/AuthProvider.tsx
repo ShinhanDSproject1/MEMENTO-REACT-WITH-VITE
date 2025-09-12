@@ -1,34 +1,38 @@
-import type { LoginInput, LoginSuccess } from "@entities/auth";
-import { login as loginApi, logout as logoutApi, refresh } from "@entities/auth";
-import type { PropsWithChildren } from "react";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+// src/app/providers/AuthProvider.tsx
+import type { AuthContextValue, LoginInput, UserRole } from "@entities/auth";
+import {
+  AuthContext,
+  login as loginApi,
+  logout as logoutApi,
+  refresh as refreshApi,
+} from "@entities/auth";
+import React, { useEffect, useMemo, useState } from "react";
 
-type AuthContextValue = {
-  user: LoginSuccess["user"] | null;
-  accessToken: string | null;
-  isAuthenticated: boolean;
-  login: (input: LoginInput) => Promise<void>;
-  logout: () => Promise<void>;
-  setAccessToken: (token: string | null) => void;
-};
+// 개발 중 테스트 토큰 사용 여부
+const USE_FAKE_TOKEN = true;
 
-const AuthContext = createContext<AuthContextValue | null>(null);
-
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within <AuthProvider />");
-  return ctx;
-}
-
-export default function AuthProvider({ children }: PropsWithChildren) {
+export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [user, setUser] = useState<LoginSuccess["user"] | null>(null);
+  const [user, setUser] = useState<AuthContextValue["user"]>(null);
   const [bootstrapped, setBootstrapped] = useState(false);
 
+  // 1) 앱 시작/새로고침 시 인증 부트스트랩
   useEffect(() => {
     (async () => {
       try {
-        const res = await refresh();
+        if (USE_FAKE_TOKEN) {
+          const fake = {
+            memberName: "테스트",
+            memberType: "MENTI" as UserRole,
+            accessToken: "dev-fake-access-token",
+          };
+          setUser(fake);
+          setAccessToken(fake.accessToken ?? null);
+          return;
+        }
+
+        // 실제: refresh 쿠키로 새 accessToken 받기
+        const res = await refreshApi(); // { accessToken }
         setAccessToken(res.accessToken);
       } catch {
         setAccessToken(null);
@@ -39,12 +43,16 @@ export default function AuthProvider({ children }: PropsWithChildren) {
     })();
   }, []);
 
+  // 2) 로그인 (서버 DTO 그대로 사용)
   const login = async (input: LoginInput) => {
-    const res = await loginApi(input);
-    setAccessToken(res.accessToken);
-    setUser(res.user);
+    const dto = await loginApi(input); // LoginSuccess
+    const result = dto.result; // { memberName, memberType, accessToken? }
+    setUser(result);
+    setAccessToken(result.accessToken ?? null);
+    console.log("🔐 Auth state updated:", { user, accessToken });
   };
 
+  // 3) 로그아웃
   const logout = async () => {
     try {
       await logoutApi();
@@ -54,21 +62,18 @@ export default function AuthProvider({ children }: PropsWithChildren) {
     }
   };
 
+  // 4) Context value 메모
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       accessToken,
-      isAuthenticated: !!accessToken,
+      isAuthenticated: !!(accessToken ?? user?.accessToken),
       login,
       logout,
-      setAccessToken,
     }),
     [user, accessToken],
   );
 
-  if (!bootstrapped) {
-    return <div>로딩 중…</div>;
-  }
-
+  if (!bootstrapped) return <div>인증 확인 중...</div>;
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

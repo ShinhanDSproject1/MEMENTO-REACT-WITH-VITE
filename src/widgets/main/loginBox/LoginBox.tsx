@@ -11,13 +11,14 @@ export interface LoginBoxProps {
 }
 
 export default function LoginBox({ userType, userName, userProfileImage }: LoginBoxProps) {
-  if (userType === "mentee") {
-    return <MenteeLoginBox userName={userName ?? ""} />;
-  } else if (userType === "mentor") {
-    return <MentoLoginBox userName={userName ?? ""} userProfileImage={userProfileImage ?? ""} />;
-  } else if (userType === "admin") {
-    return <AdminLoginBox />;
-  } else {
-    return <GuestLoginBox />;
+  switch (userType) {
+    case "mentee":
+      return <MenteeLoginBox userName={userName} />;
+    case "mentor":
+      return <MentoLoginBox userName={userName} userProfileImage={userProfileImage ?? ""} />;
+    case "admin":
+      return <AdminLoginBox />;
+    default:
+      return <GuestLoginBox />;
   }
 }

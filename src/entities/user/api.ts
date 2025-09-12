@@ -20,7 +20,9 @@ export async function updatePassword({
     let data: UpdatePasswordErrorBody | undefined;
     try {
       data = await res.json();
-    } catch {}
+    } catch {
+      data = undefined;
+    }
     throw new UpdatePasswordError(data?.message ?? "Password update failed", {
       code: data?.code,
       status: res.status,

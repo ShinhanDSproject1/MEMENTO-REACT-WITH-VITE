@@ -1,69 +1,58 @@
+// src/pages/login/Login.tsx
 import character from "@assets/images/character/character-full-dance.svg";
 import logo from "@assets/images/logo/memento-logo.svg";
+import { useAuth } from "@entities/auth"; // ✅ AuthProvider에서 제공하는 훅
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-type Role = "mentor" | "mentee";
+type Role = "mentor" | "menti";
 
 export default function Login() {
   const [role, setRole] = useState<Role>("mentor");
-  const [id, setId] = useState<string>("");
-  const [pw, setPw] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<boolean>(false);
+  const [id, setId] = useState("");
+  const [pw, setPw] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const navigate = useNavigate();
+  const { login } = useAuth(); // ✅ 전역 auth 액션 사용
 
+  // * 입력값, 로딩중 아닐때
   const canSubmit = !!(id.trim() && pw.trim()) && !loading;
 
+  // * 로그인 폼 제출 이벤트 핸들러
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!canSubmit) return;
+
     setLoading(true);
+    setErrorMsg(null);
 
     try {
-      // await api.login({ role, id, pw });
+      // role -> 서버의 userType (대문자)로 매핑
+      const userType = role === "mentor" ? "MENTO" : "MENTI";
 
-      if (role === "mentee" && pw === "mentee") {
-        if (id === "안가연") {
-          navigate("/", {
-            state: { userType: "mentee", userName: id, recommend: true },
-          });
-        } else {
-          navigate("/", {
-            state: { userType: "mentee", userName: id, recommend: false },
-          });
-        }
-      } else if (role === "mentor" && pw === "mentor") {
-        navigate("/", { state: { userType: "mentor", userName: id } });
-      } else if (id === "admin" && pw === "admin") {
-        navigate("/", { state: { userType: "admin" } });
-      } else {
-        // 서버 에러 모사
-        throw {
-          response: {
-            status: 400,
-            data: {
-              code: 5003,
-              message: "아이디 또는 비밀번호가 올바르지 않습니다.",
-            },
-          },
-        };
-      }
-    } catch (error) {
-      error;
-      setError(true);
+      await login({
+        userType,
+        memberId: id,
+        memberPwd: pw,
+      });
+
+      // 로그인 성공 → 홈으로 이동 (필요시 리다이렉트 대상 바꿔도 OK)
+      navigate("/", { replace: true });
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } }; message?: string };
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "아이디 또는 비밀번호가 올바르지 않습니다.";
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  type TypeBtnProps = {
-    value: Role;
-    label: string;
-  };
-
-  const TypeBtn = ({ value, label }: TypeBtnProps) => {
+  const TypeBtn = ({ value, label }: { value: Role; label: string }) => {
     const active = role === value;
     return (
       <button
@@ -102,7 +91,7 @@ export default function Login() {
       {/* 멘토/멘티 선택 버튼 */}
       <div className="mb-6 flex items-center justify-center gap-3 pt-1">
         <TypeBtn value="mentor" label="멘토" />
-        <TypeBtn value="mentee" label="멘티" />
+        <TypeBtn value="menti" label="멘티" />
       </div>
 
       {/* ID/PW 입력 폼 */}
@@ -115,10 +104,11 @@ export default function Login() {
             autoComplete="username"
             placeholder="ID 입력"
             value={id}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setId(e.target.value)}
+            onChange={(e) => setId(e.target.value)}
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm ring-0 outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
           />
         </label>
+
         <label className="block">
           <span className="sr-only">비밀번호</span>
           <input
@@ -126,7 +116,7 @@ export default function Login() {
             autoComplete="current-password"
             placeholder="PW 입력"
             value={pw}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPw(e.target.value)}
+            onChange={(e) => setPw(e.target.value)}
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
           />
         </label>
@@ -148,9 +138,7 @@ export default function Login() {
         </div>
 
         {/* 에러 메세지 */}
-        {error && (
-          <p className="text-sm text-[#DF001F]">* 아이디 또는 비밀번호가 일치하지 않습니다.</p>
-        )}
+        {errorMsg && <p className="text-sm text-[#DF001F]">* {errorMsg}</p>}
 
         {/* 로그인 버튼 */}
         <button

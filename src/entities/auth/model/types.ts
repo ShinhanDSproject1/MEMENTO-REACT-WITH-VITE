@@ -1,21 +1,22 @@
 // * 유저 타입
-export type UserRole = "MENTOR" | "MENTEE" | "ADMIN";
+export type UserRole = "MENTO" | "MENTI" | "ADMIN";
 
 // * 로그인 요청
 export interface LoginInput {
   userType: UserRole;
-  userid: string;
-  password: string;
+  memberId: string;
+  memberPwd: string;
 }
 
 // * 로그인 성공
 export interface LoginSuccess {
-  accessToken: string;
-  refreshToken: string;
-  user: {
-    id: number;
-    name: string;
-    role: UserRole;
+  code: number;
+  status: number;
+  message: string;
+  result: {
+    memberName: string;
+    memberType: UserRole;
+    accessToken?: string; // 나중에 줄 수도 있으니 optional
   };
 }
 
@@ -29,15 +30,9 @@ export interface LogoutSuccess {
   success: boolean;
 }
 
-// * 토큰 재발급
-export interface RefreshInput {
-  refreshToken: string;
-}
-
 // * 토큰 재발급 성공
 export interface RefreshSuccess {
   accessToken: string;
-  refreshToken?: string;
 }
 
 // * 내 정보 확인
