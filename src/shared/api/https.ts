@@ -5,7 +5,8 @@ import axios, { AxiosError, type AxiosRequestConfig } from "axios";
 type InternalConfig = AxiosRequestConfig & { _retry?: boolean; _skipAuth?: boolean };
 
 // ✅ baseURL 직접 하드코딩
-const BASE_URL = "https://memento.shinhanacademy.co.kr/api";
+// const BASE_URL = "https://memento.shinhanacademy.co.kr/api";
+const BASE_URL = "/api";
 const REFRESH_PATH = "/auth/refresh";
 
 export const http = axios.create({

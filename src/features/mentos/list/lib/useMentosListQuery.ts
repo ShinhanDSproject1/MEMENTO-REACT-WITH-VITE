@@ -1,15 +1,19 @@
-import type { MentosCategory } from "@entities/mentos";
 import { getMentosList } from "@entities/mentos";
+import type { GetMentosListResponse } from "@entities/mentos/model/types";
 import { useQuery } from "@tanstack/react-query";
 import { mentosKeys } from "../model/queryKeys";
 
-export function useMentosListQuery(category?: MentosCategory) {
-  return useQuery({
-    queryKey: mentosKeys.list(category),
+export function useMentosListQuery(categoryId?: number, limit = 5, cursor?: number) {
+  return useQuery<GetMentosListResponse>({
+    queryKey: mentosKeys.list(categoryId, limit, cursor),
     queryFn: () =>
-      category
-        ? getMentosList({ category, page: 1, size: 5 })
-        : Promise.resolve({ items: [], total: 0, page: 1, size: 5 }),
-    enabled: !!category, // 카테고리 있을 때만 호출
+      categoryId
+        ? getMentosList({ categoryId, limit, cursor })
+        : Promise.resolve({
+            code: 200,
+            message: "빈 카테고리",
+            result: { mentos: [], hasNext: false },
+          }),
+    enabled: !!categoryId, // categoryId가 있을 때만 실행
   });
 }

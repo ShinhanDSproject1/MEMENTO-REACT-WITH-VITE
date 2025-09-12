@@ -3,22 +3,24 @@ export type MentosCategory = "consumption" | "tips" | "saving" | "growth";
 
 export interface MentosItem {
   mentosSeq: number;
-  title: string;
-  price: number;
-  location: string;
-  status: "completed" | "pending" | "mento";
-  thumbnailUrl?: string;
+  approved: boolean;
+  mentosImg: string;
+  mentosTitle: string;
+  mentosPrice: number;
+  region: string; // bname
 }
 
 export interface GetMentosListParams {
-  category: MentosCategory;
-  page?: number;
-  size?: number;
+  categoryId?: number;
+  limit?: number;
+  cursor?: number;
 }
 
 export interface GetMentosListResponse {
-  items: MentosItem[];
-  total: number;
-  page: number;
-  size: number;
+  code: number;
+  message: string;
+  result: {
+    mentos: MentosItem[];
+    hasNext: boolean;
+  };
 }

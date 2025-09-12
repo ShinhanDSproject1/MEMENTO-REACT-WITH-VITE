@@ -1,4 +1,5 @@
 export const mentosKeys = {
   all: ["mentos"] as const,
-  list: (category: string | undefined) => [...mentosKeys.all, "list", category] as const,
+  list: (categoryId?: number, limit?: number, cursor?: number) =>
+    ["mentos", "list", categoryId, limit, cursor] as const,
 };
