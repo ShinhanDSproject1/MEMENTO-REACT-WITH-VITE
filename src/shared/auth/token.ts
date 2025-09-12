@@ -1,21 +1,13 @@
-// 토큰 보관 유틸
+let ACCESS_TOKEN: string | null = null;
 
-const ACCESS_KEY = "access_token";
-const REFRESH_KEY = "refresh_token";
+export function setAccessToken(token: string | null) {
+  ACCESS_TOKEN = token;
+}
 
-export const tokenStore = {
-  get access() {
-    return localStorage.getItem(ACCESS_KEY) || "";
-  },
-  get refresh() {
-    return localStorage.getItem(REFRESH_KEY) || "";
-  },
-  set(access: string, refresh?: string) {
-    localStorage.setItem(ACCESS_KEY, access);
-    if (refresh) localStorage.setItem(REFRESH_KEY, refresh);
-  },
-  clear() {
-    localStorage.removeItem(ACCESS_KEY);
-    localStorage.removeItem(REFRESH_KEY);
-  },
-};
+export function getAccessToken() {
+  return ACCESS_TOKEN;
+}
+
+export function clearAccessToken() {
+  ACCESS_TOKEN = null;
+}

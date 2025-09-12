@@ -1,5 +1,4 @@
-// src/components/common/LocationField.tsx
-import useDaumPostcode from "@hooks/intergrations/useDaumPostcode";
+import { useDaumPostcode } from "@shared/hooks";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
 
@@ -57,12 +56,8 @@ export default function LocationField({ onChange }: LocationFieldProps) {
                 emit(z, a, detail);
               })
             }
-            className={`absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold ${
-              loaded
-                ? "bg-[#005EF9] text-white hover:brightness-95"
-                : "cursor-not-allowed bg-slate-200 text-white"
-            }`}>
-            주소검색
+            className={`absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold ${loaded ? "bg-[#005EF9] text-white hover:brightness-95" : "cursor-not-allowed bg-slate-200 text-white"}`}>
+            주소 검색
           </button>
         </div>
       </div>

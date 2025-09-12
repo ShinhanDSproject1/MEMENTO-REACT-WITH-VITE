@@ -27,15 +27,14 @@ declare global {
   }
 }
 
-export default function useDaumPostcode() {
+export function useDaumPostcode() {
   const [loaded, setLoaded] = useState<boolean>(!!window.daum?.Postcode);
 
   useEffect(() => {
     if (loaded) return;
 
     const script = document.createElement("script");
-    script.src =
-      "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
     script.async = true;
     script.onload = () => setLoaded(true);
     document.body.appendChild(script);

@@ -2,16 +2,17 @@
 import React, { Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 
-// Layouts
+// [ Layout ]
 const HomeLayout = React.lazy(() => import("@/app/routes/layouts/HomeLayout"));
 const AppLayout = React.lazy(() => import("@/app/routes/layouts/AppLayout"));
-
-// Pages
-const Home = React.lazy(() => import("@/pages/home/Home"));
 const Error400 = React.lazy(() => import("@/pages/home/Error400"));
 const Error404 = React.lazy(() => import("@/pages/home/Error404"));
 const Error500 = React.lazy(() => import("@/pages/home/Error500"));
 
+// [ Home ]
+const Home = React.lazy(() => import("@/pages/home/Home"));
+
+// [ auth ]
 const Login = React.lazy(() => import("@/pages/login/Login"));
 const SignupSelect = React.lazy(() => import("@/pages/login/SignupSelect"));
 const MentorSignup = React.lazy(() => import("@/pages/login/MentorSignup"));
@@ -23,7 +24,6 @@ const MentosDetail = React.lazy(() => import("@/pages/mentos/MentosDetail"));
 
 const MyMentosList = React.lazy(() => import("@/pages/my-profile/MyMentosList"));
 const MentorProfile = React.lazy(() => import("@/pages/my-profile/MentoProfile"));
-// const MyProfile = React.lazy(() => import("@/pages/my-profile/MyProfile"));
 
 const CreateMentos = React.lazy(() => import("@/pages/mentor/CreateMentos"));
 const EditMentos = React.lazy(() => import("@/pages/mentor/EditMentos"));

@@ -1,68 +1,59 @@
-// src/pages/MentosList.tsx
+// src/pages/mentos/MentosList.tsx
 import MentosCard from "@/widgets/common/MentosCard";
 import MentosMainTitleComponent from "@/widgets/mentos/MentosMainTitleComponent";
-import { useEffect, useState } from "react";
+import type { MentosCategory } from "@entities/mentos";
+import { useMentosListQuery } from "@features/mentos";
+import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 
-// useParams에서 받을 category 값의 타입 정의
-type Category = "consumption" | "tips" | "saving" | "growth" | undefined;
+const TITLE_MAP: Record<MentosCategory, string> = {
+  consumption: "소비패턴 멘토링",
+  tips: "생활노하우 멘토링",
+  saving: "저축방식 멘토링",
+  growth: "자산증식 멘토링",
+};
 
 export default function MentosList() {
-  const { category } = useParams<{ category: Category }>();
-  const [mainTitle, setMainTitle] = useState("");
+  const { category } = useParams<{ category?: MentosCategory }>();
+  const mainTitle = useMemo(() => (category ? (TITLE_MAP[category] ?? "") : ""), [category]);
 
-  useEffect(() => {
-    switch (category) {
-      case "consumption":
-        setMainTitle("소비패턴 멘토링");
-        break;
-      case "tips":
-        setMainTitle("생활노하우 멘토링");
-        break;
-      case "saving":
-        setMainTitle("저축방식 멘토링");
-        break;
-      case "growth":
-        setMainTitle("자산증식 멘토링");
-        break;
-      default:
-        setMainTitle("");
-    }
-  }, [category]);
+  const { data, isLoading, isError, refetch } = useMentosListQuery(category);
 
   return (
     <div className="flex min-h-screen w-full justify-center overflow-x-hidden bg-[#f5f6f8] font-sans antialiased">
       <section className="w-full overflow-x-hidden bg-white px-4 py-5">
         <MentosMainTitleComponent mainTitle={mainTitle} />
+
+        {/* 상태 영역 */}
+        {isLoading && (
+          <div className="py-10 text-center text-sm text-gray-500">목록을 불러오는 중…</div>
+        )}
+
+        {isError && (
+          <div className="flex items-center justify-center gap-3 py-10 text-sm">
+            <span className="text-red-500">목록을 불러오지 못했습니다.</span>
+            <button onClick={() => refetch()} className="rounded bg-blue-600 px-3 py-1 text-white">
+              다시 시도
+            </button>
+          </div>
+        )}
+
+        {!isLoading && !isError && (data?.items?.length ?? 0) === 0 && (
+          <div className="py-10 text-center text-sm text-gray-500">표시할 멘토링이 없어요.</div>
+        )}
+
+        {/* 리스트 */}
         <section className="flex w-full flex-col items-center space-y-4 overflow-x-hidden bg-white px-4 py-5">
-          <MentosCard
-            mentosSeq={1}
-            title="React 강의"
-            price={50000}
-            location="연남동"
-            status="completed"
-          />
-          <MentosCard
-            mentosSeq={2}
-            title="Spring Boot 강의"
-            price={70000}
-            location="홍대"
-            status="completed"
-          />
-          <MentosCard
-            mentosSeq={3}
-            title="TypeScript 강의"
-            price={60000}
-            location="신촌"
-            status="completed"
-          />
-          <MentosCard
-            mentosSeq={4}
-            title="Node.js 강의"
-            price={55000}
-            location="강남"
-            status="completed"
-          />
+          {data?.items?.map((item) => (
+            <MentosCard
+              key={item.mentosSeq}
+              mentosSeq={item.mentosSeq}
+              title={item.title}
+              price={item.price}
+              location={item.location}
+              status={item.status}
+            />
+          ))}
         </section>
       </section>
     </div>

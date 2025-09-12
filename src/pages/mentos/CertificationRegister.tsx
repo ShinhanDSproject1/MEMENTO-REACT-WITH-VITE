@@ -11,9 +11,7 @@ export default function CertificationRegister() {
       {/* 제목 */}
       <div className="flex w-full">
         <p className="font-WooridaumB text-black">
-          보유중인{" "}
-          <span className="font-WooridaumB text-[#005EF9]">자격증</span>을{" "}
-          <br />
+          보유중인 <span className="font-WooridaumB text-[#005EF9]">자격증</span>을 <br />
           업로드해주세요!
         </p>
       </div>
@@ -22,16 +20,14 @@ export default function CertificationRegister() {
       <div className="flex w-full items-center justify-center">
         <Label
           htmlFor="dropzone-file"
-          className="flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-        >
+          className="flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:border-gray-500 dark:hover:bg-gray-600">
           <div className="flex flex-col items-center justify-center pt-5 pb-6">
             <svg
               className="mb-4 h-8 w-8 text-gray-500 dark:text-gray-400"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
-              viewBox="0 0 20 16"
-            >
+              viewBox="0 0 20 16">
               <path
                 stroke="currentColor"
                 strokeLinecap="round"
@@ -44,8 +40,7 @@ export default function CertificationRegister() {
               />
             </svg>
             <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-              <span className="font-semibold">Click to upload</span> or drag and
-              drop
+              <span className="font-semibold">Click to upload</span> or drag and drop
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               SVG, PNG, JPG or GIF (MAX. 800x400px)
@@ -61,16 +56,14 @@ export default function CertificationRegister() {
           onClick={() => navigate("/mento/certification/inprogress")}
           variant="primary"
           className="font-WooridaumB w-full px-8 py-4 font-bold"
-          size="xl"
-        >
+          size="xl">
           추가하기
         </Button>
         <Button
           onClick={() => navigate("/mento")}
           variant="cancelGray"
           className="font-WooridaumB w-full px-8 py-4 font-bold"
-          size="xl"
-        >
+          size="xl">
           돌아가기
         </Button>
       </div>

@@ -8,9 +8,7 @@ export interface MentosItem {
 }
 
 // GET(상세 조회) - 지금은 목업
-export async function getMentos(
-  id: string | number
-): Promise<MentosItem | null> {
+export async function getMentos(id: string | number): Promise<MentosItem | null> {
   await new Promise((r) => setTimeout(r, 150));
 
   // 데이터 없을 수도 있다고 가정
@@ -32,7 +30,7 @@ export async function getMentos(
 // PUT(수정) - 지금은 콘솔만
 export async function updateMentos(
   id: string,
-  body: Partial<MentosItem> // 일부만 수정할 수 있도록 Partial
+  body: Partial<MentosItem>, // 일부만 수정할 수 있도록 Partial
 ): Promise<{ ok: boolean }> {
   await new Promise((r) => setTimeout(r, 150));
   console.log("PUT", `${BASE}/${id}`, body);

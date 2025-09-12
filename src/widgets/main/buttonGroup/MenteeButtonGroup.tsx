@@ -8,16 +8,16 @@ function MenteeButtonGroup() {
   return (
     <div className="mt-10 flex flex-col items-center gap-y-4">
       <MainButton className={style} onClick={() => navigate("/mentee/consumption")}>
-        소비패턴
+        소비 패턴
       </MainButton>
       <MainButton className={style} onClick={() => navigate("/mentee/tips")}>
-        생활노하우
+        생활 노하우
       </MainButton>
       <MainButton className={style} onClick={() => navigate("/mentee/saving")}>
-        저축방식
+        저축 방식
       </MainButton>
       <MainButton className={style} onClick={() => navigate("/mentee/growth")}>
-        자산증식
+        자산 증식
       </MainButton>
     </div>
   );
