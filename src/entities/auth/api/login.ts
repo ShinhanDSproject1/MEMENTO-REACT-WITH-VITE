@@ -1,10 +1,15 @@
+import type { LoginInput, LoginSuccess } from "@entities/auth";
 import { http } from "@shared/api";
-import type { LoginInput, LoginSuccess } from "./types";
 
+// * 로그인
 export async function login(input: LoginInput): Promise<LoginSuccess> {
-  const { userType, ...body } = input;
-  const { data } = await http.post<LoginSuccess>(`/auth/login/${userType}`, body, {
-    headers: { "Content-Type": "application/json" },
-  });
+  const { data } = await http.post<LoginSuccess>(
+    `/auth/login/${input.userType}`,
+    {
+      userid: input.userid,
+      password: input.password,
+    },
+    { headers: { "Content-Type": "application/json" } },
+  );
   return data;
 }

@@ -43,6 +43,13 @@ export default defineConfig({
     port: 3000,
     // dev 서버 띄울 때 특정 경로로 열고 싶다면:
     open: "/memento-finance",
+    proxy: {
+      "/api": {
+        target: "https://memento.shinhanacademy.co.kr",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   // GH Pages 같은 서브경로 배포 시 활성화(빌드 시 기준 경로)
   // base: "/memento-finance/",
