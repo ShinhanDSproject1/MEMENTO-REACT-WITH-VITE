@@ -99,7 +99,8 @@ export const router = createBrowserRouter([
 
       { path: "/booking", element: withSuspense(<BookingPage />) },
       { path: "/booking/confirm", element: withSuspense(<BookingConfirm />) },
-      { path: "/booking/success", element: withSuspense(<PaySuccess />) }, // ← 추가
+      { path: "/payments/success", element: withSuspense(<PaySuccess />) },
+      { path: "/booking/success", element: withSuspense(<PaySuccess />) }, // 임시 호환
 
       { path: "/video", element: withSuspense(<HomeVideo />) },
     ],

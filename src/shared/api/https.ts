@@ -1,18 +1,20 @@
 // src/shared/api/http.ts
-import { clearAccessToken, getAccessToken, setAccessToken } from "@/shared/auth/token";
 import axios, { AxiosError, type AxiosRequestConfig } from "axios";
+import { clearAccessToken, getAccessToken, setAccessToken } from "@/shared/auth/token";
 
 type InternalConfig = AxiosRequestConfig & { _retry?: boolean; _skipAuth?: boolean };
 
 // ✅ baseURL 직접 하드코딩
-const BASE_URL = "https://memento.shinhanacademy.co.kr/api";
+const BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+  (import.meta.env.DEV ? "/api" : "https://memento.shinhanacademy.co.kr/api");
 const REFRESH_PATH = "/auth/refresh";
 
 export const http = axios.create({
-  baseURL: BASE_URL,
-  withCredentials: true, // refresh 쿠키 전송
+  baseURL: BASE_URL.replace(/\/+$/, ""),
+
+  withCredentials: true,
   timeout: 15_000,
-  headers: { "X-Requested-With": "XMLHttpRequest" },
 });
 
 // 요청 인터셉터 (토큰 주입, _skipAuth 예외)

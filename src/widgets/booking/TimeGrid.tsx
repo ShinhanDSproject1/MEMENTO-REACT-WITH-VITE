@@ -1,5 +1,5 @@
 import { slotToDate } from "@/shared/lib/datetime";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 const COMMON_SLOTS = [
   "10:00",
@@ -21,45 +21,60 @@ interface Props {
   selectedDate: Date | null;
   selectedTime: string;
   onSelectTime: (t: string) => void;
+  availableTimes?: string[];
 }
-export default function TimeGrid({ selectedDate, selectedTime, onSelectTime }: Props) {
+
+export default function TimeGrid({
+  selectedDate,
+  selectedTime,
+  onSelectTime,
+  availableTimes,
+}: Props) {
   const now = new Date();
 
-  const availableTimes = useMemo(() => {
+  const slots = useMemo(() => {
     if (!selectedDate) return [];
+
+    const base = availableTimes && availableTimes.length > 0 ? availableTimes : COMMON_SLOTS;
+
+    const isToday = selectedDate.toDateString() === now.toDateString();
+    if (!isToday) return base;
+
     const minAllowed = new Date();
     minAllowed.setMinutes(minAllowed.getMinutes() + LEAD_MINUTES);
-    const isToday = selectedDate.toDateString() === now.toDateString();
-    if (!isToday) return COMMON_SLOTS;
-    return COMMON_SLOTS.filter((t) => slotToDate(selectedDate, t) > minAllowed);
-  }, [selectedDate]);
+    return base.filter((t) => slotToDate(selectedDate, t) > minAllowed);
+  }, [selectedDate, availableTimes]);
+
+  useEffect(() => {
+    if (selectedTime && !slots.includes(selectedTime)) {
+      onSelectTime("");
+    }
+  }, [slots, selectedTime, onSelectTime]);
 
   if (!selectedDate) return null;
 
   return (
     <div className="mb-8 grid grid-cols-3 gap-3">
-      {availableTimes.map((timeStr) => {
+      {slots.map((timeStr) => {
         const chosen = selectedTime === timeStr;
-        const ok = true;
-
         return (
           <button
             key={timeStr}
-            onClick={() => ok && onSelectTime(timeStr)}
-            disabled={!ok}
+            onClick={() => onSelectTime(timeStr)}
             className={`h-12 rounded-lg border text-sm font-medium transition-colors ${
-              ok ? "cursor-pointer" : "cursor-not-allowed"
-            } ${
-              ok
-                ? chosen
-                  ? "border-blue-500 bg-[#005EF9] text-white"
-                  : "border-gray-200 bg-white text-[#4D4B4C] hover:border-gray-300"
-                : "border-[#E9E9EC] bg-gray-50 text-gray-400"
+              chosen
+                ? "border-blue-500 bg-[#005EF9] text-white"
+                : "border-gray-200 bg-white text-[#4D4B4C] hover:border-gray-300"
             }`}>
             {timeStr}
           </button>
         );
       })}
+      {slots.length === 0 && (
+        <div className="col-span-3 text-center text-sm text-gray-500">
+          예약 가능한 시간이 없습니다.
+        </div>
+      )}
     </div>
   );
 }
