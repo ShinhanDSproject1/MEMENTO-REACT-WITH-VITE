@@ -1,6 +1,5 @@
-// src/entities/auth/api/login.ts
+import type { LoginInput, LoginSuccess } from "@entities/auth";
 import { http } from "@shared/api";
-import type { LoginInput, LoginSuccess } from "../model/types";
 
 export async function login(input: LoginInput): Promise<LoginSuccess> {
   const { data } = await http.post<LoginSuccess>(

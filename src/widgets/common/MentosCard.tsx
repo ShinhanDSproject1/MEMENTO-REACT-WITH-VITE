@@ -3,7 +3,7 @@ import Button from "@/widgets/common/Button";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
-type MentosStatus = "completed" | "pending" | "mento";
+type MentosStatus = "completed" | "pending" | "mento" | "guest";
 
 export interface MentosCardProps {
   mentosSeq: number;
@@ -22,15 +22,15 @@ export interface MentosCardProps {
 }
 
 const statusStyles: Record<MentosStatus, string> = {
-  completed: "bg-[#2E3849]", // 진행 완료
-  pending: "bg-[#B3B6B8]", // 진행 전
-  mento: "bg-[#2E3849]", // 멘토용 카드 배지(원 코드엔 별도 배지 문구 없음)
+  completed: "bg-[#2E3849]",
+  pending: "bg-[#B3B6B8]",
+  mento: "bg-[#2E3849]",
+  guest: "bg-transparent",
 };
 
 const statusTextMap: Partial<Record<MentosStatus, string>> = {
   completed: "진행 완료",
   pending: "진행 전",
-  // mento 상태는 배지 텍스트가 없으면 공백으로 처리
 };
 
 export default function MentosCard({
@@ -80,24 +80,41 @@ export default function MentosCard({
             </Button>
           </>
         );
+      case "guest":
       default:
         return null;
     }
   })();
 
   return (
-    <div className="relative flex h-auto w-[80vw] max-w-[360px] flex-col rounded-[10px] border-[1px] border-solid border-[#E5E7ED] bg-white">
-      <Link to={`/mentee/mentos-detail/${mentosSeq}`}>
-        <section className="h-[15vh]">
+    <div
+      className={[
+        "group relative flex h-auto w-[80vw] max-w-[360px] flex-col rounded-[10px] border border-solid border-[#E5E7ED] bg-white",
+        "transition-all duration-200 ease-out will-change-transform",
+        "motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-xl",
+        "motion-safe:active:scale-[0.98]",
+        "focus-within:ring-2 focus-within:ring-blue-300 focus-within:ring-offset-2 focus-within:ring-offset-white",
+      ].join(" ")}>
+      <Link
+        to={`/mentee/mentos-detail/${mentosSeq}`}
+        className="rounded-t-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
+        <section className="h-[15vh] overflow-hidden rounded-t-[10px]">
           <img
-            className="h-full w-full rounded-t-[10px]"
+            className={[
+              "h-full w-full object-cover",
+              "transition-transform duration-200 ease-out",
+              "motion-safe:group-hover:scale-[1.02]",
+            ].join(" ")}
             src={imageUrl || "https://picsum.photos/seed/picsum/200/300"}
             alt="mentos card"
           />
-          {/* 진행 상태 배지 (멘토 상태는 텍스트 없으면 렌더 생략) */}
           {statusText && (
             <div
-              className={`${statusClassName} absolute top-2 right-2 rounded-[65px] px-2 py-1 text-xs text-white`}>
+              className={[
+                statusClassName,
+                "absolute top-2 right-2 rounded-[65px] px-2 py-1 text-xs text-white",
+                "transition-transform duration-200 motion-safe:group-hover:-translate-y-0.5",
+              ].join(" ")}>
               {statusText}
             </div>
           )}

@@ -1,15 +1,15 @@
-// src/pages/MyMentosList.tsx
+import { useMyMentosInfinite } from "@/features/mentos-list/hooks/useMyMentosInfiniteList";
 import Button from "@/widgets/common/Button";
 import MentosCard from "@/widgets/common/MentosCard";
 import MentosMainTitleComponent from "@/widgets/mentos/MentosMainTitleComponent";
+import type { MyMentosItem } from "@entities/mentos";
 import { useModal } from "@hooks/ui/useModal";
 import { CommonModal } from "@widgets/common";
-import type { FC } from "react";
+import { useEffect, useRef, type FC } from "react";
 import { useNavigate } from "react-router-dom";
 
 type Role = "mento" | "menti";
 
-// 이 페이지에서 사용하는 모달 타입들만 엄격하게 명시
 type ModalType =
   | "deleteMentos"
   | "deleteComplete"
@@ -22,7 +22,6 @@ type ModalType =
   | "reportMentos"
   | "reportComplete";
 
-// 필요한 최소 모달 훅 반환 타입(프로젝트 훅 시그니처에 맞게 필요 시 확장 가능)
 type UseModalReturn = {
   isOpen: boolean;
   modalType?: ModalType;
@@ -41,110 +40,76 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
 
   const handleConfirmAction = () => {
     closeModal();
-
-    if (modalType === "deleteMentos") {
-      return openModal("deleteComplete");
-    }
-    if (modalType === "dismissUser") {
-      return openModal("dismissSuccess");
-    }
-    if (modalType === "refundMentos") {
-      return openModal("refundComplete");
-    }
+    if (modalType === "deleteMentos") return openModal("deleteComplete");
+    if (modalType === "dismissUser") return openModal("dismissSuccess");
+    if (modalType === "refundMentos") return openModal("refundComplete");
   };
 
-  const handleCancelAction = () => {
-    closeModal();
-  };
+  const handleCancelAction = () => closeModal();
 
   const handleSubmit = () => {
     closeModal();
-    if (modalType === "reviewMentos") {
-      openModal("reviewComplete");
-    }
-    if (modalType === "reportMentos") {
-      openModal("reportComplete");
-    }
-    // if (modalType === "reportDetail") {
-    //   openModal("dismissUser");
-    // }
+    if (modalType === "reviewMentos") openModal("reviewComplete");
+    if (modalType === "reportMentos") openModal("reportComplete");
   };
 
-  const onReviewClick = () => {
-    openModal("reviewMentos", { title: "인생한방, 공격투자" });
-  };
+  const onReviewClick = () => openModal("reviewMentos", { title: "리뷰 작성" });
+  const onDeleteClick = () => openModal("deleteMentos");
+  const onUpdateClick = () => navigate("/edit/1"); // TODO: 실제 id 교체
+  const onReportClick = () => openModal("reportMentos", { title: "신고하기" });
+  const onRefundClick = () => openModal("refundMentos");
 
-  const onDeleteClick = () => {
-    openModal("deleteMentos");
-  };
+  // role === 'menti' → API 연결
+  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
+    useMyMentosInfinite(5);
 
-  const onUpdateClick = () => {
-    navigate("/edit/1"); // TODO: 실제 id로 교체
-  };
+  const list = data?.pages.flatMap((p) => p.result.content) ?? [];
+  const loaderRef = useRef<HTMLDivElement | null>(null);
 
-  const onReportClick = () => {
-    openModal("reportMentos", { title: "신고하기" });
-  };
-
-  const onRefundClick = () => {
-    openModal("refundMentos");
-  };
+  useEffect(() => {
+    if (!loaderRef.current || !hasNextPage) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting) && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    io.observe(loaderRef.current);
+    return () => io.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   if (role === "mento") {
     return (
-      <div className="flex min-h-screen w-full justify-center overflow-x-hidden bg-[#f5f6f8] antialiased">
-        <section className="w-full overflow-x-hidden bg-white px-4 py-5 shadow">
+      <div className="flex min-h-screen w-full justify-center bg-[#f5f6f8] antialiased">
+        <section className="w-full bg-white px-4 py-5 shadow">
           <div className="mt-6 mb-15 flex w-full items-baseline justify-between">
-            <h1 className="font-WooridaumB pl-2 text-[20px] leading-[30px] font-bold">
-              멘토링 관리
-            </h1>
-
+            <h1 className="font-WooridaumB pl-2 text-[20px] font-bold">멘토링 관리</h1>
             <Button
               variant="primary"
               size="sm"
-              className="-mt-[1px] !h-[32px] !rounded-[8px] !px-3 !text-[13px] !leading-[30px] whitespace-nowrap"
+              className="!h-[32px] !rounded-[8px] !px-3 !text-[13px]"
               onClick={() => navigate("/create-mentos")}>
               멘토링 생성하기
             </Button>
           </div>
 
-          <section className="flex w-full flex-col items-center justify-center gap-4">
-            <MentosCard
-              mentosSeq={1}
-              title="React 강의"
-              price={50000}
-              location="연남동"
-              status="mento"
-              onUpdateClick={onUpdateClick}
-              onDeleteClick={onDeleteClick}
-            />
-            <MentosCard
-              mentosSeq={1}
-              title="React 강의"
-              price={50000}
-              location="연남동"
-              status="mento"
-              onUpdateClick={onUpdateClick}
-              onDeleteClick={onDeleteClick}
-            />
-            <MentosCard
-              mentosSeq={1}
-              title="React 강의"
-              price={50000}
-              location="연남동"
-              status="mento"
-              onUpdateClick={onUpdateClick}
-              onDeleteClick={onDeleteClick}
-            />
-            <MentosCard
-              mentosSeq={1}
-              title="React 강의"
-              price={50000}
-              location="연남동"
-              status="mento"
-              onUpdateClick={onUpdateClick}
-              onDeleteClick={onDeleteClick}
-            />
+          {/* ✅ 멘토도 API 연결 가능하도록 확장 예정 */}
+          <section className="flex w-full flex-col items-center gap-4">
+            {list.map((item: MyMentosItem) => (
+              <MentosCard
+                key={item.mentosSeq}
+                mentosSeq={item.mentosSeq}
+                title={item.mentosTitle}
+                price={item.price}
+                location={item.region}
+                status="mento"
+                imageUrl={item.mentosImage}
+                onUpdateClick={onUpdateClick}
+                onDeleteClick={onDeleteClick}
+              />
+            ))}
           </section>
 
           <CommonModal
@@ -162,43 +127,44 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
 
   // role === 'menti'
   return (
-    <div className="no-scrollbar flex h-full w-full min-w-[375px] flex-col gap-4 overflow-y-auto bg-white pb-4">
+    <div className="no-scrollbar flex min-h-screen w-full flex-col gap-4 overflow-y-auto bg-white pb-4">
       <MentosMainTitleComponent mainTitle={"나의 멘토링 내역"} />
-      <section className="flex w-full flex-col items-center justify-center gap-3">
-        <MentosCard
-          mentosSeq={1}
-          title="React 강의"
-          price={50000}
-          location="연남동"
-          status="completed"
-          onReportClick={onReportClick}
-          onReviewClick={onReviewClick}
-        />
-        <MentosCard
-          mentosSeq={2}
-          title="React 강의"
-          price={50000}
-          location="연남동"
-          status="completed"
-          onReportClick={onReportClick}
-          onReviewClick={onReviewClick}
-        />
-        <MentosCard
-          mentosSeq={3}
-          title="React 강의"
-          price={50000}
-          location="연남동"
-          status="pending"
-          onRefundClick={onRefundClick}
-        />
-        <MentosCard
-          mentosSeq={4}
-          title="React 강의"
-          price={50000}
-          location="연남동"
-          status="pending"
-          onRefundClick={onRefundClick}
-        />
+
+      {isLoading && <div className="py-6 text-center text-sm">불러오는 중…</div>}
+      {isError && (
+        <div className="py-6 text-center text-sm text-red-500">
+          데이터를 불러오지 못했습니다.
+          <button
+            onClick={() => refetch()}
+            className="ml-2 rounded bg-blue-500 px-2 py-1 text-white">
+            다시 시도
+          </button>
+        </div>
+      )}
+
+      <section className="flex w-full flex-col items-center gap-3">
+        {list.map((item: MyMentosItem) => (
+          <MentosCard
+            key={item.mentosSeq}
+            mentosSeq={item.mentosSeq}
+            title={item.mentosTitle}
+            price={item.price}
+            location={item.region}
+            status={item.progressStatus === "진행 완료" ? "completed" : "pending"}
+            imageUrl={item.mentosImage}
+            onReportClick={onReportClick}
+            onReviewClick={onReviewClick}
+            onRefundClick={onRefundClick}
+          />
+        ))}
+
+        {hasNextPage && <div ref={loaderRef} className="h-10 w-full" />}
+        {isFetchingNextPage && (
+          <div className="py-4 text-center text-sm text-gray-500">더 불러오는 중…</div>
+        )}
+        {!hasNextPage && list.length > 0 && (
+          <div className="py-6 text-center text-xs text-gray-400">마지막 페이지입니다.</div>
+        )}
       </section>
 
       <CommonModal

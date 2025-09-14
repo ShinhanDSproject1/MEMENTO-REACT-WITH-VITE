@@ -1,11 +1,7 @@
 // src/pages/home/Home.tsx
 import { useAuth } from "@/entities/auth";
-import Index from "@/widgets/main/buttonGroup/index";
-import HelpCard from "@/widgets/main/cardGroup/HelpCard";
-import RecomendBox from "@/widgets/main/cardGroup/RecomendBox";
-import LoginBox from "@/widgets/main/loginBox/LoginBox";
-import Footer from "@/widgets/main/mainFooter/MainFooter";
-import CharacterAni from "@/widgets/main/mainHeader/CharacterAni";
+import { CharacterAni, HelpCard, LoginBox, MainFooter, RecommendBox } from "@widgets/main";
+import Index from "@widgets/main/buttonGroup/index";
 import { useLocation } from "react-router-dom";
 
 type UserType = "mentee" | "mentor" | "admin" | "guest";
@@ -44,10 +40,10 @@ export default function Home() {
         userName={effectiveUserName ?? ""}
         userProfileImage={effectiveUserProfileImage}
       />
-      <RecomendBox userType={effectiveUserType} recommend={effectiveRecommend} />
+      <RecommendBox userType={effectiveUserType} recommend={effectiveRecommend} />
       <Index userType={effectiveUserType} />
       <HelpCard />
-      <Footer />
+      <MainFooter />
     </div>
   );
 }

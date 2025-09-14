@@ -2,11 +2,12 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import flowbiteReact from "flowbite-react/plugin/vite";
-import tsconfigPaths from "vite-tsconfig-paths";
-
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
+import mkcert from "vite-plugin-mkcert";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 // ESM에서 __dirname 대체
 const __filename = fileURLToPath(import.meta.url);
@@ -20,6 +21,7 @@ export default defineConfig({
     tailwindcss(),
     flowbiteReact(),
     tsconfigPaths(), // tsconfig의 paths와 동기화
+    mkcert(),
   ],
   resolve: {
     alias: {
@@ -39,6 +41,10 @@ export default defineConfig({
     },
   },
   server: {
+    https: {
+      key: fs.readFileSync("localhost-key.pem"),
+      cert: fs.readFileSync("localhost.pem"),
+    },
     host: true,
     port: 3000,
     // dev 서버 띄울 때 특정 경로로 열고 싶다면:
