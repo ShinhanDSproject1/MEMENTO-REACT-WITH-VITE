@@ -1,15 +1,61 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "jsx": "react-jsx",
+    "target": "ES2020",
     "module": "ESNext",
-    "checkJs": false,
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
     "baseUrl": ".",
-    "moduleResolution": "bundler",
-    "paths": { "@/*": ["src/*"] },
-    "lib": ["ES2020", "DOM"]
-  },
+    "paths": {
+      "@/*": ["src/*"],
 
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "**/node_modules", "dist"]
+      "@app/*": ["src/app/*"],
+      "@pages/*": ["src/pages/*"],
+
+      "@widgets": ["src/widgets/index.ts"],
+      "@widgets/*": ["src/widgets/*"],
+
+      "@features": ["src/features/index.ts"],
+      "@features/*": ["src/features/*"],
+
+      "@entities": ["src/entities/index.ts"],
+      "@entities/*": ["src/entities/*"],
+
+      "@shared": ["src/shared/index.ts"],
+      "@shared/*": ["src/shared/*"],
+
+      "@assets/*": ["src/shared/assets/*"],
+
+      "@hooks": ["src/shared/hooks/index.ts"],
+      "@hooks/*": ["src/shared/hooks/*"],
+
+      "@lib": ["src/shared/lib/index.ts"],
+      "@lib/*": ["src/shared/lib/*"],
+
+      "@ui": ["src/shared/ui/index.ts"],
+      "@ui/*": ["src/shared/ui/*"],
+
+      "@api": ["src/shared/api/index.ts"],
+      "@api/*": ["src/shared/api/*"]
+    },
+    "types": ["vite/client", "node", "vitest/globals", "react", "react-dom"],
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true
+  },
+  "include": [
+    "src",
+    "test",
+    "config",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "config/**/*.ts",
+    "config/**/*.tsx",
+    "eslint.config.ts",
+    "prettier.config.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
 }

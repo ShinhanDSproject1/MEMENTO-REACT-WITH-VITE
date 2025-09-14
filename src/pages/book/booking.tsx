@@ -1,11 +1,9 @@
+import { useCalendar, useKoreanHolidays } from "@hooks";
+import { Calendar } from "@widgets/booking";
+import TimeGrid from "@widgets/booking/TimeGrid";
 import { useEffect, useMemo, useState } from "react";
-import Calendar from "../../components/booking/Calendar";
-import TimeGrid from "../../components/booking/TimeGrid";
-import { useCalendar } from "../../hooks/useCalendar";
-import { useKoreanHolidays } from "../../hooks/useKoreanHolidays";
-import { toYMD, toYM } from "../../utils/datetime";
 import { useNavigate } from "react-router-dom";
-import { Section } from "lucide-react";
+import { toYM, toYMD } from "../../shared/lib/datetime";
 
 interface Booking {
   mentorId: number;
