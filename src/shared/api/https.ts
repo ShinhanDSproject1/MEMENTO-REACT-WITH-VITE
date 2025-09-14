@@ -1,7 +1,6 @@
 // src/shared/api/http.ts
 import { clearAccessToken, getAccessToken, setAccessToken } from "@/shared/auth/token";
 import axios, {
-  AxiosError,
   AxiosHeaders,
   type AxiosRequestHeaders,
   type InternalAxiosRequestConfig,
@@ -9,26 +8,25 @@ import axios, {
 
 const DEBUG_HTTP = true;
 
+// const BASE_URL = "https://memento.shinhanacademy.co.kr/api";
 const BASE_URL = "/api";
 const LOGIN_PATH = "/auth/login";
 const REFRESH_PATH = "/auth/refresh";
 
-// * App Config 타입
 export interface AppRequestConfig extends InternalAxiosRequestConfig {
-  _retry?: boolean; // refresh 시도 여부
-  _skipAuth?: boolean; // 특정 요청에서 인증 건너뛰기
-  _hadAuth?: boolean; // 토큰을 실제로 부착했는지
+  _retry?: boolean; // 이 요청이 리프레시 이후 재시도된 것인지
+  _skipAuth?: boolean; // 인증 건너뛰기 플래그
+  _hadAuth?: boolean; // 실제로 Authorization 헤더를 붙였는지
 }
 
-// * Axios 인스턴스 생성
 export const http = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true,
+  withCredentials: true, // RT 쿠키 포함
   timeout: 15_000,
   headers: { "X-Requested-With": "XMLHttpRequest" },
 });
 
-// * Authorization 헤더 세팅
+/** Authorization 헤더 부착 + 표식 */
 function setAuthHeader(c: AppRequestConfig, token: string) {
   const headers =
     c.headers instanceof AxiosHeaders
@@ -39,27 +37,7 @@ function setAuthHeader(c: AppRequestConfig, token: string) {
   c._hadAuth = true;
 }
 
-// -----------------------------
-// 요청 인터셉터
-// -----------------------------
-http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const c = config as AppRequestConfig;
-
-  // 토큰 부착이 필요 없는 경우
-  if (c._skipAuth) return c;
-
-  // 로그인/리프레시 요청은 토큰 불필요
-  const url = c.url ?? "";
-  if (url.endsWith(LOGIN_PATH) || url.endsWith(REFRESH_PATH)) return c;
-
-  // AccessToken 붙이기
-  const token = getAccessToken();
-  if (token) setAuthHeader(c, token);
-
-  return c;
-});
-
-// ✅ 디버그용 요청 로거
+/* ------------------------ 디버그 로깅 (단 1회 등록) ------------------------ */
 if (DEBUG_HTTP) {
   http.interceptors.request.use((config) => {
     const auth =
@@ -80,113 +58,103 @@ if (DEBUG_HTTP) {
     );
     return config;
   });
-}
 
-// -----------------------------
-// 에러 처리 & refresh 로직
-// -----------------------------
-let isRefreshing = false;
-let waiters: Array<() => void> = [];
-let forcedLogout = false;
-
-function isAuthError(status?: number) {
-  return status === 401 || status === 419 || status === 440 || status === 498;
-}
-
-function goLoginOnce() {
-  if (forcedLogout) return;
-  forcedLogout = true;
-  clearAccessToken();
-  // window.location.replace("/login");
-}
-
-// refresh API 호출 (인터셉터 영향 없음)
-async function refreshAccessToken() {
-  const { data } = await axios.post<{ accessToken: string }>(BASE_URL + REFRESH_PATH, null, {
-    withCredentials: true,
-    headers: { "X-Requested-With": "XMLHttpRequest" },
-  });
-  return data.accessToken;
-}
-
-// -----------------------------
-// 응답 인터셉터
-// -----------------------------
-http.interceptors.response.use(
-  (res) => {
-    if (DEBUG_HTTP) {
+  http.interceptors.response.use(
+    (res) => {
       console.log(
         `%c[HTTP:RES] ${res.config.method?.toUpperCase()} ${res.config.baseURL}${res.config.url} -> ${res.status}`,
         "color:#16A34A;font-weight:bold;",
         { data: res.data },
       );
-    }
-    return res;
-  },
-  async (err: AxiosError) => {
-    if (DEBUG_HTTP) {
+      return res;
+    },
+    (error) => {
+      const cfg = error.config as AppRequestConfig | undefined;
       console.log(
-        "%c[HTTP:ERR]",
+        `%c[HTTP:ERR] ${cfg?.method?.toUpperCase()} ${cfg?.baseURL}${cfg?.url} -> ${error.response?.status}`,
         "color:#DC2626;font-weight:bold;",
-        err.response?.status,
-        err.config?.url,
-        {
-          hadAuth: (err.config as any)?._hadAuth,
-          retry: (err.config as any)?._retry,
-        },
+        { hadAuth: cfg?._hadAuth, retry: cfg?._retry, data: error.response?.data },
       );
-    }
+      return Promise.reject(error);
+    },
+  );
+}
 
+/* ----------------------------- Request 인터셉터 ----------------------------- */
+http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const c = config as AppRequestConfig;
+
+  // 인증 스킵
+  if (c._skipAuth) return c;
+
+  // 로그인/리프레시는 AT 불필요
+  const url = c.url ?? "";
+  if (url.endsWith(LOGIN_PATH) || url.endsWith(REFRESH_PATH)) return c;
+
+  // AT 부착
+  const token = getAccessToken();
+  if (token) setAuthHeader(c, token);
+
+  return c;
+});
+
+function isAuthError(status?: number) {
+  return status === 401 || status === 419 || status === 440 || status === 498;
+}
+
+let refreshPromise: Promise<string> | null = null;
+
+function refreshAccessTokenOnce(): Promise<string> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = axios
+    .post<{ accessToken: string }>(BASE_URL + REFRESH_PATH, null, {
+      withCredentials: true,
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+    })
+    .then((res) => {
+      const t = res.data.accessToken;
+      if (!t) throw new Error("No accessToken");
+      setAccessToken(t);
+      return t;
+    })
+    .finally(() => {
+      refreshPromise = null;
+    });
+
+  return refreshPromise;
+}
+
+// ✅ 외부(Provider)에서 같은 Promise를 재사용할 수 있게 export
+export function refreshSilently() {
+  return refreshAccessTokenOnce();
+}
+
+http.interceptors.response.use(
+  (r) => r,
+  async (err) => {
     const original = err.config as AppRequestConfig | undefined;
-
     if (!original || original._retry || !isAuthError(err.response?.status) || !original._hadAuth) {
       throw err;
     }
-
-    // refresh API 자체가 실패한 경우 → 무한루프 방지
-    const url = original.url ?? "";
-    if (url.endsWith(REFRESH_PATH)) {
-      goLoginOnce();
+    if ((original.url ?? "").endsWith(REFRESH_PATH)) {
+      clearAccessToken();
       throw err;
     }
-
     original._retry = true;
 
-    if (isRefreshing) {
-      // 다른 요청이 refresh 중이면 대기
-      await new Promise<void>((ok) => waiters.push(ok));
-      const t = getAccessToken();
-      if (!t) {
-        goLoginOnce();
-        throw err;
-      }
-      setAuthHeader(original, t);
-      return http(original);
-    }
-
     try {
-      // refresh 최초 실행
-      isRefreshing = true;
-      const newToken = await refreshAccessToken();
-      if (!newToken) {
-        goLoginOnce();
-        throw err;
-      }
-      setAccessToken(newToken);
-
-      // 대기중인 요청 모두 깨우기
-      waiters.forEach((ok) => ok());
-      waiters = [];
-
-      setAuthHeader(original, newToken);
+      const newToken = await refreshAccessTokenOnce();
+      const headers =
+        original.headers instanceof AxiosHeaders
+          ? original.headers
+          : new AxiosHeaders(original.headers as AxiosRequestHeaders | undefined);
+      headers.set("Authorization", `Bearer ${newToken}`);
+      original.headers = headers;
       return http(original);
     } catch (e) {
       clearAccessToken();
-      waiters = [];
-      goLoginOnce();
       throw e;
-    } finally {
-      isRefreshing = false;
     }
   },
 );
