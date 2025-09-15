@@ -79,7 +79,7 @@ export const router = createBrowserRouter([
 
       { path: "/mento/my-list", element: withSuspense(<MyMentosList role="mento" />) },
       { path: "/mento", element: withSuspense(<MentorProfile />) },
-      { path: "/mento/nearby", element: withSuspense(<MentorMapNearbyPage />) }, // ← 추가
+      { path: "/mento/nearby", element: withSuspense(<MentorMapNearbyPage />) },
       { path: "/create-mentos", element: withSuspense(<CreateMentos />) },
       { path: "/edit/:id", element: withSuspense(<EditMentos />) },
       { path: "/mento/certification", element: withSuspense(<CertificationRegister />) },

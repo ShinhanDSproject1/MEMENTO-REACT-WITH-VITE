@@ -1,36 +1,53 @@
 // src/shared/api/http.ts
-import axios, { AxiosError, type AxiosRequestConfig } from "axios";
 import { clearAccessToken, getAccessToken, setAccessToken } from "@/shared/auth/token";
-
-type InternalConfig = AxiosRequestConfig & { _retry?: boolean; _skipAuth?: boolean };
+import axios, {
+  AxiosError,
+  AxiosHeaders,
+  type AxiosRequestConfig,
+  type AxiosRequestHeaders,
+  type InternalAxiosRequestConfig,
+} from "axios";
+type Internal = AxiosRequestConfig & { _retry?: boolean; _skipAuth?: boolean };
 
 // ✅ baseURL 직접 하드코딩
-const BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
-  (import.meta.env.DEV ? "/api" : "https://memento.shinhanacademy.co.kr/api");
+// const BASE_URL = "https://memento.shinhanacademy.co.kr/api";
+const BASE_URL = "/api";
 const REFRESH_PATH = "/auth/refresh";
 
-export const http = axios.create({
-  baseURL: BASE_URL.replace(/\/+$/, ""),
+export interface AppRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+  _skipAuth?: boolean;
+}
 
-  withCredentials: true,
-  timeout: 15_000,
+export const http = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: true, // refresh 쿠키 전송
+  timeout: 15000,
+  headers: { "X-Requested-With": "XMLHttpRequest" },
 });
 
-// 요청 인터셉터 (토큰 주입, _skipAuth 예외)
-http.interceptors.request.use((config: InternalConfig) => {
-  if (config._skipAuth) return config;
+http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const c = config as AppRequestConfig;
+
+  if (c._skipAuth) return c;
+
   const token = getAccessToken();
   if (token) {
-    config.headers = config.headers ?? {};
-    config.headers.Authorization = `Bearer ${token}`;
+    // ✅ headers를 AxiosHeaders 인스턴스로 보장
+    const headers =
+      c.headers instanceof AxiosHeaders
+        ? c.headers
+        : new AxiosHeaders(c.headers as AxiosRequestHeaders | undefined);
+
+    headers.set("Authorization", `Bearer ${token}`);
+    c.headers = headers; // ✅ 타입 안전
   }
-  return config;
+  return c;
 });
 
-// 401 응답 시 refresh → 재시도
+// 응답: 401 → refresh 1회 → 재시도
 let isRefreshing = false;
-let pendingQueue: Array<() => void> = [];
+let waiters: Array<() => void> = [];
 
 async function refreshAccessToken() {
   const { data } = await axios.post<{ accessToken: string }>(BASE_URL + REFRESH_PATH, null, {
@@ -40,14 +57,14 @@ async function refreshAccessToken() {
 }
 
 http.interceptors.response.use(
-  (res) => res,
-  async (error: AxiosError) => {
-    const original = error.config as InternalConfig;
-    if (error.response?.status === 401 && !original?._retry) {
+  (r) => r,
+  async (err: AxiosError) => {
+    const original = err.config as Internal;
+    if (err.response?.status === 401 && !original?._retry) {
       original._retry = true;
 
       if (isRefreshing) {
-        await new Promise<void>((resolve) => pendingQueue.push(resolve));
+        await new Promise<void>((ok) => waiters.push(ok));
         original.headers = original.headers ?? {};
         original.headers.Authorization = `Bearer ${getAccessToken()}`;
         return http(original);
@@ -57,19 +74,19 @@ http.interceptors.response.use(
         isRefreshing = true;
         const newToken = await refreshAccessToken();
         setAccessToken(newToken);
-        pendingQueue.forEach((cb) => cb());
-        pendingQueue = [];
+        waiters.forEach((cb) => cb());
+        waiters = [];
         original.headers = original.headers ?? {};
         original.headers.Authorization = `Bearer ${newToken}`;
         return http(original);
       } catch (e) {
         clearAccessToken();
-        pendingQueue = [];
+        waiters = [];
         throw e;
       } finally {
         isRefreshing = false;
       }
     }
-    throw error;
+    throw err;
   },
 );

@@ -48,6 +48,8 @@ export default defineConfig({
         target: "https://memento.shinhanacademy.co.kr",
         changeOrigin: true,
         secure: false,
+        cookieDomainRewrite: "localhost",
+        cookiePathRewrite: "/",
       },
     },
   },

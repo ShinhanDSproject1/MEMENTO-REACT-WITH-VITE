@@ -1,36 +1,55 @@
 // src/shared/api/reservations.ts
-import { http } from "@api/https";
+import { axiosAuth } from "./axiosAuth";
 
-/** 서버 응답 스펙(예시) */
-type AvailabilityApiResp = {
+// ---------- 예약 생성 ----------
+export type CreateReservationReq = {
+  mentosSeq: number;
+  mentosDate: string; // "YYYY-MM-DD"
+  mentosTime: string; // "HH:mm"
+};
+export type CreateReservationRes = {
   code: number;
+  status: number;
   message: string;
-  // 서버가 ["18:00","19:00"] 형태이거나 [{startTime:"18:00"}] 형태일 수 있어 안전 처리
-  result: Array<string | { startTime?: string; time?: string }>;
+  data?: { reservationSeq: number };
 };
 
-/** 선택한 날짜의 예약 가능 시간 조회 */
+export async function createReservation(body: CreateReservationReq) {
+  return axiosAuth<CreateReservationRes>({
+    url: "/reservation",
+    method: "POST",
+    data: body,
+  });
+}
+
+// ---------- 예약 가용 시간 조회 ----------
+type AvailabilityResponse = {
+  code: number;
+  message: string;
+  result: {
+    startTime: string;
+    endTime: string;
+    availableTime: string[];
+  };
+};
+
+// GET /api/reservation/availability/{mentosSeq}?selectedDate=YYYY-MM-DD
 export async function fetchAvailability(
   mentosSeq: number,
   selectedDate: string,
 ): Promise<string[]> {
-  if (mentosSeq === undefined || mentosSeq === null) {
-    throw new Error("fetchAvailability: mentosSeq가 없습니다.");
+  if (!mentosSeq || !selectedDate) return [];
+
+  const res = await fetch(
+    `/api/reservation/availability/${encodeURIComponent(String(mentosSeq))}?selectedDate=${encodeURIComponent(selectedDate)}`,
+    { method: "GET" },
+  );
+
+  if (!res.ok) {
+    console.error("예약 가능 시간 조회 실패:", res.status);
+    return [];
   }
-  if (!selectedDate) {
-    throw new Error("fetchAvailability: selectedDate가 없습니다.");
-  }
 
-  const url = `/reservation/availability/${encodeURIComponent(String(mentosSeq))}`;
-
-  const { data } = await http.get<AvailabilityApiResp>(url, {
-    params: { selectedDate },
-    // withCredentials: true, // 쿠키 인증을 쓴다면 http 인스턴스 설정에 맞춰 사용
-  });
-
-  // 문자열/객체 케이스 공통 처리
-  const times =
-    data?.result?.map((v) => (typeof v === "string" ? v : (v.startTime ?? v.time ?? ""))) ?? [];
-
-  return times.filter(Boolean);
+  const data: AvailabilityResponse = await res.json();
+  return data.result?.availableTime ?? [];
 }

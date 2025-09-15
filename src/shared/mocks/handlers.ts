@@ -1,48 +1,92 @@
-// src/shared/mocks/handlers.ts
 import { http, HttpResponse } from "msw";
 
+// 데모용 메모리 저장소(간단 홀드 효과)
+const holds = new Map<string, { memberSeq?: number }>();
+
 export const handlers = [
-  // ✅ 예약 가용시간 조회
-  http.get("/api/reservation/availability/:mentosSeq", async ({ request, params }) => {
-    const url = new URL(request.url);
-    const selectedDate = url.searchParams.get("selectedDate");
-    const mentosSeq = params.mentosSeq as string;
+  // 1) 예약 생성: POST /api/reservation
+  http.post("/api/reservation", async ({ request }) => {
+    const body = (await request.json().catch(() => ({}))) as any;
+    const { mentosSeq, mentosDate, mentosTime } = body || {};
 
-    console.log("[MSW] 예약 가용시간 요청", { mentosSeq, selectedDate });
+    if (!mentosSeq || !mentosDate || !mentosTime) {
+      return HttpResponse.json(
+        { code: 1400, status: 400, message: "잘못된 요청입니다." },
+        { status: 400 },
+      );
+    }
 
-    // 날짜별 가짜 데이터 (테스트용)
-    const result =
-      selectedDate === "2025-09-12" ? ["18:00", "19:00", "20:00"] : ["16:00", "17:00", "18:00"];
+    const key = `${mentosSeq}::${mentosDate}::${mentosTime}`;
+    if (holds.has(key)) {
+      return HttpResponse.json(
+        { code: 1409, status: 409, message: "이미 예약된 시간입니다." },
+        { status: 409 },
+      );
+    }
 
+    holds.set(key, {}); // 홀드
     return HttpResponse.json({
       code: 1000,
       status: 200,
-      message: "Mocked availability",
-      result,
+      message: "예약 생성 성공",
+      data: { reservationSeq: Math.floor(Math.random() * 1_000_000) },
     });
   }),
 
-  // ✅ 결제 init (프론트가 기대하는 응답 구조 스텁)
-  http.post("/api/mentos/payments/:memberSeq/init", async ({ request, params }) => {
-    const body = (await request.json()) as {
-      mentosSeq: number;
-      mentosAt: string;
-      mentosTime: string;
-    };
-    const memberSeq = params.memberSeq;
+  // 2) 가용 시간 조회: GET /api/reservation/availability/:mentosSeq?selectedDate=YYYY-MM-DD
+  http.get("/api/reservation/availability/:mentosSeq", ({ params, request }) => {
+    const url = new URL(request.url);
+    const date = url.searchParams.get("selectedDate") || "";
+    const mentosSeq = String(params.mentosSeq);
 
-    console.log("[MSW] 결제 init 요청", { memberSeq, ...body });
+    // 데모용 슬롯
+    let result = ["19:00", "20:00", "21:00"];
+
+    // 이미 예약/홀드된 시간은 제거
+    result = result.filter((t) => !holds.has(`${mentosSeq}::${date}::${t}`));
 
     return HttpResponse.json({
       code: 1000,
       status: 200,
-      message: "Mocked payment init",
-      result: {
-        orderId: `ORD_M_${body.mentosSeq}_${body.mentosAt}_${body.mentosTime.replace(":", "")}_TEST`,
-        orderName: "모의 멘토링",
+      message: "OK",
+      result, // fetchAvailability가 "HH:mm"로 사용
+    });
+  }),
+
+  // 3) 결제 init: POST /api/mentos/payments/:memberSeq/init
+  http.post("/api/mentos/payments/:memberSeq/init", async ({ params, request }) => {
+    const body = (await request.json().catch(() => ({}))) as any;
+    const { mentosSeq, mentosDate, mentosTime } = body || {};
+    const memberSeq = Number(params.memberSeq);
+
+    if (!mentosSeq || !mentosDate || !mentosTime) {
+      return HttpResponse.json(
+        { code: 1400, status: 400, message: "잘못된 요청입니다." },
+        { status: 400 },
+      );
+    }
+
+    const key = `${mentosSeq}::${mentosDate}::${mentosTime}`;
+    // 예약 단계에서 잡아둔 홀드를 확인(데모용 검증)
+    if (!holds.has(key)) {
+      return HttpResponse.json(
+        { code: 1404, status: 404, message: "예약 내역을 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+    holds.set(key, { memberSeq });
+
+    const origin = location.origin;
+    return HttpResponse.json({
+      code: 1000,
+      status: 200,
+      message: "결제 준비 완료",
+      data: {
         amount: 50000,
-        successUrl: "http://localhost:3000/booking/success",
-        failUrl: "http://localhost:3000/booking/fail",
+        orderId: `MEMENTO-${Date.now()}`,
+        orderName: "인생 역전, 공격투자 멘토링",
+        successUrl: `${origin}/memento-finance/pay/success?orderId=MEMENTO-${Date.now()}`,
+        failUrl: `${origin}/memento-finance/pay/fail`,
       },
     });
   }),

@@ -37,15 +37,15 @@ export default function MentorSignup() {
   const [certFile, setCertFile] = useState<File | null>(null);
 
   const [agree, setAgree] = useState<boolean>(false);
-  const [verifying, setVerifying] = useState<boolean>(false);
-  const [verified, setVerified] = useState<boolean>(false);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string>("");
 
   // DatePicker 열림 상태
   const [isCalOpen, setIsCalOpen] = useState<boolean>(false);
 
   // 전화번호/비번 검증
   const pwOk = pw.length >= 6 && pw === pw2;
-  const phoneOk = /^\d{9,13}$/.test(phone.replace(/\D/g, ""));
+  const phoneOk = /^010-\d{4}-\d{4}$/.test(phone);
 
   // 생년월일 검증(실제 날짜 유효성)
   const birthOk = useMemo(() => {
@@ -70,18 +70,56 @@ export default function MentorSignup() {
     );
   }, [id, pwOk, name, phoneOk, birthOk, certOwn, certFile, agree]);
 
-  const onSelfVerify = async () => {
-    setVerifying(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setVerifying(false);
-    setVerified(true);
+  // ✅ 실제 가입 API
+  const submitSignup = async () => {
+    const BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
+    const requestDto = {
+      memberId: id.trim(),
+      memberPwd: pw,
+      memberName: name.trim(),
+      memberPhoneNumber: phone,
+      memberBirthDate: `${birth.y}-${birth.m.padStart(2, "0")}-${birth.d.padStart(2, "0")}`,
+    };
+    const form = new FormData();
+    form.append("requestDto", new Blob([JSON.stringify(requestDto)], { type: "application/json" }));
+    if (certOwn && certFile) form.append("imageFile", certFile);
+
+    const res = await fetch(`${BASE}/auth/signup/mento`, {
+      method: "POST",
+      body: form,
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      let detail = "";
+      try {
+        const data = await res.json();
+        detail = data?.message || "";
+      } catch {
+        /* ignore */
+      }
+      throw new Error(detail || `가입 실패 (${res.status})`);
+    }
+    return res.json(); // { code, status, message }
   };
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!canSubmit) return;
-    // TODO: 실제 가입 API 호출
-    navigate("/signup-complete");
+    if (!canSubmit || submitting) return;
+    setErrorMsg("");
+    setSubmitting(true);
+
+    try {
+      await submitSignup();
+      navigate("/signup-complete");
+    } catch (err: any) {
+      const status = err?.response?.status ?? err?.status;
+      if (status === 409) setErrorMsg("이미 존재하는 아이디입니다.");
+      else if (status === 400) setErrorMsg("입력값을 다시 확인해주세요.");
+      else setErrorMsg(err?.message ?? "서버 오류가 발생했습니다.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // DatePicker 선택 값
@@ -324,12 +362,14 @@ export default function MentorSignup() {
         <div className="mt-4 grid grid-cols-2 gap-3">
           <button
             type="submit"
-            disabled={!canSubmit}
+            disabled={!canSubmit || submitting}
             className={[
               "h-14 rounded-2xl text-base font-extrabold text-white transition",
-              canSubmit ? "bg-[#1161FF] hover:bg-[#0C2D62]" : "cursor-not-allowed bg-[#9BB9FF]",
+              !canSubmit || submitting
+                ? "cursor-not-allowed bg-[#9BB9FF]"
+                : "bg-[#1161FF] hover:bg-[#0C2D62]",
             ].join(" ")}>
-            가입
+            {submitting ? "가입 중..." : "가입"}
           </button>
           <button
             type="button"

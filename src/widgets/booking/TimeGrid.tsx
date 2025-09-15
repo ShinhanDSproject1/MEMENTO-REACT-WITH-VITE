@@ -17,12 +17,13 @@ const COMMON_SLOTS = [
 ];
 const LEAD_MINUTES = 120;
 
-interface Props {
+type Props = {
   selectedDate: Date | null;
   selectedTime: string;
   onSelectTime: (t: string) => void;
   availableTimes?: string[];
-}
+  loading?: boolean;
+};
 
 export default function TimeGrid({
   selectedDate,

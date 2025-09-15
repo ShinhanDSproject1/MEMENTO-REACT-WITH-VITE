@@ -1,4 +1,5 @@
 import logo from "@assets/images/logo/memento-logo.svg";
+// import { set } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useMemo, useState, type FormEvent } from "react";
 import DatePicker from "react-datepicker";
@@ -17,12 +18,15 @@ export default function MenteeSignup() {
   const [birth, setBirth] = useState({ y: "", m: "", d: "" });
   const [agree, setAgree] = useState(false);
 
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
   // DatePicker 열림 상태
   const [isCalOpen, setIsCalOpen] = useState(false);
 
   // 전화번호/비번 검증
   const pwOk = pw.length >= 6 && pw === pw2;
-  const phoneOk = /^\d{9,13}$/.test(phone.replace(/\D/g, ""));
+  const phoneOk = /^010-\d{4}-\d{4}$/.test(phone);
 
   // 생년월일 검증(실제 날짜 유효성)
   const birthOk = useMemo(() => {
@@ -37,16 +41,56 @@ export default function MenteeSignup() {
 
   // 제출 가능 여부
   const canSubmit = useMemo(() => {
-    return id.trim() && pwOk && name.trim() && phoneOk && birthOk;
-  }, [id, pwOk, name, phoneOk, birthOk]);
+    return id.trim() !== "" && pwOk && name.trim() !== "" && phoneOk && birthOk && agree;
+  }, [id, pwOk, name, phoneOk, birthOk, agree]);
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!canSubmit) return;
-    // TODO: 실제 가입 API 호출
-    navigate("/signup-complete");
+  // 실제 가입 API
+  const submitSignup = async () => {
+    const BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
+    const body = {
+      memberId: id.trim(),
+      memberPwd: pw,
+      memberName: name.trim(),
+      memberPhoneNumber: phone,
+      memberBirthDate: `${birth.y}-${birth.m.padStart(2, "0")}-${birth.d.padStart(2, "0")}`,
+    };
+
+    const res = await fetch(`${BASE}/auth/signup/menti`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      credentials: "include",
+    });
+
+    // NOTE: 지금 서버가 auth도 401을 주는 이슈가 있어 여기서 401이 날 수 있음(백 수정 후 정상 200 예상)
+    if (!res.ok) {
+      let detail = "";
+      try {
+        const data = await res.json();
+        detail = data?.message || "";
+      } catch {
+        /* ignore */
+      }
+      throw new Error(detail || `가입 실패 (${res.status})`);
+    }
+    return res.json(); // { code, status, message }
   };
 
+  // onSubmit 교체
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!canSubmit || submitting) return;
+    setErrorMsg("");
+    setSubmitting(true);
+    try {
+      await submitSignup();
+      navigate("/signup-complete");
+    } catch (err: any) {
+      setErrorMsg(err?.message ?? "서버 오류가 발생했습니다.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
   return (
     <main className="mx-auto w-full max-w-md px-5 py-8">
       {/* 로고 + 인사 */}
@@ -235,12 +279,14 @@ export default function MenteeSignup() {
         <div className="mt-4 grid grid-cols-2 gap-3">
           <button
             type="submit"
-            disabled={!canSubmit}
+            disabled={!canSubmit || submitting}
             className={[
               "h-14 rounded-2xl text-base font-extrabold text-white transition",
-              canSubmit ? "bg-[#1161FF] hover:bg-[#0C2D62]" : "cursor-not-allowed bg-[#9BB9FF]",
+              !canSubmit || submitting
+                ? "cursor-not-allowed bg-[#9BB9FF]"
+                : "bg-[#1161FF] hover:bg-[#0C2D62]",
             ].join(" ")}>
-            가입
+            {submitting ? "가입 중..." : "가입"}
           </button>
           <button
             type="button"
@@ -249,6 +295,7 @@ export default function MenteeSignup() {
             취소
           </button>
         </div>
+        {errorMsg && <p className="mt-2 text-sm text-red-500">{errorMsg}</p>}
 
         {/* 로그인 링크 */}
         <p className="mt-6 text-center text-sm text-slate-500">
