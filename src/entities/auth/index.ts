@@ -7,4 +7,5 @@ export * from "./api/refresh";
 export * from "./hooks/useAuth";
 
 // * Model (타입)
+export * from "./model/context";
 export * from "./model/types";

@@ -1,54 +1,50 @@
-import type { LoginInput, LoginSuccess } from "@entities/auth";
-import { login as loginApi, logout as logoutApi, refresh } from "@entities/auth";
-import type { PropsWithChildren } from "react";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+// src/app/providers/AuthProvider.tsx
+import { clearAccessToken, setAccessToken as saveAccessToken } from "@/shared/auth/token";
+import type { AuthContextValue, LoginInput } from "@entities/auth";
+import { AuthContext, login as loginApi, logout as logoutApi } from "@entities/auth";
+import { refreshSilently } from "@shared/api"; // ✅ 이걸 사용
+import React, { useEffect, useMemo, useState } from "react";
 
-type AuthContextValue = {
-  user: LoginSuccess["user"] | null;
-  accessToken: string | null;
-  isAuthenticated: boolean;
-  login: (input: LoginInput) => Promise<void>;
-  logout: () => Promise<void>;
-  setAccessToken: (token: string | null) => void;
-};
-
-const AuthContext = createContext<AuthContextValue | null>(null);
-
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within <AuthProvider />");
-  return ctx;
-}
-
-export default function AuthProvider({ children }: PropsWithChildren) {
+export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [user, setUser] = useState<LoginSuccess["user"] | null>(null);
+  const [user, setUser] = useState<AuthContextValue["user"]>(null);
   const [bootstrapped, setBootstrapped] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await refresh();
-        setAccessToken(res.accessToken);
+        const t = await refreshSilently(); // ✅ 인터셉터와 같은 Promise 공유
+        if (t) {
+          saveAccessToken(t);
+          setAccessToken(t);
+        } else {
+          clearAccessToken();
+        }
       } catch {
+        clearAccessToken();
         setAccessToken(null);
         setUser(null);
       } finally {
-        setBootstrapped(true);
+        setBootstrapped(true); // 부트스트랩 끝나기 전엔 자식 렌더 X
       }
     })();
   }, []);
 
   const login = async (input: LoginInput) => {
-    const res = await loginApi(input);
-    setAccessToken(res.accessToken);
-    setUser(res.user);
+    const dto = await loginApi(input);
+    const result = dto.result;
+    setUser(result);
+    if (result.accessToken) {
+      saveAccessToken(result.accessToken);
+      setAccessToken(result.accessToken);
+    }
   };
 
   const logout = async () => {
     try {
       await logoutApi();
     } finally {
+      clearAccessToken();
       setAccessToken(null);
       setUser(null);
     }
@@ -61,14 +57,10 @@ export default function AuthProvider({ children }: PropsWithChildren) {
       isAuthenticated: !!accessToken,
       login,
       logout,
-      setAccessToken,
     }),
     [user, accessToken],
   );
 
-  if (!bootstrapped) {
-    return <div>로딩 중…</div>;
-  }
-
+  if (!bootstrapped) return <div>인증 확인 중…</div>;
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

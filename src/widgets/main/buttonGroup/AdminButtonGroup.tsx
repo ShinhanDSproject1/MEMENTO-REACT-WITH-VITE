@@ -10,10 +10,7 @@ function AdminButtonGroup() {
       <MainButton className={style} onClick={() => navigate("/admin/report")}>
         회원관리
       </MainButton>
-      <MainButton
-        className={style}
-        onClick={() => navigate("/admin/declaration")}
-      >
+      <MainButton className={style} onClick={() => navigate("/admin/declaration")}>
         관리자 신고확인
       </MainButton>
       <MainButton className={style} onClick={() => navigate("/admin/revenue")}>

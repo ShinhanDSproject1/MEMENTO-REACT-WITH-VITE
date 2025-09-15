@@ -1,6 +1,7 @@
 import backIcon from "@assets/icons/icon-back.png";
 import loginIcon from "@assets/icons/icon-login.svg";
 import homeIcon from "@assets/icons/icon-move-home.svg";
+import { useAuth } from "@entities/auth";
 import { useNavigate } from "react-router-dom";
 
 interface CommonHeaderProps {
@@ -8,11 +9,20 @@ interface CommonHeaderProps {
   onClickHome?: () => void;
 }
 
-export default function CommonHeader({ onClickLogin, onClickHome }: CommonHeaderProps) {
+export default function CommonHeader({ onClickHome }: CommonHeaderProps) {
   const navigate = useNavigate();
-
+  const { user, logout } = useAuth();
   const goBack = () => navigate(-1);
-  const goLogin = () => (onClickLogin ? onClickLogin() : navigate("/login"));
+  const goLogin = async () => {
+    if (user) {
+      await logout();
+      alert("로그아웃 되었습니다."); //임시 - 추후에 모달UI 추가 필요
+      navigate("/login");
+    } else {
+      navigate("/login");
+    }
+  };
+
   const goHome = () => (onClickHome ? onClickHome() : navigate("/"));
 
   return (

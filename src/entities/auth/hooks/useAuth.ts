@@ -1,4 +1,8 @@
+import { AuthContext } from "@entities/auth";
+import { useContext } from "react";
+
 export function useAuth() {
-  const token = localStorage.getItem("accessToken");
-  return { isAuthenticated: !!token };
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within <AuthProvider />");
+  return ctx;
 }
