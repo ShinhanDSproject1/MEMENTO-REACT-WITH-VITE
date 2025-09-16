@@ -1,14 +1,12 @@
-// src/shared/api/reservations.ts
 import { http } from "@api/https";
 
 export type Availability = {
-  startTime: string; // "10:00"
-  endTime: string; // "18:00"
-  availableTime: string[]; // ["11:00","13:00","14:00"]
+  startTime: string;
+  endTime: string;
+  availableTime: string[];
 };
 
 // 로그인 불필요 → fetch 사용
-// GET /api/reservation/availability/{mentosSeq}?selectedDate=YYYY-MM-DD
 export async function fetchAvailability(
   mentosSeq: number,
   selectedDate: string,
@@ -27,12 +25,10 @@ export async function fetchAvailability(
   };
 }
 
-// 로그인 필요 → axios(http) 사용
-// POST /api/reservation
 export async function createReservation(payload: {
   mentosSeq: number;
-  mentosAt: string; // "YYYY-MM-DD"
-  mentosTime: string; // "HH:mm"
+  mentosAt: string;
+  mentosTime: string;
 }) {
   const { data } = await http.post("/reservation", payload, {
     headers: { "Content-Type": "application/json" },
