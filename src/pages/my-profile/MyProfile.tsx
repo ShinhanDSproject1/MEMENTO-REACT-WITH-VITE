@@ -1,10 +1,12 @@
 // src/pages/MyProfile.tsx
-import DateField from "@/widgets/profile/BirthDate"; // DateField: selected/onChange 타입 정의되어 있어야 함
+import DateField from "@/widgets/profile/BirthDate";
 import SectionCard from "@/widgets/profile/CardSection";
 import CommonInput from "@/widgets/profile/CommonInput";
 import FieldRow from "@/widgets/profile/FieldRow";
 import PageContainer from "@/widgets/profile/PageContainer";
-import { type ChangeEvent, useState } from "react";
+import { updateMyPassword, useMyProfile, useUpdateMyProfile } from "@entities/profile";
+import type { AxiosError } from "axios";
+import { type ChangeEvent, useEffect, useState } from "react";
 
 // ── 유틸 함수들 타입 안전하게 정리 ──────────────────────────
 const toDate = (v: string | null | undefined): Date | null => {
@@ -41,7 +43,7 @@ const fmtKOR = (v: string | null | undefined): string => {
 type User = {
   name: string;
   phone: string;
-  dob: string; // ISO(YYYY-MM-DD) or "YYYY년 MM월 DD일"
+  dob: string;
   userid: string;
   pw: string;
 };
@@ -57,7 +59,26 @@ type InfoDraft = {
   confirm: string;
 };
 
+// ✅ 서버 프로필 → 로컬 User 매핑
+function mapProfileToUser(p: {
+  memberName: string;
+  memberPhoneNumber: string;
+  memberBirthDate: string; // ISO
+  memberId: string;
+}): User {
+  return {
+    name: p.memberName,
+    phone: p.memberPhoneNumber,
+    dob: p.memberBirthDate, // 내부는 ISO로 들고, 표시에서 fmtKOR 사용
+    userid: p.memberId,
+    pw: "********", // 서버 비번은 보관하지 않음(표시용)
+  };
+}
+
 export default function MyProfile() {
+  const { data: profile, isLoading, isError, refetch } = useMyProfile();
+  const { mutateAsync: updateProfile } = useUpdateMyProfile();
+
   const [user, setUser] = useState<User>({
     name: "안가연",
     phone: "010-1111-2222",
@@ -80,23 +101,71 @@ export default function MyProfile() {
     confirm: "",
   });
 
-  const isCurrentOk = infoDraft.current === user.pw && infoDraft.current.length > 0;
+  // ✅ 서버 데이터 들어오면 user/profileDraft에 주입 (조회만)
+  useEffect(() => {
+    if (!profile) return;
+    const u = mapProfileToUser(profile);
+    setUser(u);
+    setProfileDraft({ phone: u.phone, dob: toISO(toDate(u.dob)) });
+  }, [profile]);
+
+  const isCurrentOk = infoDraft.current.length > 0;
   const isNewMatch = infoDraft.next.length > 0 && infoDraft.next === infoDraft.confirm;
   const canSubmit = isCurrentOk && isNewMatch;
 
-  const handleProfileSave = () => {
-    setUser((prev) => ({
-      ...prev,
-      phone: profileDraft.phone,
-      dob: profileDraft.dob,
-    }));
-    setEditProfile(false);
+  const handleProfileSave = async () => {
+    // 서버에 보낼 입력 (ISO 보장)
+    const input = {
+      memberPhoneNumber: profileDraft.phone,
+      memberBirthDate: profileDraft.dob, // 이미 toISO로 관리 중
+    };
+
+    try {
+      await updateProfile(input);
+      // ✅ 낙관적 UI: 로컬 상태도 갱신
+      setUser((prev) => ({ ...prev, phone: profileDraft.phone, dob: profileDraft.dob }));
+      setEditProfile(false);
+
+      // (선택) 즉시 최신 서버 데이터로 동기화하고 싶다면:
+      // await qc.invalidateQueries({ queryKey: profileQueryKeys.me() });
+    } catch (e) {
+      // 간단한 에러 처리
+      console.error("[update profile] failed:", e);
+      alert("프로필 수정에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+    }
   };
 
-  const handleInfoSave = () => {
-    setUser((prev) => ({ ...prev, pw: infoDraft.next }));
-    setEditInfo(false);
-    setInfoDraft({ current: "", next: "", confirm: "" });
+  const handleInfoSave = async () => {
+    // 클라이언트 쪽 1차 검증
+    if (!infoDraft.current || !infoDraft.next || !infoDraft.confirm) {
+      alert("모든 비밀번호 입력란을 채워주세요.");
+      return;
+    }
+    if (infoDraft.next !== infoDraft.confirm) {
+      alert("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    try {
+      await updateMyPassword({
+        currentPassword: infoDraft.current,
+        newPassword: infoDraft.next,
+        confirmPassword: infoDraft.confirm,
+      });
+
+      // 성공 처리: UI 초기화
+      setEditInfo(false);
+      setInfoDraft({ current: "", next: "", confirm: "" });
+      // 표시용 pw는 실제 서버 비번을 보관하지 않으니 그대로 두거나 별도 문구로
+      setUser((prev) => ({ ...prev, pw: "********" }));
+      alert("비밀번호가 변경되었습니다.");
+    } catch (e) {
+      const error = e as AxiosError<{ message?: string }>;
+      const msg =
+        error.response?.data?.message ??
+        "비밀번호 변경에 실패했습니다. 잠시 후 다시 시도해 주세요.";
+      alert(msg);
+    }
   };
 
   const onChangePhone = (e: ChangeEvent<HTMLInputElement>) => {
@@ -116,6 +185,38 @@ export default function MyProfile() {
   const headingCls =
     "mb-6 text-left text-[24px] leading-[28px] tracking-tight font-bold text-[#121418]";
 
+  // ✅ 조회 상태 표시
+  if (isLoading) {
+    return (
+      <div className="font-WooridaumB flex min-h-screen justify-center bg-[#f5f6f8] antialiased">
+        <main className="min-h-dvh w-full bg-white px-4 py-8 shadow">
+          <PageContainer>
+            <div className="py-10 text-center text-sm text-gray-500">프로필을 불러오는 중…</div>
+          </PageContainer>
+        </main>
+      </div>
+    );
+  }
+
+  if (isError || !profile) {
+    return (
+      <div className="font-WooridaumB flex min-h-screen justify-center bg-[#f5f6f8] antialiased">
+        <main className="min-h-dvh w-full bg-white px-4 py-8 shadow">
+          <PageContainer>
+            <div className="py-10 text-center text-sm text-red-500">
+              프로필을 불러오지 못했습니다.
+              <button
+                onClick={() => refetch()}
+                className="ml-2 rounded bg-blue-500 px-2 py-1 text-white"
+                type="button">
+                다시 시도
+              </button>
+            </div>
+          </PageContainer>
+        </main>
+      </div>
+    );
+  }
   return (
     <div className="font-WooridaumB flex min-h-screen justify-center bg-[#f5f6f8] antialiased">
       <main className="min-h-dvh w-full bg-white px-4 py-8 shadow">
@@ -125,7 +226,6 @@ export default function MyProfile() {
           <section className="mb-8">
             <SectionCard>
               <FieldRow label="이름" htmlFor="name">
-                {/* tone prop은 CommonInput 타입에 없을 수 있어 제거 */}
                 <CommonInput id="name" value={user.name} editable={false} />
               </FieldRow>
 
@@ -206,7 +306,6 @@ export default function MyProfile() {
                       value={infoDraft.current}
                       onChange={onChangeCurrent}
                       editable
-                      // validation prop이 CommonInput에 없으면 제거
                       placeholder={
                         infoDraft.current.length > 0 && !isCurrentOk
                           ? "현재 비밀번호가 일치하지 않습니다"

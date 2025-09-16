@@ -10,9 +10,6 @@ export type SnapshotUser = {
 export const saveUserSnapshot = (u: SnapshotUser) => {
   const str = JSON.stringify(u);
   localStorage.setItem(KEY, str);
-
-  console.log("[saveUserSnapshot] saved:", str);
-  console.log("[saveUserSnapshot] sessionStorage now:", localStorage.getItem(KEY));
 };
 
 export const loadUserSnapshot = (): SnapshotUser | null => {

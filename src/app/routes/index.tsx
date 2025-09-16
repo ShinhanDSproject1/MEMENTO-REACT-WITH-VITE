@@ -24,6 +24,7 @@ const MentosDetail = React.lazy(() => import("@/pages/mentos/MentosDetail"));
 
 const MyMentosList = React.lazy(() => import("@/pages/my-profile/MyMentosList"));
 const MentorProfile = React.lazy(() => import("@/pages/my-profile/MentoProfile"));
+const MyProfile = React.lazy(() => import("@/pages/my-profile/MyProfile"));
 
 const CreateMentos = React.lazy(() => import("@/pages/mentor/CreateMentos"));
 const EditMentos = React.lazy(() => import("@/pages/mentor/EditMentos"));
@@ -42,7 +43,7 @@ const MemberReport = React.lazy(() => import("@/pages/admin/MemberReport"));
 const ReportList = React.lazy(() => import("@/pages/admin/ReportList"));
 
 const HomeVideo = React.lazy(() => import("@/pages/home/HomeVideo"));
-const BookingPage = React.lazy(() => import("@/pages/book/Booking"));
+const BookingPage = React.lazy(() => import("@/pages/book/Booking"));
 const BookingConfirm = React.lazy(() => import("@/pages/book/BookingConfirm"));
 const MentoIntroduce2 = React.lazy(() => import("@/pages/book/MentoIntroduce2"));
 
@@ -73,9 +74,10 @@ export const router = createBrowserRouter([
       { path: "/signup/mentee", element: withSuspense(<MenteeSignup />) },
       { path: "/signup-complete", element: withSuspense(<SignupComplete />) },
 
-      { path: "/mentee/:category", element: withSuspense(<MentosList />) },
-      { path: "/mentee/mentos-detail/:id", element: withSuspense(<MentosDetail />) },
-      { path: "/mentee/mymentos", element: withSuspense(<MyMentosList role="menti" />) },
+      { path: "/menti/:category", element: withSuspense(<MentosList />) },
+      { path: "/menti/mentos-detail/:id", element: withSuspense(<MentosDetail />) },
+      { path: "/menti/mymentos", element: withSuspense(<MyMentosList role="menti" />) },
+      { path: "/menti/myprofile", element: withSuspense(<MyProfile />) },
 
       { path: "/mento/my-list", element: withSuspense(<MyMentosList role="mento" />) },
       { path: "/mento", element: withSuspense(<MentorProfile />) },
