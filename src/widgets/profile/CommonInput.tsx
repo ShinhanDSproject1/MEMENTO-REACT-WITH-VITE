@@ -22,7 +22,7 @@ const CommonInput = forwardRef<HTMLInputElement, CommonInputProps>(
     const toneCls = tone === "light" ? "bg-gray-50" : "";
     const valCls =
       validation === "ok"
-        ? "border-green-500 focus:ring-green-500"
+        ? "focus:ring-2 focus:ring-blue-500"
         : validation === "error"
           ? "border-red-500 focus:ring-red-500"
           : "";
