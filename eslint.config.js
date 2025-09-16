@@ -43,6 +43,7 @@ export default defineConfig([
       ...reactHooks.configs.recommended.rules,
 
       // 팀 커스텀
+
       "no-console": "warn",
       "no-alert": "warn",
       "default-case": ["error", { commentPattern: "^skip\\sdefault" }],

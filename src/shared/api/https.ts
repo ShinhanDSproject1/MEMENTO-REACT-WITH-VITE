@@ -1,10 +1,14 @@
 // src/shared/api/http.ts
 import { clearAccessToken, getAccessToken, setAccessToken } from "@/shared/auth/token";
 import axios, {
+  // AxiosError,
   AxiosHeaders,
+  // type AxiosRequestConfig,
   type AxiosRequestHeaders,
   type InternalAxiosRequestConfig,
 } from "axios";
+
+// type Internal = AxiosRequestConfig & { _retry?: boolean; _skipAuth?: boolean };
 
 const DEBUG_HTTP = true;
 
@@ -106,6 +110,9 @@ http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 function isAuthError(status?: number) {
   return status === 401 || status === 419 || status === 440 || status === 498;
 }
+
+// let isRefreshing = false;
+// let waiters: Array<() => void> = [];
 
 let refreshPromise: Promise<string> | null = null;
 
