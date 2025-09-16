@@ -43,7 +43,7 @@ const MemberReport = React.lazy(() => import("@/pages/admin/MemberReport"));
 const ReportList = React.lazy(() => import("@/pages/admin/ReportList"));
 
 const HomeVideo = React.lazy(() => import("@/pages/home/HomeVideo"));
-const BookingPage = React.lazy(() => import("@/pages/book/Booking"));
+const BookingPage = React.lazy(() => import("@/pages/book/Booking"));
 const BookingConfirm = React.lazy(() => import("@/pages/book/BookingConfirm"));
 const MentoIntroduce2 = React.lazy(() => import("@/pages/book/MentoIntroduce2"));
 

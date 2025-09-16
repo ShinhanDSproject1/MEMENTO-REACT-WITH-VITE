@@ -10,25 +10,40 @@ import locationIcon from "@assets/icons/icon-location.svg";
 import starIcon from "@assets/icons/icon-star.svg";
 import DOMPurify from "dompurify";
 
-import { getMentosDetail } from "@shared/api/mentos";
-import type { MentosDetailResult } from "@shared/api/mentos";
-
-// 카카오맵 컨트롤러
 import { KakaoMapController } from "@entities/editor";
+import type { MentosDetailResult } from "@shared/api/mentos";
+import { getMentosDetail } from "@shared/api/mentos";
 
-// TS가 window.kakao를 인지하도록 선언
+/* ---------- Kakao 타입 최소 정의 (any 제거) ---------- */
+type KakaoStatus = "OK" | "ZERO_RESULT" | "ERROR";
+interface KakaoAddressResult {
+  x: string; // lng
+  y: string; // lat
+}
+interface KakaoGeocoder {
+  addressSearch(
+    addr: string,
+    callback: (result: KakaoAddressResult[], status: KakaoStatus) => void,
+  ): void;
+}
+interface KakaoServices {
+  Geocoder: new () => KakaoGeocoder;
+  Status: KakaoStatus;
+}
 declare global {
   interface Window {
-    kakao: any;
+    kakao: {
+      maps: {
+        services: KakaoServices;
+      };
+    };
   }
 }
 
+/* ---------- HTML sanitize ---------- */
 function toHtml(input?: string) {
   const raw = input ?? "";
-  // \r\n, \r, \n → <br/>  (태그는 건드리지 않음)
   const withBreaks = raw.replace(/\r\n|\r|\n/g, "<br/>");
-
-  // 허용할 태그/속성만 선택적으로 열어두기
   const sanitized = DOMPurify.sanitize(withBreaks, {
     ALLOWED_TAGS: [
       "b",
@@ -51,20 +66,29 @@ function toHtml(input?: string) {
     ],
     ALLOWED_ATTR: ["href", "target", "rel"],
   });
-
   return { __html: sanitized };
+}
+
+/* mento가 객체/배열 둘 다 올 수 있다고 했으니 안전한 헬퍼 */
+type MentoLike = {
+  mentoName?: string;
+  mentoImg?: string;
+  mentoDescription?: string;
+};
+function pickFirstMento(mento: unknown): MentoLike | undefined {
+  if (!mento) return undefined;
+  if (Array.isArray(mento)) return (mento[0] as MentoLike) ?? undefined;
+  return mento as MentoLike;
 }
 
 export default function MentosDetail() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
-  // 상세 데이터 상태
   const [data, setData] = useState<MentosDetailResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
-  // 지도 관련 ref
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const ctrlRef = useRef<KakaoMapController | null>(null);
 
@@ -76,8 +100,9 @@ export default function MentosDetail() {
       try {
         const res = await getMentosDetail(Number(id));
         if (alive) setData(res);
-      } catch (e: any) {
-        if (alive) setErr(e?.message ?? "불러오기에 실패했어요.");
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : "불러오기에 실패했어요.";
+        if (alive) setErr(msg);
       } finally {
         if (alive) setLoading(false);
       }
@@ -87,13 +112,10 @@ export default function MentosDetail() {
     };
   }, [id]);
 
-  // (2) 지도 초기화 — 데이터가 왔을 때 실행
+  /* 2) 지도 초기화 — 데이터가 왔을 때 실행 */
   useEffect(() => {
-    if (!data) return; // 데이터가 없으면 지도 섹션도 아직 안 그려졌을 확률↑
-    let mounted = true;
-
+    if (!data) return;
     const host = mapDivRef.current;
-    console.log("[Map:init] host ref:", host); // ✅ null인지 로그로 바로 확인
     if (!host) return;
 
     const ctrl = new KakaoMapController(host);
@@ -102,24 +124,25 @@ export default function MentosDetail() {
     (async () => {
       try {
         await ctrl.init();
-        console.log("[Map:init] created");
         ctrl.relayout();
         setTimeout(() => ctrl.relayout(), 0);
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.error("[Map] 지도 초기화 실패:", e);
       }
     })();
 
     return () => {
-      mounted = false;
       try {
         ctrlRef.current?.destroy();
-      } catch {}
+      } catch {
+        // noop
+      }
       ctrlRef.current = null;
     };
   }, [data]);
 
-  // (3) 데이터 들어오면 주소 지오코딩 → 지도 중심/마커
+  /* 3) 주소 지오코딩 → 지도 중심/마커 */
   useEffect(() => {
     const ctrl = ctrlRef.current;
     const address = data?.mentosLocation;
@@ -127,25 +150,22 @@ export default function MentosDetail() {
 
     const services = window.kakao?.maps?.services;
     if (!services) {
+      // eslint-disable-next-line no-console
       console.warn("[Map] services가 없습니다. SDK에 &libraries=services 포함 필요");
       return;
     }
 
     const geocoder = new services.Geocoder();
-    geocoder.addressSearch(address, (result: any[], status: string) => {
-      if (status === services.Status.OK && result?.[0]) {
+    geocoder.addressSearch(address, (result, status) => {
+      if (status === "OK" && result?.[0]) {
         const lat = parseFloat(result[0].y);
         const lng = parseFloat(result[0].x);
-
         ctrl.setMyLocation(lat, lng);
-
-        // ✅ 지오코딩으로 좌표 찍은 직후에도 재배치
         ctrl.relayout();
       } else {
+        // eslint-disable-next-line no-console
         console.warn("[Map] 지오코딩 실패:", address, status);
-
-        // (선택) 기본 위치라도 보여주기
-        ctrl.setMyLocation(37.5665, 126.978);
+        ctrl.setMyLocation(37.5665, 126.978); // 서울 시청 근처 대체 위치
         ctrl.relayout();
       }
     });
@@ -168,8 +188,10 @@ export default function MentosDetail() {
   if (err) return <div className="p-4 text-red-600">에러: {err}</div>;
   if (!data) return <div className="p-4">데이터가 없어요.</div>;
 
-  // mento가 객체/배열 둘 다 올 수 있으므로 안전 처리
-  const mento = Array.isArray((data as any).mento) ? (data as any).mento[0] : (data as any).mento;
+  const mento = pickFirstMento(
+    // data.mento의 실제 타입이 불명확하므로 안전 캐스팅만 사용
+    (data as unknown as { mento?: MentoLike | MentoLike[] }).mento,
+  );
   const reviewCountText = data.reviewTotalCnt.toLocaleString();
 
   return (
@@ -226,49 +248,38 @@ export default function MentosDetail() {
       {/* 지도 섹션 */}
       <section className="flex w-full justify-center border-b border-b-zinc-100 px-4 py-2">
         <div className="w-full overflow-hidden rounded-xl border border-gray-200">
-          {/* ⚠️ 지도 컨테이너는 px 높이가 꼭 있어야 타일이 렌더됨 */}
           <div ref={mapDivRef} id="mentos-detail-map" className="h-[220px] min-h-[220px] w-full" />
         </div>
       </section>
 
       {/* 멘토 소개 */}
-
-      {/* 멘토 소개 — 이미지처럼 정렬/배치 */}
       <section className="flex w-full justify-center px-4 pt-10">
         <div className="w-full max-w-sm">
-          {/* 타이틀 */}
           <h2 className="font-WooridaumB mb-3 text-center text-xl font-extrabold">멘토 소개</h2>
 
-          {/* 아바타 */}
           <div className="flex justify-center">
             <div className="h-40 w-40 overflow-hidden rounded-full shadow-md ring-4 ring-white">
-              <img
-                src={data.mento.mentoImg}
-                alt="멘토 프로필"
-                className="h-full w-full object-cover"
-              />
+              <img src={mento?.mentoImg} alt="멘토 프로필" className="h-full w-full object-cover" />
             </div>
           </div>
 
-          {/* 이름 배지(핵심 포인트 색상) */}
           <div className="mt-3 flex justify-center">
             <span className="rounded-full bg-[#0059FF] px-4 py-1 text-sm font-bold text-white">
               {mento?.mentoName ?? "익명 멘토"}
             </span>
           </div>
 
-          {/* 소개 카드(둥근 박스) : 카드가 위로 살짝 끌려오도록 -mt 사용 */}
           <div className="-mt-4 rounded-[20px] bg-[#F4F4F4] p-6 shadow-sm">
-            {/* 본문 */}
             <div
-              className="text-center leading-relaxed" // ⚠️ innerHTML 쓸 땐 whitespace-pre-line 빼세요
+              className="text-center leading-relaxed"
               dangerouslySetInnerHTML={toHtml(mento?.mentoDescription)}
             />
           </div>
+
           {/* 상세 설명 */}
           <div className="mt-8 flex w-full flex-col items-center justify-center px-2 pb-4 text-center text-[0.8rem]">
             <div
-              className="text-center leading-relaxed" // ⚠️ innerHTML 쓸 땐 whitespace-pre-line 빼세요
+              className="text-center leading-relaxed"
               dangerouslySetInnerHTML={toHtml(data.mentosDescription)}
             />
           </div>
