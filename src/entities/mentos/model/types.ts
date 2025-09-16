@@ -57,3 +57,29 @@ export interface MyMentosItem {
   region: string;
   progressStatus: string;
 }
+
+// * 멘토스 생성 요청
+export interface CreateMentosRequest {
+  mentosTitle: string;
+  mentosContent: string;
+  mentosImage?: File | null;
+  categorySeq: number;
+  price: number;
+}
+
+// * 멘토스 생성 성공
+export interface CreateMentosResponse {
+  code: number;
+  message: string;
+  result: {
+    mentosSeq: number;
+    mentosTitle: string;
+    mentosContent: string;
+    mentosImage?: string;
+    categorySeq: number;
+    price: number;
+    approved: boolean;
+    region: string;
+    createdAt: string;
+  };
+}

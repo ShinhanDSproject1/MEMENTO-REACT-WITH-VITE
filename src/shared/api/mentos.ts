@@ -3,7 +3,7 @@ const BASE = "/api/mentos";
 export interface MentosItem {
   title: string;
   content: string;
-  price: string | number;
+  price: string;
   location: string;
 }
 
