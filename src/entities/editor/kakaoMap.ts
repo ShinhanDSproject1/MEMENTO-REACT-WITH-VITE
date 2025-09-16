@@ -15,8 +15,8 @@ export type MentorItem = {
   mentosList?: MentosItem[];
 };
 
-const API_HOST = "http://localhost:9999";
-const MAPS_KEY_ENDPOINT = `${API_HOST}/api/config/maps-key`;
+const API_HOST = "https://memento.shinhanacademy.co.kr";
+const MAPS_KEY_ENDPOINT = `/api/config/maps-key`;
 const NEARBY_ENDPOINT = (lat: number, lon: number, distanceKm: number) =>
   `${API_HOST}/map/mentos?latitude=${lat}&longitude=${lon}&distance=${distanceKm}`;
 const BASE_IMAGE_PATH = "/uploads/";
@@ -173,6 +173,11 @@ export class KakaoMapController {
     const center = new kakao.maps.LatLng(centerLat, centerLng);
     this.map = new kakao.maps.Map(this.mapEl, { center, level });
     this.infoWindow = new kakao.maps.InfoWindow({ removable: false });
+  }
+
+  relayout() {
+    if (!this.map) return;
+    this.map.relayout();
   }
 
   /** 페이지 언마운트 등 정리 */

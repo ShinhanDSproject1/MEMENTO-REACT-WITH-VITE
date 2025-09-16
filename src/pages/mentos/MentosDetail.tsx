@@ -1,47 +1,190 @@
 // src/pages/MentosDetail.tsx
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
 import Button from "@/widgets/common/Button";
 import SnapCarousel from "@/widgets/common/SnapCarousel";
 import ReviewMentosDetailCard from "@/widgets/mentos/ReviewMentosDetailCard";
 import clockIcon from "@assets/icons/icon-clock.svg";
 import locationIcon from "@assets/icons/icon-location.svg";
 import starIcon from "@assets/icons/icon-star.svg";
-import kogiri from "@assets/images/character/character-kogiri.svg";
-import mapDummyimg from "@assets/images/dummy/mapdummyimg.svg";
-import { useNavigate, useParams } from "react-router-dom";
+import DOMPurify from "dompurify";
+
+import { getMentosDetail } from "@shared/api/mentos";
+import type { MentosDetailResult } from "@shared/api/mentos";
+
+// 카카오맵 컨트롤러
+import { KakaoMapController } from "@entities/editor";
+
+// TS가 window.kakao를 인지하도록 선언
+declare global {
+  interface Window {
+    kakao: any;
+  }
+}
+
+function toHtml(input?: string) {
+  const raw = input ?? "";
+  // \r\n, \r, \n → <br/>  (태그는 건드리지 않음)
+  const withBreaks = raw.replace(/\r\n|\r|\n/g, "<br/>");
+
+  // 허용할 태그/속성만 선택적으로 열어두기
+  const sanitized = DOMPurify.sanitize(withBreaks, {
+    ALLOWED_TAGS: [
+      "b",
+      "strong",
+      "i",
+      "em",
+      "u",
+      "s",
+      "br",
+      "p",
+      "div",
+      "span",
+      "ul",
+      "ol",
+      "li",
+      "a",
+      "blockquote",
+      "code",
+      "pre",
+    ],
+    ALLOWED_ATTR: ["href", "target", "rel"],
+  });
+
+  return { __html: sanitized };
+}
 
 export default function MentosDetail() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
-  const title = "[홍대] 하루에 100만원 벌고 부자되는 비법 공유!!!";
-  const exReviews = 2000;
-  const reviewCount = exReviews.toLocaleString();
+  // 상세 데이터 상태
+  const [data, setData] = useState<MentosDetailResult | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
 
-  const exPrice = 8000;
+  // 지도 관련 ref
+  const mapDivRef = useRef<HTMLDivElement | null>(null);
+  const ctrlRef = useRef<KakaoMapController | null>(null);
 
+  /* 1) 상세 API 호출 */
+  useEffect(() => {
+    if (!id) return;
+    let alive = true;
+    (async () => {
+      try {
+        const res = await getMentosDetail(Number(id));
+        if (alive) setData(res);
+      } catch (e: any) {
+        if (alive) setErr(e?.message ?? "불러오기에 실패했어요.");
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [id]);
+
+  // (2) 지도 초기화 — 데이터가 왔을 때 실행
+  useEffect(() => {
+    if (!data) return; // 데이터가 없으면 지도 섹션도 아직 안 그려졌을 확률↑
+    let mounted = true;
+
+    const host = mapDivRef.current;
+    console.log("[Map:init] host ref:", host); // ✅ null인지 로그로 바로 확인
+    if (!host) return;
+
+    const ctrl = new KakaoMapController(host);
+    ctrlRef.current = ctrl;
+
+    (async () => {
+      try {
+        await ctrl.init();
+        console.log("[Map:init] created");
+        ctrl.relayout();
+        setTimeout(() => ctrl.relayout(), 0);
+      } catch (e) {
+        console.error("[Map] 지도 초기화 실패:", e);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+      try {
+        ctrlRef.current?.destroy();
+      } catch {}
+      ctrlRef.current = null;
+    };
+  }, [data]);
+
+  // (3) 데이터 들어오면 주소 지오코딩 → 지도 중심/마커
+  useEffect(() => {
+    const ctrl = ctrlRef.current;
+    const address = data?.mentosLocation;
+    if (!ctrl || !address) return;
+
+    const services = window.kakao?.maps?.services;
+    if (!services) {
+      console.warn("[Map] services가 없습니다. SDK에 &libraries=services 포함 필요");
+      return;
+    }
+
+    const geocoder = new services.Geocoder();
+    geocoder.addressSearch(address, (result: any[], status: string) => {
+      if (status === services.Status.OK && result?.[0]) {
+        const lat = parseFloat(result[0].y);
+        const lng = parseFloat(result[0].x);
+
+        ctrl.setMyLocation(lat, lng);
+
+        // ✅ 지오코딩으로 좌표 찍은 직후에도 재배치
+        ctrl.relayout();
+      } else {
+        console.warn("[Map] 지오코딩 실패:", address, status);
+
+        // (선택) 기본 위치라도 보여주기
+        ctrl.setMyLocation(37.5665, 126.978);
+        ctrl.relayout();
+      }
+    });
+  }, [data?.mentosLocation]);
+
+  /* 예약 이동 */
   const handleGoBooking = () => {
+    if (!id || !data) return;
     navigate("/booking", {
       state: {
-        mentorId: id ? Number(id) : 1,
-        title,
-        price: exPrice,
+        mentorId: Number(id),
+        title: data.mentosTitle,
+        price: data.mentosPrice,
       },
     });
   };
+
+  /* 가드 */
+  if (loading) return <div className="p-4">불러오는 중…</div>;
+  if (err) return <div className="p-4 text-red-600">에러: {err}</div>;
+  if (!data) return <div className="p-4">데이터가 없어요.</div>;
+
+  // mento가 객체/배열 둘 다 올 수 있으므로 안전 처리
+  const mento = Array.isArray((data as any).mento) ? (data as any).mento[0] : (data as any).mento;
+  const reviewCountText = data.reviewTotalCnt.toLocaleString();
 
   return (
     <div className="flex w-full flex-col gap-2 bg-white">
       {/* 상단 이미지 */}
       <section className="flex h-[20%] w-full items-center justify-center">
-        <img className="w-full" src="https://picsum.photos/id/1/300/200" alt="mentos image" />
+        <img className="w-full" src={data.mentosImage} alt="mentos image" />
       </section>
 
       {/* 타이틀, 위치, 시간, 별점 */}
       <section className="flex w-full flex-col gap-2 px-4">
-        <p className="font-WooridaumB text-[0.85rem] font-bold">{title}</p>
+        <p className="font-WooridaumB text-[0.85rem] font-bold">{data.mentosTitle}</p>
         <div className="flex flex-row items-center gap-1.5 text-sm">
           <img src={locationIcon} alt="location" />
-          <span className="font-WooridaumB text-[0.6rem] leading-3">마포구 연남동</span>
+          <span className="font-WooridaumB text-[0.6rem] leading-3">{data.mentosLocation}</span>
         </div>
         <div className="flex h-full items-center justify-between">
           <div className="flex w-auto flex-row items-center gap-1.5 text-sm">
@@ -56,12 +199,12 @@ export default function MentosDetail() {
                 alt="star"
               />
               <span className="font-WooridaumB text-[0.6rem] leading-3 font-bold text-gray-900">
-                4.95
+                {data.reviewRatingAvg.toFixed(2)}
               </span>
             </div>
             <span className="mx-1.5 h-1 w-1 rounded-full bg-gray-500" />
             <span className="font-WooridaumB text-[0.6rem] leading-3 font-medium text-gray-900 underline">
-              {reviewCount}건 리뷰
+              {reviewCountText}건 리뷰
             </span>
           </div>
         </div>
@@ -69,91 +212,65 @@ export default function MentosDetail() {
 
       {/* 리뷰 캐러셀 */}
       <SnapCarousel className="flex w-full pt-6">
-        <div className="snap-item w-[85%] flex-none snap-center">
-          <ReviewMentosDetailCard
-            value={3}
-            context={`안녕하세요 저는 집에안가연 입니다
-                      도대체 집을 왜안가는지 모르겠습니다
-                      감사합니다`}
-            name="안가연"
-          />
-        </div>
-        <div className="snap-item w-[85%] flex-none snap-center">
-          <ReviewMentosDetailCard
-            value={5}
-            context={`안녕하세요 저는 집에안가연 입니다
-                      도대체 집을 왜안가는지 모르겠습니다
-                      감사합니다`}
-            name="안가연"
-          />
-        </div>
-        <div className="snap-item w-[85%] flex-none snap-center">
-          <ReviewMentosDetailCard
-            value={1}
-            context={`안녕하세요 저는 집에안가연 입니다
-                      도대체 집을 왜안가는지 모르겠습니다
-                      감사합니다`}
-            name="안가연"
-          />
-        </div>
+        {(data.reviews?.length ? data.reviews : []).map((rv) => (
+          <div key={rv.reviewSeq} className="snap-item w-[85%] flex-none snap-center">
+            <ReviewMentosDetailCard
+              value={rv.reviewRating}
+              context={rv.reviewContent}
+              name={mento?.mentoName ?? "익명 멘토"}
+            />
+          </div>
+        ))}
       </SnapCarousel>
 
-      {/* 지도 이미지 */}
-      <section className="flex h-[20%] w-full justify-center border-b border-b-zinc-100 py-2">
-        <img className="w-full" src={mapDummyimg} alt="map" />
+      {/* 지도 섹션 */}
+      <section className="flex w-full justify-center border-b border-b-zinc-100 px-4 py-2">
+        <div className="w-full overflow-hidden rounded-xl border border-gray-200">
+          {/* ⚠️ 지도 컨테이너는 px 높이가 꼭 있어야 타일이 렌더됨 */}
+          <div ref={mapDivRef} id="mentos-detail-map" className="h-[220px] min-h-[220px] w-full" />
+        </div>
       </section>
 
       {/* 멘토 소개 */}
-      <section className="flex w-full flex-col items-center justify-center gap-4 px-4 pt-[26%]">
-        <div className="mb- relative flex w-full max-w-sm flex-col items-center justify-center rounded-[20px] bg-[#F4F4F4] p-4">
-          <div className="absolute -top-[30%] flex w-full">
-            <div className="relative flex w-full flex-col items-center justify-center">
-              <span className="font-WooridaumB py-1 text-xl font-bold">멘토 소개</span>
-              <div className="z-10 h-auto w-[40%] overflow-hidden rounded-full bg-radial from-[white] via-[#E4EDFF] to-[#AEC8FF] p-1">
-                <img src={kogiri} className="h-full w-full object-cover" alt="멘토 프로필" />
-              </div>
-              <div className="absolute -bottom-[12%] z-20 w-[40%] min-w-[150px] rounded-[10px] bg-[#0059FF] px-4 py-1 text-center">
-                <span className="font-WooridaumB text-[0.85rem] font-bold text-white">
-                  집언제가연? 안가연
-                </span>
-              </div>
+
+      {/* 멘토 소개 — 이미지처럼 정렬/배치 */}
+      <section className="flex w-full justify-center px-4 pt-10">
+        <div className="w-full max-w-sm">
+          {/* 타이틀 */}
+          <h2 className="font-WooridaumB mb-3 text-center text-xl font-extrabold">멘토 소개</h2>
+
+          {/* 아바타 */}
+          <div className="flex justify-center">
+            <div className="h-40 w-40 overflow-hidden rounded-full shadow-md ring-4 ring-white">
+              <img
+                src={data.mento.mentoImg}
+                alt="멘토 프로필"
+                className="h-full w-full object-cover"
+              />
             </div>
           </div>
 
-          <div className="flex pt-22 text-center">
-            <span className="font-WooridaumB">
-              Jelly sweet roll jelly beans biscuit pie macaroon chocolate donut. Carrot cake
-              caramels pie sweet apple pie tiramisu carrot cake. Marzipan marshmallow croissant
-              tootsie roll lollipop. Cupcake lemon drops bear claw gummies. Jelly bear claw gummi
-              bears lollipop cotton candy gummi bears chocolate bar cake cookie. Cupcake muffin
-              danish muffin cookie gummies.
+          {/* 이름 배지(핵심 포인트 색상) */}
+          <div className="mt-3 flex justify-center">
+            <span className="rounded-full bg-[#0059FF] px-4 py-1 text-sm font-bold text-white">
+              {mento?.mentoName ?? "익명 멘토"}
             </span>
           </div>
-        </div>
 
-        {/* 상세 설명 */}
-        <div className="flex w-full flex-col items-center justify-center px-2 pb-4 text-center text-[0.8rem]">
-          <div className="flex flex-col">
-            <span>금융권 취준 대외활동의 절대 강자!! </span>
-            <span>
-              <b>삼성</b>이 하면 다르다!
-            </span>
-            <span>교육의 메카 삼성에서 제공하는 프리미엄 금융교육!</span>
-            전문지식과 실무경험이 함께하는 예비금융권취업(은행,증권,카드,보험)을 위한 프로그램
-            전문지식 습득과 생생한 실무경험의 기회!
-            <span>체계화된 교육프로그램으로 금융업의 취업비전을 한발 앞서 키우십시오.</span>
-            <br />
-            <span className="font-bold">■지원기간</span>
-            <span>2019년 10.11(금) 15시 마감 지원방법은 아래의 구글폼 작성 후 제출해주세요</span>
-            <br />
-            <span className="font-bold">■교육기간</span>
-            <span>
-              2019. 10.14(월) ~ 10.18(금) / (총 5일)
-              <br /> 매일 14시~18시
-            </span>
-            <br />
-            <span className="font-bold">■ 교육장소</span>
-            서울시 강남구 대치동, 삼성생명 대치타워 21층 (선릉역 2호선 1번 출구에서 직진 200m)
+          {/* 소개 카드(둥근 박스) : 카드가 위로 살짝 끌려오도록 -mt 사용 */}
+          <div className="-mt-4 rounded-[20px] bg-[#F4F4F4] p-6 shadow-sm">
+            {/* 본문 */}
+            <div
+              className="text-center leading-relaxed" // ⚠️ innerHTML 쓸 땐 whitespace-pre-line 빼세요
+              dangerouslySetInnerHTML={toHtml(mento?.mentoDescription)}
+            />
+          </div>
+          {/* 상세 설명 */}
+          <div className="mt-8 flex w-full flex-col items-center justify-center px-2 pb-4 text-center text-[0.8rem]">
+            <div
+              className="text-center leading-relaxed" // ⚠️ innerHTML 쓸 땐 whitespace-pre-line 빼세요
+              dangerouslySetInnerHTML={toHtml(data.mentosDescription)}
+            />
           </div>
         </div>
       </section>
@@ -161,7 +278,9 @@ export default function MentosDetail() {
       {/* 하단 가격 + 버튼 */}
       <div className="flex w-full flex-row items-center justify-center gap-4 border-t border-t-zinc-100 p-4">
         <div className="flex-1 text-center">
-          <span className="font-WooridaumB font-bold">{exPrice.toLocaleString()}원</span>
+          <span className="font-WooridaumB font-bold">
+            {Number(data.mentosPrice).toLocaleString()}원
+          </span>
         </div>
         <Button variant="primary" size="lg" className="flex-1" onClick={handleGoBooking}>
           예약하기

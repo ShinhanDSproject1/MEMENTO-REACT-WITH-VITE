@@ -1,4 +1,12 @@
+import { http } from "./https";
 const BASE = "/api/mentos";
+
+/** 공통 응답 래퍼 */
+export interface ApiResponse<T> {
+  code: number;
+  message: string;
+  result: T;
+}
 
 export interface MentosItem {
   title: string;
@@ -7,24 +15,44 @@ export interface MentosItem {
   location: string;
 }
 
-// GET(상세 조회) - 지금은 목업
-export async function getMentos(id: string | number): Promise<MentosItem | null> {
-  await new Promise((r) => setTimeout(r, 150));
+/** 리뷰 단건 */
+export interface ReviewItem {
+  reviewSeq: number;
+  reviewRating: number;
+  reviewDate: string; // "YYYY-MM-DD"
+  reviewContent: string;
+}
 
-  // 데이터 없을 수도 있다고 가정
-  if (id === "1") {
-    return {
-      title: "공격적으로 저축하는 법 알려준다!!",
-      content: `
-        하이 나 김대현이다 이 강의 들어라 
-        들으면 하루 만에 백만원 벌 수 있음!!
-        거짓말이면 내가 200프로 보장해줌!!!
-      `,
-      price: "20,000",
-      location: "서울 강남구",
-    };
+/** 멘토 프로필 */
+export interface MentoProfile {
+  mentoName: string;
+  mentoImg: string;
+  mentoDescription: string;
+}
+
+/** 멘토스 상세 결과 */
+export interface MentosDetailResult {
+  mentosImage: string;
+  mentosTitle: string;
+  mentosLocation: string;
+  reviewTotalCnt: number;
+  reviewRatingAvg: number;
+  reviews: ReviewItem[];
+  mento: MentoProfile;
+  mentosDescription: string;
+  mentosPrice: number;
+}
+
+/** 상세 조회: GET /api/mentos/detail/{mentosSeq} */
+export async function getMentosDetail(mentosSeq: number): Promise<MentosDetailResult> {
+  const { data } = await http.get<ApiResponse<MentosDetailResult>>(`/mentos/detail/${mentosSeq}`);
+  console.log(`[API]-> code=${data.code}, message="${data.message}"`);
+  // 성공 코드 체크
+  if (data.code !== 1000) {
+    throw new Error(data.message || "요청에 실패했습니다.");
   }
-  return null;
+
+  return data.result;
 }
 
 // PUT(수정) - 지금은 콘솔만
