@@ -83,3 +83,28 @@ export interface CreateMentosResponse {
     createdAt: string;
   };
 }
+
+/** 공통 응답 래퍼 */
+export interface ApiResponse<T> {
+  code: number;
+  status: number;
+  message: string;
+  result: T;
+}
+
+export interface MentorMentosItem {
+  mentosSeq: number;
+  mentosTitle: string;
+  mentosImage?: string;
+  price: number;
+  region: string;
+  progressStatus?: string | null; // 멘토는 null 가능
+}
+
+export interface MentorMentosListResult {
+  content: MentorMentosItem[];
+  nextCursor?: number;
+  hasNext: boolean;
+}
+
+export type MentorMentosListResponse = ApiResponse<MentorMentosListResult>;
