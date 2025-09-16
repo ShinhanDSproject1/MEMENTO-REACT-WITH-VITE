@@ -12,6 +12,12 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     (async () => {
+      const hasLocalAuth =
+        !!localStorage.getItem("accessToken") || !!localStorage.getItem("memberSeq");
+      if (!hasLocalAuth) {
+        setBootstrapped(true);
+        return;
+      }
       try {
         const t = await refreshSilently(); // ✅ 인터셉터와 같은 Promise 공유
         if (t) {

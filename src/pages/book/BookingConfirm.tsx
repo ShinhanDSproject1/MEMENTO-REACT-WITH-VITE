@@ -1,41 +1,86 @@
+// src/pages/booking/BookingConfirm.tsx
 import BookingSummaryCard from "@/widgets/booking/BookingSummaryCard";
 import TermsAccordion from "@/widgets/booking/TermsAccordion";
 import PrivacyCollectTerms from "@/widgets/booking/term/PrivacyCollectTerms";
 import PrivacyThirdPartyTerms from "@/widgets/booking/term/PrivacyThirdPartyTerms";
 import TermsOfUse from "@/widgets/booking/term/TermsOfUse";
-import { useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+
+import { useMemo, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { createReservation } from "@/shared/api/reservations";
+import { initMentosPayment } from "@/shared/api/payments";
+import { getAccessToken } from "@/shared/auth/token";
 
 type BookingState = {
   title: string;
-  date: string;
-  time: string;
+  date: string; // "YYYY-MM-DD"
+  time: string; // "HH:mm"
   price: number;
+  mentosSeq?: number;
 };
 
 const weekdayKo = ["일", "월", "화", "수", "목", "금", "토"];
-const formatKoreanDate = (ymd: string, time: string) => {
+const fmt = (ymd: string, time: string) => {
   const [y, m, d] = ymd.split("-").map(Number);
   const dt = new Date(y, (m ?? 1) - 1, d ?? 1);
-  const w = weekdayKo[dt.getDay()];
-  return `${m}.${d}(${w}) ${time}`;
+  return `${m}.${d}(${weekdayKo[dt.getDay()]}) ${time}`;
 };
 
 export default function BookingConfirm() {
   const navigate = useNavigate();
   const { state } = useLocation();
+  const [sp] = useSearchParams();
   const booking = (state || {}) as Partial<BookingState>;
 
-  const valid =
-    !!booking.date && !!booking.time && !!booking.title && typeof booking.price === "number";
+  const mentosSeq = booking.mentosSeq ?? Number(sp.get("mentosSeq") ?? sp.get("mentorId") ?? 0);
 
-  const formattedWhen = useMemo(
-    () => (valid ? formatKoreanDate(booking!.date!, booking!.time!) : "-"),
+  const valid =
+    !!booking.date &&
+    !!booking.time &&
+    !!booking.title &&
+    typeof booking.price === "number" &&
+    mentosSeq > 0;
+
+  const whenText = useMemo(
+    () => (valid ? fmt(booking!.date!, booking!.time!) : "-"),
     [valid, booking],
   );
 
-  const handlePay = () => {
-    alert("결제 로직 추후 연결.");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handlePay = async () => {
+    if (!getAccessToken()) {
+      alert("로그인이 필요한 기능입니다.");
+      navigate("/login", { state: { from: location.pathname + location.search } });
+      return;
+    }
+    if (!valid || submitting) return;
+
+    setSubmitting(true);
+    try {
+      await createReservation({
+        mentosSeq,
+        mentosAt: booking.date!,
+        mentosTime: booking.time!,
+      });
+
+      const init = await initMentosPayment({
+        mentosSeq,
+        mentosAt: booking.date!,
+        mentosTime: booking.time!,
+      });
+
+      if (!init.successUrl) throw new Error("결제 리다이렉트 URL을 받지 못했습니다.");
+      const qs = new URLSearchParams({
+        orderId: init.orderId,
+        amount: String(init.amount),
+      });
+      location.href = `${init.successUrl}?${qs.toString()}`;
+    } catch (e: any) {
+      alert(e?.response?.data?.message ?? e.message ?? "오류가 발생했습니다.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -47,7 +92,7 @@ export default function BookingConfirm() {
             선택하신 항목이 맞는지 확인해주세요.
           </p>
 
-          <BookingSummaryCard title={booking.title ?? "-"} whenText={formattedWhen} />
+          <BookingSummaryCard title={booking.title ?? "-"} whenText={whenText} />
 
           <div className="mt-2 mb-4 flex items-center justify-between">
             <span className="font-WooridaumR text-[17px] text-[#3F3E6D]">지금 결제할 금액</span>
@@ -57,47 +102,28 @@ export default function BookingConfirm() {
           </div>
 
           <TermsAccordion title="개인정보 수집, 제공" defaultOpen>
-            <TermsAccordion.Item title="이용약관 동의" defaultOpen={false}>
+            <TermsAccordion.Item title="이용약관 동의">
               <TermsOfUse />
             </TermsAccordion.Item>
-
             <TermsAccordion.Item title="개인정보 수집 및 이용 동의">
               <PrivacyCollectTerms />
             </TermsAccordion.Item>
-
             <TermsAccordion.Item title="개인정보 제 3자 제공 동의">
               <PrivacyThirdPartyTerms />
             </TermsAccordion.Item>
           </TermsAccordion>
 
-          <p className="font-WooridaumL mt-3 flex items-start gap-2 text-[12px] leading-[1.6]">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="green"
-              strokeWidth={2}
-              className="mt-[2px] h-4 w-4 flex-none">
-              <circle cx="12" cy="12" r="10" /> <path d="M7 12l3 3 7-7" />
-            </svg>
-            <span className="flex-1">
-              예약 서비스 이용을 위한 개인정보 수집 및 제3자 제공 <br />
-              규정을 확인하였으며 이에 동의합니다.
-            </span>
-          </p>
-
-          {/* 버튼 */}
           <button
             onClick={handlePay}
-            disabled={!valid}
+            disabled={!valid || submitting}
             className={[
               "mt-4 mb-3 h-14 w-full rounded-2xl text-base font-extrabold text-white shadow transition active:scale-[0.99]",
-              valid
+              valid && !submitting
                 ? "cursor-pointer bg-[#1161FF] hover:bg-[#0C2D62]"
                 : "cursor-not-allowed bg-[#1E90FF]/40",
               "font-WooridaumB",
             ].join(" ")}>
-            결제하기
+            {submitting ? "처리 중..." : "결제하기"}
           </button>
 
           <button

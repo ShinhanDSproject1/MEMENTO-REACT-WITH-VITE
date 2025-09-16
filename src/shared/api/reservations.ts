@@ -1,55 +1,41 @@
 // src/shared/api/reservations.ts
-import { axiosAuth } from "./axiosAuth";
+import { http } from "@api/https";
 
-// ---------- 예약 생성 ----------
-export type CreateReservationReq = {
-  mentosSeq: number;
-  mentosDate: string; // "YYYY-MM-DD"
-  mentosTime: string; // "HH:mm"
-};
-export type CreateReservationRes = {
-  code: number;
-  status: number;
-  message: string;
-  data?: { reservationSeq: number };
+export type Availability = {
+  startTime: string; // "10:00"
+  endTime: string; // "18:00"
+  availableTime: string[]; // ["11:00","13:00","14:00"]
 };
 
-export async function createReservation(body: CreateReservationReq) {
-  return axiosAuth<CreateReservationRes>({
-    url: "/reservation",
-    method: "POST",
-    data: body,
-  });
-}
-
-// ---------- 예약 가용 시간 조회 ----------
-type AvailabilityResponse = {
-  code: number;
-  message: string;
-  result: {
-    startTime: string;
-    endTime: string;
-    availableTime: string[];
-  };
-};
-
+// 로그인 불필요 → fetch 사용
 // GET /api/reservation/availability/{mentosSeq}?selectedDate=YYYY-MM-DD
 export async function fetchAvailability(
   mentosSeq: number,
   selectedDate: string,
-): Promise<string[]> {
-  if (!mentosSeq || !selectedDate) return [];
-
-  const res = await fetch(
-    `/api/reservation/availability/${encodeURIComponent(String(mentosSeq))}?selectedDate=${encodeURIComponent(selectedDate)}`,
-    { method: "GET" },
+): Promise<Availability> {
+  const rsp = await fetch(
+    `/api/reservation/availability/${mentosSeq}?selectedDate=${encodeURIComponent(selectedDate)}`,
+    { credentials: "include" },
   );
+  const data = await rsp.json();
+  const res = data?.result ?? data;
 
-  if (!res.ok) {
-    console.error("예약 가능 시간 조회 실패:", res.status);
-    return [];
-  }
+  return {
+    startTime: res?.startTime ?? "10:00",
+    endTime: res?.endTime ?? "21:00",
+    availableTime: Array.isArray(res?.availableTime) ? res.availableTime.map(String) : [],
+  };
+}
 
-  const data: AvailabilityResponse = await res.json();
-  return data.result?.availableTime ?? [];
+// 로그인 필요 → axios(http) 사용
+// POST /api/reservation
+export async function createReservation(payload: {
+  mentosSeq: number;
+  mentosAt: string; // "YYYY-MM-DD"
+  mentosTime: string; // "HH:mm"
+}) {
+  const { data } = await http.post("/reservation", payload, {
+    headers: { "Content-Type": "application/json" },
+  });
+  return data?.result ?? data;
 }

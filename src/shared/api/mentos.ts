@@ -1,4 +1,16 @@
+import { http } from "@api/https";
 const BASE = "/api/mentos";
+
+export type MentosDetail = {
+  mentosSeq: number;
+  mentosTitle: string;
+  price: number;
+};
+
+export async function fetchMentosDetail(mentosSeq: number): Promise<MentosDetail> {
+  const { data } = await http.get(`/mentos/${mentosSeq}`);
+  return (data?.result ?? data) as MentosDetail;
+}
 
 export interface MentosItem {
   title: string;
