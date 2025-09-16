@@ -15,7 +15,7 @@ const DEBUG_HTTP = true;
 // const BASE_URL = "https://memento.shinhanacademy.co.kr/api";
 const BASE_URL = "/api";
 const LOGIN_PATH = "/auth/login";
-const REFRESH_PATH = "/auth/refresh";
+const REFRESH_PATH = "/auth/reissue";
 
 export interface AppRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean; // 이 요청이 리프레시 이후 재시도된 것인지
@@ -43,11 +43,16 @@ function setAuthHeader(c: AppRequestConfig, token: string) {
 
 /* ------------------------ 디버그 로깅 (단 1회 등록) ------------------------ */
 if (DEBUG_HTTP) {
-  http.interceptors.request.use((config) => {
+  interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+    _hadAuth?: boolean;
+    _skipAuth?: boolean;
+  }
+
+  http.interceptors.request.use((config: CustomAxiosRequestConfig) => {
     const auth =
       config.headers instanceof AxiosHeaders
         ? config.headers.get("Authorization")
-        : (config.headers as any)?.Authorization;
+        : (config.headers?.["Authorization"] as string | undefined);
 
     console.log(
       `%c[HTTP:REQ] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`,
@@ -55,9 +60,9 @@ if (DEBUG_HTTP) {
       {
         params: config.params,
         data: config.data,
-        hadAuth: (config as any)._hadAuth,
+        hadAuth: config._hadAuth,
         authHeader: auth,
-        skipAuth: (config as any)._skipAuth,
+        skipAuth: config._skipAuth,
       },
     );
     return config;
@@ -93,7 +98,7 @@ http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
   // 로그인/리프레시는 AT 불필요
   const url = c.url ?? "";
-  if (url.endsWith(LOGIN_PATH) || url.endsWith(REFRESH_PATH)) return c;
+  if (url.startsWith(LOGIN_PATH) || url.startsWith(REFRESH_PATH)) return c;
 
   // AT 부착
   const token = getAccessToken();
@@ -115,12 +120,12 @@ function refreshAccessTokenOnce(): Promise<string> {
   if (refreshPromise) return refreshPromise;
 
   refreshPromise = axios
-    .post<{ accessToken: string }>(BASE_URL + REFRESH_PATH, null, {
+    .post<{ result?: { accessToken: string } }>(BASE_URL + REFRESH_PATH, null, {
       withCredentials: true,
       headers: { "X-Requested-With": "XMLHttpRequest" },
     })
     .then((res) => {
-      const t = res.data.accessToken;
+      const t = res.data?.result?.accessToken;
       if (!t) throw new Error("No accessToken");
       setAccessToken(t);
       return t;
@@ -140,10 +145,13 @@ export function refreshSilently() {
 http.interceptors.response.use(
   (r) => r,
   async (err) => {
+    //리프래시 조건 체크
     const original = err.config as AppRequestConfig | undefined;
     if (!original || original._retry || !isAuthError(err.response?.status) || !original._hadAuth) {
       throw err;
     }
+
+    // 리프레시 API 자체에서 난 에러면 그냥 실패 처리
     if ((original.url ?? "").endsWith(REFRESH_PATH)) {
       clearAccessToken();
       throw err;
@@ -152,12 +160,14 @@ http.interceptors.response.use(
 
     try {
       const newToken = await refreshAccessTokenOnce();
+
       const headers =
         original.headers instanceof AxiosHeaders
           ? original.headers
           : new AxiosHeaders(original.headers as AxiosRequestHeaders | undefined);
       headers.set("Authorization", `Bearer ${newToken}`);
       original.headers = headers;
+
       return http(original);
     } catch (e) {
       clearAccessToken();

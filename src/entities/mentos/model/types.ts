@@ -52,8 +52,34 @@ export interface GetMyMentosResponse {
 export interface MyMentosItem {
   mentosSeq: number;
   mentosTitle: string;
-  mentosImage: string;
+  mentosImage?: string;
   price: number;
   region: string;
-  progressStatus: "진행 전" | "진행 완료"; // 서버 값 그대로 사용
+  progressStatus: string;
+}
+
+// * 멘토스 생성 요청
+export interface CreateMentosRequest {
+  mentosTitle: string;
+  mentosContent: string;
+  mentosImage?: File | null;
+  categorySeq: number;
+  price: number;
+}
+
+// * 멘토스 생성 성공
+export interface CreateMentosResponse {
+  code: number;
+  message: string;
+  result: {
+    mentosSeq: number;
+    mentosTitle: string;
+    mentosContent: string;
+    mentosImage?: string;
+    categorySeq: number;
+    price: number;
+    approved: boolean;
+    region: string;
+    createdAt: string;
+  };
 }

@@ -18,8 +18,7 @@ function ArrowButton({ dir = "left", onClick }: ArrowButtonProps) {
       type="button"
       onClick={onClick}
       aria-label={dir === "left" ? "이전" : "다음"}
-      className="grid h-8 w-8 place-items-center rounded-full border border-slate-300 bg-white/70 shadow-sm backdrop-blur hover:bg-white"
-    >
+      className="grid h-8 w-8 place-items-center rounded-full border border-slate-300 bg-white/70 shadow-sm backdrop-blur hover:bg-white">
       <span className="text-slate-500">{dir === "left" ? "‹" : "›"}</span>
     </button>
   );
@@ -29,11 +28,7 @@ interface PriceProps {
   value: number;
 }
 function Price({ value }: PriceProps) {
-  return (
-    <div className="mt-1 font-bold tracking-tight">
-      ₩ {value.toLocaleString()}
-    </div>
-  );
+  return <div className="mt-1 font-bold tracking-tight">₩ {value.toLocaleString()}</div>;
 }
 
 export interface RecommendItem {
@@ -86,10 +81,7 @@ export default function RecommendCard({
 
   const [idx, setIdx] = useState<number>(0);
 
-  const go = useCallback(
-    (dir: number) => setIdx((i) => (i + dir + count) % count),
-    [count]
-  );
+  const go = useCallback((dir: number) => setIdx((i) => (i + dir + count) % count), [count]);
   const prev = useCallback(() => go(-1), [go]);
   const next = useCallback(() => go(+1), [go]);
 
@@ -103,8 +95,7 @@ export default function RecommendCard({
   }, [prev, next]);
 
   const cardStates = useMemo(() => {
-    if (count === 0)
-      return [] as { pos: "left" | "center" | "right"; i: number }[];
+    if (count === 0) return [] as { pos: "left" | "center" | "right"; i: number }[];
     const left = (idx - 1 + count) % count;
     const center = idx;
     const right = (idx + 1) % count;
@@ -138,8 +129,7 @@ export default function RecommendCard({
             let scale = "scale-100";
             let z = "z-20";
             let opacity = "opacity-100";
-            let ring =
-              "ring-2 ring-[#E5E7ED] hover:border-[#005EF9] hover:ring-[#005EF9]";
+            let ring = "ring-2 ring-[#E5E7ED] hover:border-[#005EF9] hover:ring-[#005EF9]";
 
             if (pos === "left") {
               x = "30%";
@@ -161,25 +151,12 @@ export default function RecommendCard({
             return (
               <article
                 key={`${pos}-${i}`}
-                className={[
-                  base,
-                  common,
-                  ring,
-                  scale,
-                  z,
-                  opacity,
-                  "ring-offset-0",
-                ].join(" ")}
-                style={{ left: x, transform: `translateX(${dx})` }}
-              >
+                className={[base, common, ring, scale, z, opacity, "ring-offset-0"].join(" ")}
+                style={{ left: x, transform: `translateX(${dx})` }}>
                 {/* 상단 썸네일 */}
                 <div className="relative h-55 w-full overflow-hidden rounded-t-[28px] bg-slate-100">
                   {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="h-full w-full object-cover"
-                    />
+                    <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
                   ) : (
                     <div className="h-full w-full bg-gradient-to-br from-slate-100 to-slate-200" />
                   )}
@@ -202,9 +179,7 @@ export default function RecommendCard({
                     {item.title}
                   </h4>
                   <div className="font-WooridaumB mt-3 text-xs font-extrabold tracking-wide text-[#00BBA8]">
-                    {item.mentor?.toUpperCase?.()
-                      ? item.mentor.toUpperCase()
-                      : item.mentor}
+                    {item.mentor?.toUpperCase?.() ? item.mentor.toUpperCase() : item.mentor}
                   </div>
                   <div className="bg-white">
                     <Price value={item.price ?? 0} />
@@ -223,8 +198,7 @@ export default function RecommendCard({
           <button
             type="button"
             onClick={onViewAll}
-            className="[font-WooridaumB] text-sm font-extrabold text-slate-500 underline-offset-4 hover:underline"
-          >
+            className="[font-WooridaumB] text-sm font-extrabold text-slate-500 underline-offset-4 hover:underline">
             전체 보기
           </button>
           <ArrowButton dir="right" onClick={next} />

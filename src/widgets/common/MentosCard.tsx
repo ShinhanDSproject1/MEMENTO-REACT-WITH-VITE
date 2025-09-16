@@ -96,7 +96,7 @@ export default function MentosCard({
         "focus-within:ring-2 focus-within:ring-blue-300 focus-within:ring-offset-2 focus-within:ring-offset-white",
       ].join(" ")}>
       <Link
-        to={`/mentee/mentos-detail/${mentosSeq}`}
+        to={`/menti/mentos-detail/${mentosSeq}`}
         className="rounded-t-[10px] outline-none focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
         <section className="h-[15vh] overflow-hidden rounded-t-[10px]">
           <img

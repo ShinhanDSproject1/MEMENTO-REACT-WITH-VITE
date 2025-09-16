@@ -48,7 +48,6 @@ const Button: React.FC<ButtonProps> = ({
   variant,
   size,
   onClick,
-  actionType,
   ...props
 }) => {
   const finalClassName = twMerge(clsx(buttonVariants({ variant, size }), className));

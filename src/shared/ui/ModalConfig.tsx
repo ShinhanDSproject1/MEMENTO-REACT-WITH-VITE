@@ -21,9 +21,9 @@ export type ModalButton = Omit<ButtonProps, "children" | "onClick"> & {
 
 // 알림/결정 모달
 type AlertConfig = {
-  type?: "alert"; // 기본값처럼 사용 (생략 가능)
+  type?: "alert";
   icon?: string;
-  message: string;
+  message?: string; // optional (loading 등)
   buttons: ModalButton[];
 };
 
@@ -32,12 +32,11 @@ export type FormConfig = {
   content: (modalData: Record<string, unknown>) => ReactNode;
   buttons: ModalButton[];
 };
-// 전체 모달 설정 타입
+
 type ModalConfig = AlertConfig | FormConfig;
 
-// 🔥 리터럴 타입 유지 + 구조 검증을 동시에
 export const MODAL_CONFIG = {
-  // '확인/결정' 모달 케이스
+  // ---- 확인/결정
   deleteMentos: {
     icon: deleteIcon,
     message: "정말 삭제하시겠습니까?",
@@ -65,7 +64,7 @@ export const MODAL_CONFIG = {
     ],
   },
 
-  // '알림/완료' 모달 케이스
+  // ---- 알림/완료
   createMentos: {
     icon: checkBlueIcon,
     message: "생성이 완료되었습니다!",
@@ -93,16 +92,10 @@ export const MODAL_CONFIG = {
       },
     ],
   },
+
   paySuccess: {
     icon: checkBlueIcon,
-    buttons: [
-      {
-        text: "확인",
-        variant: "primary",
-        size: "lg",
-        actionType: "close",
-      },
-    ],
+    buttons: [{ text: "확인", variant: "primary", size: "lg", actionType: "close" }],
   },
 
   refundSuccess: {
@@ -114,71 +107,65 @@ export const MODAL_CONFIG = {
   reportComplete: {
     icon: checkRedIcon,
     message: "신고가 접수되었습니다.",
-    buttons: [
-      { text: "닫기", variant: "danger", size: "lg", actionType: "close" },
-    ],
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
   },
 
   reportReject: {
     icon: deleteIcon,
     message: "신고를 거절했습니다",
-    buttons: [
-      { text: "닫기", variant: "danger", size: "lg", actionType: "close" },
-    ],
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
+  },
+
+  loading: {
+    message: "처리 중입니다...",
+    buttons: [],
   },
 
   reviewComplete: {
     icon: checkBlueIcon,
     message: "리뷰 작성이 완료되었습니다.",
-    buttons: [
-      { text: "닫기", variant: "primary", size: "lg", actionType: "close" },
-    ],
+    buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
   },
 
   refundComplete: {
     icon: checkBlueIcon,
     message: "환불이 완료되었습니다.",
-    buttons: [
-      { text: "닫기", variant: "primary", size: "lg", actionType: "close" },
-    ],
+    buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
   },
 
   deleteComplete: {
     icon: checkRedIcon,
     message: "삭제가 완료되었습니다!",
-    buttons: [
-      { text: "닫기", variant: "danger", size: "lg", actionType: "close" },
-    ],
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
   },
 
   dismissSuccess: {
     icon: checkRedIcon,
     message: "제명이 완료되었습니다.",
-    buttons: [
-      { text: "닫기", variant: "danger", size: "lg", actionType: "close" },
-    ],
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
   },
 
   reportAgree: {
     icon: checkBlueIcon,
     message: "신고를 승인했습니다.",
-    buttons: [
-      { text: "닫기", variant: "primary", size: "lg", actionType: "close" },
-    ],
+    buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
   },
 
-  // '폼(form)' 모달 케이스
+  // ---- 폼
   reviewMentos: {
     type: "form",
-    content: (modalData) => (
-      <div className="flex flex-col px-4">
-        <StarRating onRatingChange={(modalData as any).onRatingChange} />
-        <textarea
-          className="h-24 w-full resize-none rounded-[10px] border-[1px] border-solid border-[#E6E7EA] p-2 outline-none focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
-          placeholder="내용을 입력하세요"
-        />
-      </div>
-    ),
+    content: (modalData) => {
+      const { onRatingChange } = modalData as { onRatingChange?: (rating: number) => void };
+      return (
+        <div className="flex flex-col px-4">
+          <StarRating onRatingChange={onRatingChange} />
+          <textarea
+            className="h-24 w-full resize-none rounded-[10px] border-[1px] border-solid border-[#E6E7EA] p-2 outline-none focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
+            placeholder="내용을 입력하세요"
+          />
+        </div>
+      );
+    },
     buttons: [
       { text: "등록", variant: "primary", size: "lg", actionType: "submit" },
       { text: "취소", variant: "cancelWhite", size: "lg", actionType: "close" },
@@ -201,20 +188,21 @@ export const MODAL_CONFIG = {
 
   reportDetail: {
     type: "form",
-    content: (modalData) => (
-      <div className="flex flex-col gap-3 px-4">
-        <TitleTextComponent
-          subtitle="신고자"
-          context={(modalData as any).reporter}
-        />
-        <TitleTextComponent subtitle="멘토링" context="인생한방" />
-        <TitleTextComponent
-          subtitle="신고항목"
-          context={(modalData as any).category}
-        />
-        <TitleTextComponent subtitle="파일" context={(modalData as any).file} />
-      </div>
-    ),
+    content: (modalData) => {
+      const { reporter, category, file } = modalData as {
+        reporter?: string;
+        category?: string;
+        file?: string;
+      };
+      return (
+        <div className="flex flex-col gap-3 px-4">
+          <TitleTextComponent subtitle="신고자" context={reporter ?? ""} />
+          <TitleTextComponent subtitle="멘토링" context="인생한방" />
+          <TitleTextComponent subtitle="신고항목" context={category ?? ""} />
+          <TitleTextComponent subtitle="파일" context={file ?? ""} />
+        </div>
+      );
+    },
     buttons: [
       { text: "승인", variant: "primary", size: "md", actionType: "submit" },
       { text: "거부", variant: "danger", size: "md", actionType: "confirm" },
@@ -225,6 +213,4 @@ export const MODAL_CONFIG = {
 
 export type ModalKey = keyof typeof MODAL_CONFIG;
 
-// ✅ 타입 가드: 폼인지 확인
-export const isFormConfig = (c: ModalConfig): c is FormConfig =>
-  "type" in c && c.type === "form";
+export const isFormConfig = (c: ModalConfig): c is FormConfig => "type" in c && c.type === "form";
