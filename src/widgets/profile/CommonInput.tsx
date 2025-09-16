@@ -39,4 +39,6 @@ const CommonInput = forwardRef<HTMLInputElement, CommonInputProps>(
   },
 );
 
+CommonInput.displayName = "CommonInput";
+
 export default CommonInput;
