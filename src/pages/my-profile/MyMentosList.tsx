@@ -1,4 +1,4 @@
-import { useMyMentosInfinite } from "@/features/mentos-list/hooks/useMyMentosInfiniteList";
+import { useMyMentosInfiniteList } from "@/features/mentos-list/hooks/useMyMentosInfiniteList";
 import Button from "@/widgets/common/Button";
 import MentosCard from "@/widgets/common/MentosCard";
 import MentosMainTitleComponent from "@/widgets/mentos/MentosMainTitleComponent";
@@ -61,10 +61,12 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
 
   // role === 'menti' → API 연결
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
-    useMyMentosInfinite(5);
+    useMyMentosInfiniteList(5);
 
   const list = data?.pages.flatMap((p) => p.result.content) ?? [];
   const loaderRef = useRef<HTMLDivElement | null>(null);
+
+  const isEmpty = !isLoading && !isError && list.length === 0; // ✅ 추가
 
   useEffect(() => {
     if (!loaderRef.current || !hasNextPage) return;
@@ -142,27 +144,33 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
         </div>
       )}
 
-      <section className="flex w-full flex-col items-center gap-3">
-        {list.map((item: MyMentosItem) => (
-          <MentosCard
-            key={item.mentosSeq}
-            mentosSeq={item.mentosSeq}
-            title={item.mentosTitle}
-            price={item.price}
-            location={item.region}
-            status={item.progressStatus === "진행 완료" ? "completed" : "pending"}
-            imageUrl={item.mentosImage}
-            onReportClick={onReportClick}
-            onReviewClick={onReviewClick}
-            onRefundClick={onRefundClick}
-          />
-        ))}
+      {/* ✅ 빈 상태 메시지 */}
+      {isEmpty && <div className="py-10 text-center text-sm text-gray-500">데이터가 없습니다.</div>}
 
-        {hasNextPage && <div ref={loaderRef} className="h-10 w-full" />}
+      <section className="flex w-full flex-col items-center gap-3">
+        {!isEmpty &&
+          list.map((item: MyMentosItem) => (
+            <MentosCard
+              key={item.mentosSeq}
+              mentosSeq={item.mentosSeq}
+              title={item.mentosTitle}
+              price={item.price}
+              location={item.region}
+              status={item.progressStatus === "진행 완료" ? "completed" : "pending"}
+              imageUrl={item.mentosImage}
+              onReportClick={onReportClick}
+              onReviewClick={onReviewClick}
+              onRefundClick={onRefundClick}
+            />
+          ))}
+
+        {/* 빈 상태일 땐 무한스크롤 트리거도 숨김 */}
+        {hasNextPage && !isEmpty && <div ref={loaderRef} className="h-10 w-full" />}
+
         {isFetchingNextPage && (
           <div className="py-4 text-center text-sm text-gray-500">더 불러오는 중…</div>
         )}
-        {!hasNextPage && list.length > 0 && (
+        {!hasNextPage && !isEmpty && list.length > 0 && (
           <div className="py-6 text-center text-xs text-gray-400">마지막 페이지입니다.</div>
         )}
       </section>
@@ -178,5 +186,4 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
     </div>
   );
 };
-
 export default MyMentosList;

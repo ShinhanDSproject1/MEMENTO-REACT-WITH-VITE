@@ -52,8 +52,8 @@ export interface GetMyMentosResponse {
 export interface MyMentosItem {
   mentosSeq: number;
   mentosTitle: string;
-  mentosImage: string;
+  mentosImage?: string;
   price: number;
   region: string;
-  progressStatus: "진행 전" | "진행 완료"; // 서버 값 그대로 사용
+  progressStatus: string;
 }

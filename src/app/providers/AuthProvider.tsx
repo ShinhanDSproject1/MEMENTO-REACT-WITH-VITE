@@ -1,8 +1,14 @@
 // src/app/providers/AuthProvider.tsx
-import { clearAccessToken, setAccessToken as saveAccessToken } from "@/shared/auth/token";
 import type { AuthContextValue, LoginInput } from "@entities/auth";
 import { AuthContext, login as loginApi, logout as logoutApi } from "@entities/auth";
-import { refreshSilently } from "@shared/api"; // ✅ 이걸 사용
+import { refreshSilently } from "@shared/api";
+import {
+  clearAccessToken,
+  clearUserSnapshot,
+  loadUserSnapshot,
+  setAccessToken as saveAccessToken,
+  saveUserSnapshot,
+} from "@shared/auth";
 import React, { useEffect, useMemo, useState } from "react";
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -13,21 +19,36 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     (async () => {
       try {
-        const t = await refreshSilently(); // ✅ 인터셉터와 같은 Promise 공유
-        if (t) {
-          saveAccessToken(t);
-          setAccessToken(t);
+        const at = await refreshSilently(); // AT 발급
+        if (at) {
+          saveAccessToken(at);
+          setAccessToken(at);
+          const cached = loadUserSnapshot();
+          if (cached) setUser(cached);
         } else {
           clearAccessToken();
+          clearUserSnapshot();
         }
       } catch {
         clearAccessToken();
         setAccessToken(null);
         setUser(null);
       } finally {
-        setBootstrapped(true); // 부트스트랩 끝나기 전엔 자식 렌더 X
+        setBootstrapped(true);
       }
     })();
+  }, []);
+
+  // * 브라우저 탭 간 동기화
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "auth:user") {
+        const cached = loadUserSnapshot();
+        setUser(cached);
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   const login = async (input: LoginInput) => {
@@ -38,6 +59,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       saveAccessToken(result.accessToken);
       setAccessToken(result.accessToken);
     }
+    saveUserSnapshot(result);
   };
 
   const logout = async () => {

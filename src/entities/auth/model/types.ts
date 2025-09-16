@@ -16,7 +16,7 @@ export interface LoginSuccess {
   result: {
     memberName: string;
     memberType: UserRole;
-    accessToken?: string; // 나중에 줄 수도 있으니 optional
+    accessToken?: string;
   };
 }
 
