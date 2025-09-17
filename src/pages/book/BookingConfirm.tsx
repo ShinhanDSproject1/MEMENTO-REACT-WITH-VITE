@@ -4,11 +4,11 @@ import PrivacyCollectTerms from "@/widgets/booking/term/PrivacyCollectTerms";
 import PrivacyThirdPartyTerms from "@/widgets/booking/term/PrivacyThirdPartyTerms";
 import TermsOfUse from "@/widgets/booking/term/TermsOfUse";
 
+import { initMentosPayment } from "@/shared/api/payments";
+import { createReservation } from "@/shared/api/reservations";
+import { getAccessToken } from "@/shared/auth/token";
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { createReservation } from "@/shared/api/reservations";
-import { initMentosPayment } from "@/shared/api/payments";
-import { getAccessToken } from "@/shared/auth/token";
 
 type BookingState = {
   title: string;
