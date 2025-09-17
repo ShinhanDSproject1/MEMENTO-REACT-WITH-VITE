@@ -39,6 +39,7 @@ export default function MentorSignup() {
   const [agree, setAgree] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
+  const [certName, setCertName] = useState<string>("");
 
   // DatePicker 열림 상태
   const [isCalOpen, setIsCalOpen] = useState<boolean>(false);
@@ -73,6 +74,8 @@ export default function MentorSignup() {
   // ✅ 실제 가입 API
   const submitSignup = async () => {
     const BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
+
+    // 파일 외에는 기본 회원 정보만 담음
     const requestDto = {
       memberId: id.trim(),
       memberPwd: pw,
@@ -80,27 +83,36 @@ export default function MentorSignup() {
       memberPhoneNumber: phone,
       memberBirthDate: `${birth.y}-${birth.m.padStart(2, "0")}-${birth.d.padStart(2, "0")}`,
     };
+
     const form = new FormData();
     form.append("requestDto", new Blob([JSON.stringify(requestDto)], { type: "application/json" }));
-    if (certOwn && certFile) form.append("imageFile", certFile);
+
+    // 자격증 보유일 때만 파일 첨부
+    if (certOwn && certFile) {
+      form.append("imageFile", certFile);
+    }
 
     const res = await fetch(`${BASE}/auth/signup/mento`, {
       method: "POST",
       body: form,
       credentials: "include",
+      headers: {
+        "Idem-Key": "testIdempotencyKey",
+      },
     });
 
-    if (!res.ok) {
-      let detail = "";
-      try {
-        const data = await res.json();
-        detail = data?.message || "";
-      } catch {
-        /* ignore */
-      }
-      throw new Error(detail || `가입 실패 (${res.status})`);
+    let payload: any = null;
+    try {
+      payload = await res.json();
+    } catch {
+      /* 바디가 없을 수도 있음 */
     }
-    return res.json(); // { code, status, message }
+    if (!res.ok) {
+      const err: any = new Error(payload?.message || `가입 실패 (${res.status})`);
+      err.status = res.status;
+      throw err;
+    }
+    return payload;
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {

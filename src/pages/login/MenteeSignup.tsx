@@ -5,6 +5,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Link, useNavigate } from "react-router-dom";
+import { http } from "@api/https";
 
 export default function MenteeSignup() {
   const navigate = useNavigate();
@@ -46,8 +47,7 @@ export default function MenteeSignup() {
 
   // 실제 가입 API
   const submitSignup = async () => {
-    const BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
-    const body = {
+    const payload = {
       memberId: id.trim(),
       memberPwd: pw,
       memberName: name.trim(),
@@ -55,28 +55,12 @@ export default function MenteeSignup() {
       memberBirthDate: `${birth.y}-${birth.m.padStart(2, "0")}-${birth.d.padStart(2, "0")}`,
     };
 
-    const res = await fetch(`${BASE}/auth/signup/menti`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      credentials: "include",
+    const { data } = await http.post("/auth/signup/menti", payload, {
+      headers: { "Idem-Key": "testIdempotencyKey" }, // 명세 필수
     });
-
-    // NOTE: 지금 서버가 auth도 401을 주는 이슈가 있어 여기서 401이 날 수 있음(백 수정 후 정상 200 예상)
-    if (!res.ok) {
-      let detail = "";
-      try {
-        const data = await res.json();
-        detail = data?.message || "";
-      } catch {
-        /* ignore */
-      }
-      throw new Error(detail || `가입 실패 (${res.status})`);
-    }
-    return res.json(); // { code, status, message }
+    return data; // { code, status, message }
   };
-
-  // onSubmit 교체
+  // onSubmit
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!canSubmit || submitting) return;
@@ -86,7 +70,11 @@ export default function MenteeSignup() {
       await submitSignup();
       navigate("/signup-complete");
     } catch (err: any) {
-      setErrorMsg(err?.message ?? "서버 오류가 발생했습니다.");
+      const msg = err?.response?.data?.message || err?.message || "요청에 실패했습니다.";
+      setErrorMsg(msg);
+      // 콘솔에 상태/응답 로그
+      // eslint-disable-next-line no-console
+      console.error("signup fail:", err?.response?.status, err?.response?.data);
     } finally {
       setSubmitting(false);
     }
