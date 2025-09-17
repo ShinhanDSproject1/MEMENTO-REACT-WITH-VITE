@@ -57,3 +57,24 @@ export interface MyMentosItem {
   region: string;
   progressStatus: string;
 }
+
+export type ReportType =
+  | "ABUSING"
+  | "IDENTITY_THEFT"
+  | "FRAUD"
+  | "ABUSIVE_LANGUAGE"
+  | "COMMERCIAL_AD"
+  | "PERSONAL_DATA_ABUSE";
+
+// 서버의 CreateReportRequest에 해당
+export interface CreateReportDto {
+  reportType: ReportType;
+  mentosSeq: number;
+}
+
+// 프론트에서 다루기 편한 요청 스펙(멀티파트로 변환 예정)
+export interface ReportMentosRequest {
+  requestDto: CreateReportDto;
+  imageFile?: File | null;
+  idemKey: string; // 헤더로 보낼 멱등키
+}

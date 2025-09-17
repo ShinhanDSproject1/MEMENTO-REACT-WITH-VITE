@@ -114,57 +114,43 @@ export const MODAL_CONFIG = {
   reportComplete: {
     icon: checkRedIcon,
     message: "신고가 접수되었습니다.",
-    buttons: [
-      { text: "닫기", variant: "danger", size: "lg", actionType: "close" },
-    ],
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
   },
 
   reportReject: {
     icon: deleteIcon,
     message: "신고를 거절했습니다",
-    buttons: [
-      { text: "닫기", variant: "danger", size: "lg", actionType: "close" },
-    ],
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
   },
 
   reviewComplete: {
     icon: checkBlueIcon,
     message: "리뷰 작성이 완료되었습니다.",
-    buttons: [
-      { text: "닫기", variant: "primary", size: "lg", actionType: "close" },
-    ],
+    buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
   },
 
   refundComplete: {
     icon: checkBlueIcon,
     message: "환불이 완료되었습니다.",
-    buttons: [
-      { text: "닫기", variant: "primary", size: "lg", actionType: "close" },
-    ],
+    buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
   },
 
   deleteComplete: {
     icon: checkRedIcon,
     message: "삭제가 완료되었습니다!",
-    buttons: [
-      { text: "닫기", variant: "danger", size: "lg", actionType: "close" },
-    ],
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
   },
 
   dismissSuccess: {
     icon: checkRedIcon,
     message: "제명이 완료되었습니다.",
-    buttons: [
-      { text: "닫기", variant: "danger", size: "lg", actionType: "close" },
-    ],
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
   },
 
   reportAgree: {
     icon: checkBlueIcon,
     message: "신고를 승인했습니다.",
-    buttons: [
-      { text: "닫기", variant: "primary", size: "lg", actionType: "close" },
-    ],
+    buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
   },
 
   // '폼(form)' 모달 케이스
@@ -187,10 +173,13 @@ export const MODAL_CONFIG = {
 
   reportMentos: {
     type: "form",
-    content: () => (
+    content: (modalData) => (
       <div className="flex flex-col gap-4 px-4">
-        <SelectBar />
-        <FileInput />
+        {/* 선택한 신고 유형을 modalData.reportType 에 저장 */}
+        <SelectBar onChange={(v) => ((modalData as any).reportType = v)} />
+
+        {/* 업로드한 파일을 modalData.imageFile 에 저장 */}
+        <FileInput onFileChange={(f) => ((modalData as any).imageFile = f)} />
       </div>
     ),
     buttons: [
@@ -203,15 +192,9 @@ export const MODAL_CONFIG = {
     type: "form",
     content: (modalData) => (
       <div className="flex flex-col gap-3 px-4">
-        <TitleTextComponent
-          subtitle="신고자"
-          context={(modalData as any).reporter}
-        />
+        <TitleTextComponent subtitle="신고자" context={(modalData as any).reporter} />
         <TitleTextComponent subtitle="멘토링" context="인생한방" />
-        <TitleTextComponent
-          subtitle="신고항목"
-          context={(modalData as any).category}
-        />
+        <TitleTextComponent subtitle="신고항목" context={(modalData as any).category} />
         <TitleTextComponent subtitle="파일" context={(modalData as any).file} />
       </div>
     ),
@@ -226,5 +209,4 @@ export const MODAL_CONFIG = {
 export type ModalKey = keyof typeof MODAL_CONFIG;
 
 // ✅ 타입 가드: 폼인지 확인
-export const isFormConfig = (c: ModalConfig): c is FormConfig =>
-  "type" in c && c.type === "form";
+export const isFormConfig = (c: ModalConfig): c is FormConfig => "type" in c && c.type === "form";

@@ -7,6 +7,8 @@ import { useModal } from "@hooks/ui/useModal";
 import { CommonModal } from "@widgets/common";
 import { useEffect, useRef, type FC } from "react";
 import { useNavigate } from "react-router-dom";
+import { createReport } from "@entities/mentos/api/createReport";
+import type { ReportType } from "@entities/mentos/model/types";
 
 type Role = "mento" | "menti";
 
@@ -47,17 +49,49 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
 
   const handleCancelAction = () => closeModal();
 
-  const handleSubmit = () => {
-    closeModal();
-    if (modalType === "reviewMentos") openModal("reviewComplete");
-    if (modalType === "reportMentos") openModal("reportComplete");
+  const handleSubmit = async () => {
+    if (modalType === "reviewMentos") {
+      closeModal();
+      openModal("reviewComplete");
+      return;
+    }
+
+    if (modalType === "reportMentos") {
+      const { mentosSeq, reportType, imageFile, idemKey } = (modalData ?? {}) as {
+        mentosSeq?: number;
+        reportType?: ReportType;
+        imageFile?: File | null;
+        idemKey?: string;
+      };
+
+      if (!mentosSeq || !reportType || !idemKey) {
+        // TODO: 토스트/알림으로 필수값 안내
+        return;
+      }
+
+      await createReport({
+        requestDto: { reportType, mentosSeq },
+        imageFile: imageFile ?? null,
+        idemKey, // ✅ 모달에서 생성한 키 그대로 사용 (재시도에도 동일)
+      });
+
+      closeModal();
+      openModal("reportComplete");
+    }
   };
 
-  const onReviewClick = () => openModal("reviewMentos", { title: "리뷰 작성" });
-  const onDeleteClick = () => openModal("deleteMentos");
-  const onUpdateClick = () => navigate("/edit/1"); // TODO: 실제 id 교체
-  const onReportClick = () => openModal("reportMentos", { title: "신고하기" });
-  const onRefundClick = () => openModal("refundMentos");
+  // 클릭 핸들러(아이템별로 mentosSeq 주입)
+  const onReviewClick = (mentosSeq: number) =>
+    openModal("reviewMentos", { title: "리뷰 작성", mentosSeq });
+  const onDeleteClick = (mentosSeq: number) => openModal("deleteMentos", { mentosSeq });
+  const onUpdateClick = (mentosSeq: number) => navigate(`/edit/${mentosSeq}`); // TODO: 실제 라우팅 규칙 확인
+  const onReportClick = (mentosSeq: number) =>
+    openModal("reportMentos", {
+      title: "신고하기",
+      mentosSeq,
+      idemKey: crypto.randomUUID(),
+    });
+  const onRefundClick = (mentosSeq: number) => openModal("refundMentos", { mentosSeq });
 
   // role === 'menti' → API 연결
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
@@ -66,7 +100,7 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
   const list = data?.pages.flatMap((p) => p.result.content) ?? [];
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
-  const isEmpty = !isLoading && !isError && list.length === 0; // ✅ 추가
+  const isEmpty = !isLoading && !isError && list.length === 0;
 
   useEffect(() => {
     if (!loaderRef.current || !hasNextPage) return;
@@ -108,14 +142,14 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
                 location={item.region}
                 status="mento"
                 imageUrl={item.mentosImage}
-                onUpdateClick={onUpdateClick}
-                onDeleteClick={onDeleteClick}
+                onUpdateClick={() => onUpdateClick(item.mentosSeq)}
+                onDeleteClick={() => onDeleteClick(item.mentosSeq)}
               />
             ))}
           </section>
 
           <CommonModal
-            type={"deleteMentos"}
+            type={modalType ?? undefined}
             onConfirm={handleConfirmAction}
             onCancel={handleCancelAction}
             isOpen={isOpen}
@@ -158,9 +192,9 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
               location={item.region}
               status={item.progressStatus === "진행 완료" ? "completed" : "pending"}
               imageUrl={item.mentosImage}
-              onReportClick={onReportClick}
-              onReviewClick={onReviewClick}
-              onRefundClick={onRefundClick}
+              onReportClick={() => onReportClick(item.mentosSeq)}
+              onReviewClick={() => onReviewClick(item.mentosSeq)}
+              onRefundClick={() => onRefundClick(item.mentosSeq)}
             />
           ))}
 
@@ -176,7 +210,7 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
       </section>
 
       <CommonModal
-        type={"deleteMentos"}
+        type={modalType ?? undefined}
         onConfirm={handleConfirmAction}
         onCancel={handleCancelAction}
         isOpen={isOpen}
@@ -186,4 +220,5 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
     </div>
   );
 };
+
 export default MyMentosList;
