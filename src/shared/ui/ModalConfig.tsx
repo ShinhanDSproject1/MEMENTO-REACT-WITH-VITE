@@ -209,6 +209,36 @@ export const MODAL_CONFIG = {
       { text: "취소", variant: "cancelWhite", size: "md", actionType: "close" },
     ],
   },
+  /* 프로필 수정 완료 */
+  profileUpdated: {
+    icon: checkBlueIcon,
+    message: "수정이 완료되었습니다.",
+    buttons: [{ text: "확인", variant: "primary", size: "lg", actionType: "close" }],
+  },
+
+  /* 회원 탈퇴 확인 */
+  withdrawConfirm: {
+    icon: deleteIcon,
+    message: "정말 탈퇴하시겠습니까?",
+    buttons: [
+      { text: "탈퇴", variant: "danger", size: "lg", actionType: "confirm" },
+      { text: "취소", variant: "cancelWhite", size: "lg", actionType: "close" },
+    ],
+  },
+
+  /* 회원 탈퇴 완료 */
+  withdrawComplete: {
+    icon: checkBlueIcon,
+    message: "회원 탈퇴가 완료되었습니다.",
+    buttons: [{ text: "확인", variant: "primary", size: "lg", actionType: "confirm" }],
+  },
+
+  /* (옵션) 회원 탈퇴 실패 */
+  withdrawFailed: {
+    icon: checkRedIcon,
+    message: "탈퇴 요청 처리 중 문제가 발생했습니다.",
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
+  },
 } as const satisfies Record<string, ModalConfig>;
 
 export type ModalKey = keyof typeof MODAL_CONFIG;

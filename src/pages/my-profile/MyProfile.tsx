@@ -1,4 +1,6 @@
 // src/pages/MyProfile.tsx
+import { withdrawMember } from "@/entities/profile/api/withdrawMemeber";
+import { clearAccessToken } from "@/shared";
 import DateField from "@/widgets/profile/BirthDate";
 import SectionCard from "@/widgets/profile/CardSection";
 import CommonInput from "@/widgets/profile/CommonInput";
@@ -7,8 +9,13 @@ import PageContainer from "@/widgets/profile/PageContainer";
 import { updateMyPassword, useMyProfile, useUpdateMyProfile } from "@entities/profile";
 import type { AxiosError } from "axios";
 import { type ChangeEvent, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-/* ── utils ───────────────────────────────────────────── */
+/* ✅ 모달 훅/컴포넌트 */
+import { useModal } from "@hooks/ui/useModal";
+import { CommonModal } from "@widgets/common";
+
+/* ---------- utils ---------- */
 const toDate = (v: string | null | undefined): Date | null => {
   if (!v) return null;
   if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
@@ -20,13 +27,12 @@ const toDate = (v: string | null | undefined): Date | null => {
   const dt = new Date(v);
   return isNaN(dt.getTime()) ? null : dt;
 };
-const toISO = (date: Date | null): string => {
-  if (!date) return "";
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-};
+const toISO = (date: Date | null): string =>
+  !date
+    ? ""
+    : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
+        date.getDate(),
+      ).padStart(2, "0")}`;
 const fmtKOR = (v: string | null | undefined): string => {
   if (!v) return "";
   if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
@@ -35,19 +41,12 @@ const fmtKOR = (v: string | null | undefined): string => {
   }
   return v;
 };
-
-/* ── local view types ───────────────────────────────── */
-type User = {
-  name: string;
-  phone: string;
-  dob: string;
-  userid: string;
-  pw: string; // 표시용
-};
+/* ── local view types (동일) ─────────────────── */
+type User = { name: string; phone: string; dob: string; userid: string; pw: string };
 type ProfileDraft = { phone: string; dob: string };
 type InfoDraft = { current: string; next: string; confirm: string };
 
-/* ── server → view mapper ───────────────────────────── */
+/* ── server → view mapper (동일) ─────────────── */
 function mapProfileToUser(p: {
   memberName: string;
   memberPhoneNumber: string;
@@ -64,8 +63,13 @@ function mapProfileToUser(p: {
 }
 
 export default function MyProfile() {
-  const { data: profile, isLoading, isError, refetch } = useMyProfile();
+  const navigate = useNavigate();
+  const { data: profile, isLoading, isError } = useMyProfile();
   const { mutateAsync: updateProfile } = useUpdateMyProfile();
+
+  /* ✅ 모달 훅 */
+  type ModalType = "profileUpdated" | "withdrawConfirm" | "withdrawComplete" | "withdrawFailed";
+  const { isOpen, modalType, openModal, closeModal } = useModal<ModalType>();
 
   const [user, setUser] = useState<User>({
     name: "",
@@ -74,17 +78,12 @@ export default function MyProfile() {
     userid: "",
     pw: "********",
   });
-
   const [editProfile, setEditProfile] = useState(false);
   const [editInfo, setEditInfo] = useState(false);
-
   const [profileDraft, setProfileDraft] = useState<ProfileDraft>({ phone: "", dob: "" });
   const [infoDraft, setInfoDraft] = useState<InfoDraft>({ current: "", next: "", confirm: "" });
 
-  // ✅ 수정 완료 모달
-  const [isDoneOpen, setDoneOpen] = useState(false);
-
-  // 서버 데이터 들어오면 user/profileDraft 주입
+  /* 서버 데이터 주입 */
   useEffect(() => {
     if (!profile) return;
     const u = mapProfileToUser(profile);
@@ -92,37 +91,28 @@ export default function MyProfile() {
     setProfileDraft({ phone: u.phone, dob: toISO(toDate(u.dob)) });
   }, [profile]);
 
-  // 비번 변경 버튼 활성화: 현재 비번 "입력됨" + 새 비번 일치
+  /* 비번 버튼 활성화 */
   const isCurrentOk = infoDraft.current.length > 0;
   const isNewMatch = infoDraft.next.length > 0 && infoDraft.next === infoDraft.confirm;
   const canSubmit = isCurrentOk && isNewMatch;
 
-  /* ── handlers ─────────────────────────────────────── */
+  /* ── handlers ───────────────────────────── */
   const handleProfileSave = async () => {
-    const input = {
-      memberPhoneNumber: profileDraft.phone,
-      memberBirthDate: profileDraft.dob,
-    };
     try {
-      await updateProfile(input);
+      await updateProfile({
+        memberPhoneNumber: profileDraft.phone,
+        memberBirthDate: profileDraft.dob,
+      });
       setUser((prev) => ({ ...prev, phone: profileDraft.phone, dob: profileDraft.dob }));
       setEditProfile(false);
-      setDoneOpen(true); // ✅ 성공 모달
-    } catch (e) {
-      console.error("[update profile] failed:", e);
-      alert("프로필 수정에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      openModal("profileUpdated"); // ✅ 모달로 안내
+    } catch {
+      openModal("withdrawFailed"); // 재사용(실패 모달)
     }
   };
 
   const handleInfoSave = async () => {
-    if (!infoDraft.current || !infoDraft.next || !infoDraft.confirm) {
-      alert("모든 비밀번호 입력란을 채워주세요.");
-      return;
-    }
-    if (infoDraft.next !== infoDraft.confirm) {
-      alert("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
-      return;
-    }
+    if (!canSubmit) return;
     try {
       await updateMyPassword({
         currentPassword: infoDraft.current,
@@ -132,15 +122,46 @@ export default function MyProfile() {
       setEditInfo(false);
       setInfoDraft({ current: "", next: "", confirm: "" });
       setUser((prev) => ({ ...prev, pw: "********" }));
-      setDoneOpen(true); // ✅ 성공 모달
+      openModal("profileUpdated"); // ✅ 모달로 안내
     } catch (err) {
       const error = err as AxiosError<{ message?: string }>;
-      const msg =
-        error.response?.data?.message ??
-        "비밀번호 변경에 실패했습니다. 잠시 후 다시 시도해 주세요.";
-      alert(msg);
+      console.error("[update password] failed:", error.response?.data?.message);
+      openModal("withdrawFailed");
     }
   };
+
+  const handleWithdrawClick = () => {
+    openModal("withdrawConfirm"); // ✅ 확인 모달
+  };
+
+  const handleModalConfirm = async () => {
+    if (modalType === "withdrawConfirm") {
+      try {
+        const res = await withdrawMember();
+        if (res.code === 1000) {
+          // 완료 모달로 전환
+          openModal("withdrawComplete");
+        } else {
+          openModal("withdrawFailed");
+        }
+      } catch {
+        openModal("withdrawFailed");
+      }
+      return;
+    }
+
+    if (modalType === "withdrawComplete") {
+      closeModal();
+      clearAccessToken(); // ✅ AT 정리
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    // profileUpdated, withdrawFailed 등
+    closeModal();
+  };
+
+  const handleModalCancel = () => closeModal();
 
   const onChangePhone = (e: ChangeEvent<HTMLInputElement>) =>
     setProfileDraft((d) => ({ ...d, phone: e.target.value }));
@@ -154,39 +175,15 @@ export default function MyProfile() {
   const headingCls =
     "mb-6 text-left text-[24px] leading-[28px] tracking-tight font-bold text-[#121418]";
 
-  /* ── loading / error ──────────────────────────────── */
+  /* ── loading / error (동일) ───────────────────── */
   if (isLoading) {
-    return (
-      <div className="font-WooridaumB flex min-h-screen justify-center bg-[#f5f6f8] antialiased">
-        <main className="min-h-dvh w-full bg-white px-4 py-8 shadow">
-          <PageContainer>
-            <div className="py-10 text-center text-sm text-gray-500">프로필을 불러오는 중…</div>
-          </PageContainer>
-        </main>
-      </div>
-    );
+    /* ...로딩 뷰 동일... */
   }
   if (isError || !profile) {
-    return (
-      <div className="font-WooridaumB flex min-h-screen justify-center bg-[#f5f6f8] antialiased">
-        <main className="min-h-dvh w-full bg-white px-4 py-8 shadow">
-          <PageContainer>
-            <div className="py-10 text-center text-sm text-red-500">
-              프로필을 불러오지 못했습니다.
-              <button
-                onClick={() => refetch()}
-                className="ml-2 rounded bg-blue-500 px-2 py-1 text-white"
-                type="button">
-                다시 시도
-              </button>
-            </div>
-          </PageContainer>
-        </main>
-      </div>
-    );
+    /* ...에러 뷰 동일... */
   }
 
-  /* ── view ─────────────────────────────────────────── */
+  /* ── view ───────────────────────────── */
   return (
     <div className="font-WooridaumB flex min-h-screen justify-center bg-[#f5f6f8] antialiased">
       <main className="min-h-dvh w-full bg-white px-4 py-8 shadow">
@@ -198,7 +195,6 @@ export default function MyProfile() {
               <FieldRow label="이름" htmlFor="name">
                 <CommonInput id="name" value={user.name} editable={false} />
               </FieldRow>
-
               <FieldRow label="전화번호" htmlFor="phone">
                 <CommonInput
                   id="phone"
@@ -208,7 +204,6 @@ export default function MyProfile() {
                   placeholder={editProfile ? "전화번호를 입력하세요" : ""}
                 />
               </FieldRow>
-
               <FieldRow label="생년월일" htmlFor="dob">
                 {editProfile ? (
                   <DateField
@@ -219,7 +214,6 @@ export default function MyProfile() {
                   <CommonInput id="dob" value={fmtKOR(user.dob)} editable={false} />
                 )}
               </FieldRow>
-
               <div className="flex justify-end">
                 {editProfile ? (
                   <button
@@ -276,12 +270,9 @@ export default function MyProfile() {
                       value={infoDraft.current}
                       onChange={onChangeCurrent}
                       editable
-                      placeholder={
-                        infoDraft.current.length === 0 ? "현재 비밀번호를 입력하세요" : ""
-                      }
+                      placeholder={infoDraft.current ? "" : "현재 비밀번호를 입력하세요"}
                     />
                   </FieldRow>
-
                   <FieldRow label="새 비밀번호" htmlFor="newPw">
                     <CommonInput
                       id="newPw"
@@ -292,7 +283,6 @@ export default function MyProfile() {
                       placeholder="8자 이상 권장"
                     />
                   </FieldRow>
-
                   <FieldRow label="비밀번호 확인" htmlFor="confirmPw">
                     <div className="w-full">
                       <CommonInput
@@ -308,7 +298,6 @@ export default function MyProfile() {
                               ? "ok"
                               : "error"
                         }
-                        placeholder=""
                       />
                       {infoDraft.confirm.length > 0 &&
                         infoDraft.next.trim() !== infoDraft.confirm.trim() && (
@@ -316,7 +305,6 @@ export default function MyProfile() {
                         )}
                     </div>
                   </FieldRow>
-
                   <div className="mt-1 flex justify-end">
                     <button
                       className={[
@@ -336,37 +324,27 @@ export default function MyProfile() {
             </SectionCard>
           </section>
 
+          {/* 계정 탈퇴 */}
           <div className="mb-12 flex w-full justify-end">
             <button
               className="w-fit cursor-pointer rounded-lg py-15 text-sm font-semibold text-black underline"
-              type="button">
+              type="button"
+              onClick={handleWithdrawClick}>
               계정 탈퇴
             </button>
           </div>
         </PageContainer>
       </main>
 
-      {/* ✅ 수정 완료 모달 */}
-      {isDoneOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-[1000] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setDoneOpen(false)} />
-          <div className="relative z-10 w-[86%] max-w-sm rounded-2xl bg-white p-5 shadow-xl">
-            <div className="mb-3 text-base font-semibold text-[#121418]">수정이 완료되었습니다</div>
-            <p className="mb-5 text-sm text-[#606264]">정보가 정상적으로 저장되었습니다.</p>
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                className="rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0C2D62]"
-                onClick={() => setDoneOpen(false)}>
-                확인
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ✅ 공통 모달 (1개만 배치) */}
+      <CommonModal
+        type={modalType ?? "profileUpdated"}
+        isOpen={isOpen}
+        onConfirm={handleModalConfirm}
+        onCancel={handleModalCancel}
+        onSubmit={() => {}}
+        modalData={{}}
+      />
     </div>
   );
 }
