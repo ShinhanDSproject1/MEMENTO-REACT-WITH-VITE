@@ -121,7 +121,7 @@ export default function PaySuccess() {
     setOpen(false);
     const id = roomIdRef.current;
     if (id) navigate(`/chat/${id}`, { replace: true });
-    else navigate("/mentee/mymentos", { replace: true, state: { fromPaymentSuccess: true } });
+    else navigate("/menti/mymentos", { replace: true, state: { fromPaymentSuccess: true } });
   };
 
   return (
