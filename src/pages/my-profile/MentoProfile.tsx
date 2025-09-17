@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 
 /* ✅ 추가: 공통 모달 훅/컴포넌트 + 탈퇴 API & 토큰 클리어 */
 import { withdrawMember } from "@/entities/profile/api/withdrawMemeber";
-import { clearAccessToken } from "@/shared";
+import { clearAccessToken, clearUserSnapshot } from "@/shared";
 import { useModal } from "@hooks/ui/useModal";
 import { CommonModal } from "@widgets/common";
 
@@ -171,6 +171,7 @@ export default function MentorProfile() {
     if (modalType === "withdrawComplete") {
       closeModal();
       clearAccessToken();
+      clearUserSnapshot();
       navigate("/login", { replace: true });
       return;
     }

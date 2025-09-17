@@ -3,14 +3,14 @@ import { useMyMentosInfiniteList } from "@/features/mentos-list/hooks/useMyMento
 import Button from "@/widgets/common/Button";
 import MentosCard from "@/widgets/common/MentosCard";
 import MentosMainTitleComponent from "@/widgets/mentos/MentosMainTitleComponent";
-import type { MentorMentosItem, MyMentosItem } from "@entities/mentos";
+import type { MyMentosItem } from "@entities/mentos";
+import { createReport } from "@entities/mentos/api/createReport";
+import type { ReportType } from "@entities/mentos/model/types";
 import { useMentoMentosInfiniteList } from "@features/mentos-list";
 import { useModal } from "@hooks/ui/useModal";
 import { CommonModal } from "@widgets/common";
-import { useEffect, useRef, type FC } from "react";
+import { useEffect, useMemo, useRef, type FC } from "react";
 import { useNavigate } from "react-router-dom";
-import { createReport } from "@entities/mentos/api/createReport";
-import type { ReportType } from "@entities/mentos/model/types";
 
 type Role = "mento" | "menti";
 
@@ -74,7 +74,7 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
       await createReport({
         requestDto: { reportType, mentosSeq },
         imageFile: imageFile ?? null,
-        idemKey, // ✅ 모달에서 생성한 키 그대로 사용 (재시도에도 동일)
+        idemKey, // 재시도에도 동일 키
       });
 
       closeModal();
@@ -82,35 +82,47 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
     }
   };
 
-  // 클릭 핸들러(아이템별로 mentosSeq 주입)
+  // 아이템별 핸들러
   const onReviewClick = (mentosSeq: number) =>
     openModal("reviewMentos", { title: "리뷰 작성", mentosSeq });
   const onDeleteClick = (mentosSeq: number) => openModal("deleteMentos", { mentosSeq });
-  const onUpdateClick = (mentosSeq: number) => navigate(`/edit/${mentosSeq}`); // TODO: 실제 라우팅 규칙 확인
+  const onUpdateClick = (mentosSeq: number) => navigate(`/edit/${mentosSeq}`);
   const onReportClick = (mentosSeq: number) =>
-    openModal("reportMentos", {
-      title: "신고하기",
-      mentosSeq,
-      idemKey: crypto.randomUUID(),
-    });
+    openModal("reportMentos", { title: "신고하기", mentosSeq, idemKey: crypto.randomUUID() });
   const onRefundClick = (mentosSeq: number) => openModal("refundMentos", { mentosSeq });
 
-  /* -------------------- 멘토 / 멘티 각각의 데이터 훅 -------------------- */
-  // 멘티 목록(기존): 각 page가 ApiResponse 형태라서 p.result.content
-  const mentee = useMyMentosInfiniteList(5);
-  const menteeList = mentee.data?.pages.flatMap((p) => p.result.content) ?? [];
+  /* -------------------- 멘토 / 멘티 데이터 훅 -------------------- */
+  // 멘티: ApiEnvelope 페이지 -> p.result.content
+  const mentee = useMyMentosInfiniteList(5, { enabled: role === "menti" });
+  const menteeList = useMemo(() => {
+    const seen = new Set<number>();
+    return (mentee.data?.pages ?? [])
+      .flatMap((p) => p.result.content)
+      .filter((it) => {
+        if (seen.has(it.mentosSeq)) return false;
+        seen.add(it.mentosSeq);
+        return true;
+      });
+  }, [mentee.data]);
   const menteeEmpty = !mentee.isLoading && !mentee.isError && menteeList.length === 0;
 
-  // 멘토 목록(신규): API가 result만 반환하므로 각 page는 MentorMentosListResult,
-  // 즉 p.content 로 바로 접근
-  const mentor = useMentoMentosInfiniteList(5);
-  const mentorList = mentor.data?.pages.flatMap((p) => p.content) ?? [];
+  // 멘토: result만 페이지 -> p.content
+  const mentor = useMentoMentosInfiniteList(5, { enabled: role === "mento" });
+  const mentorList = useMemo(() => {
+    const seen = new Set<number>();
+    return (mentor.data?.pages ?? [])
+      .flatMap((p) => p.content)
+      .filter((it) => {
+        if (seen.has(it.mentosSeq)) return false;
+        seen.add(it.mentosSeq);
+        return true;
+      });
+  }, [mentor.data]);
   const mentorEmpty = !mentor.isLoading && !mentor.isError && mentorList.length === 0;
 
-  const isEmpty = !isLoading && !isError && list.length === 0;
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
-  // 무한 스크롤 옵저버: role에 맞는 훅으로 분기
+  // 무한 스크롤 옵저버 — 역할별 훅 사용
   useEffect(() => {
     const hasNext = role === "mento" ? mentor.hasNextPage : mentee.hasNextPage;
     const fetching = role === "mento" ? mentor.isFetchingNextPage : mentee.isFetchingNextPage;
@@ -153,7 +165,6 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
             </Button>
           </div>
 
-          {/* 로딩 / 에러 / 빈 상태 */}
           {mentor.isLoading && <div className="py-6 text-center text-sm">불러오는 중…</div>}
           {mentor.isError && (
             <div className="py-6 text-center text-sm text-red-500">
@@ -169,9 +180,8 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
             <div className="py-10 text-center text-sm text-gray-500">등록된 멘토링이 없습니다.</div>
           )}
 
-          {/* 리스트 */}
           <section className="flex w-full flex-col items-center gap-4">
-            {list.map((item: MyMentosItem) => (
+            {mentorList.map((item) => (
               <MentosCard
                 key={item.mentosSeq}
                 mentosSeq={item.mentosSeq}
@@ -186,7 +196,6 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
             ))}
           </section>
 
-          {/* 무한 스크롤 트리거 */}
           {mentor.hasNextPage && !mentorEmpty && <div ref={loaderRef} className="h-10 w-full" />}
           {mentor.isFetchingNextPage && (
             <div className="py-4 text-center text-sm text-gray-500">더 불러오는 중…</div>
@@ -194,16 +203,16 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
           {!mentor.hasNextPage && !mentorEmpty && mentorList.length > 0 && (
             <div className="py-6 text-center text-xs text-gray-400">마지막 페이지입니다.</div>
           )}
-
-          {/* 모달 */}
-          <CommonModal
-            type={modalType ?? undefined}
-            onConfirm={handleConfirmAction}
-            onCancel={handleCancelAction}
-            isOpen={isOpen}
-            onSubmit={handleSubmit}
-            modalData={modalData}
-          />
+          {isOpen && modalType ? (
+            <CommonModal
+              type={modalType ?? undefined}
+              onConfirm={handleConfirmAction}
+              onCancel={handleCancelAction}
+              isOpen={isOpen}
+              onSubmit={handleSubmit}
+              modalData={modalData}
+            />
+          ) : null}
         </section>
       </div>
     );
@@ -255,14 +264,16 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
         )}
       </section>
 
-      <CommonModal
-        type={modalType ?? undefined}
-        onConfirm={handleConfirmAction}
-        onCancel={handleCancelAction}
-        isOpen={isOpen}
-        onSubmit={handleSubmit}
-        modalData={modalData}
-      />
+      {isOpen && modalType ? (
+        <CommonModal
+          type={modalType ?? undefined}
+          onConfirm={handleConfirmAction}
+          onCancel={handleCancelAction}
+          isOpen={isOpen}
+          onSubmit={handleSubmit}
+          modalData={modalData}
+        />
+      ) : null}
     </div>
   );
 };

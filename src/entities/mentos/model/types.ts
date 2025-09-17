@@ -58,7 +58,6 @@ export interface MyMentosItem {
   progressStatus: string;
 }
 
-
 export type ReportType =
   | "ABUSING"
   | "IDENTITY_THEFT"

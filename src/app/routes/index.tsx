@@ -1,6 +1,7 @@
 // src/app/routes/index.tsx
 import React, { Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
+import RequireAuth from "./quards/RequireAuth";
 
 // [ Layout ]
 const HomeLayout = React.lazy(() => import("@/app/routes/layouts/HomeLayout"));
@@ -68,6 +69,7 @@ export const router = createBrowserRouter([
   {
     element: withSuspense(<AppLayout />),
     children: [
+      // ----- (1) 공개 라우트 -----
       { path: "/login", element: withSuspense(<Login />) },
       { path: "/signup", element: withSuspense(<SignupSelect />) },
       { path: "/signup/mentor", element: withSuspense(<MentorSignup />) },
@@ -76,35 +78,45 @@ export const router = createBrowserRouter([
 
       { path: "/menti/:category", element: withSuspense(<MentosList />) },
       { path: "/menti/mentos-detail/:id", element: withSuspense(<MentosDetail />) },
-      { path: "/menti/mymentos", element: withSuspense(<MyMentosList role="menti" />) },
-      { path: "/menti/myprofile", element: withSuspense(<MyProfile />) },
-
-      { path: "/mento/my-list", element: withSuspense(<MyMentosList role="mento" />) },
-      { path: "/mento", element: withSuspense(<MentorProfile />) },
-      { path: "/mento/nearby", element: withSuspense(<MentorMapNearbyPage />) },
-      { path: "/create-mentos", element: withSuspense(<CreateMentos />) },
-      { path: "/edit/:id", element: withSuspense(<EditMentos />) },
-      { path: "/mento/certification", element: withSuspense(<CertificationRegister />) },
-      { path: "/mento/certification/:result", element: withSuspense(<CertificationPage />) },
-      { path: "/mento/introduce", element: withSuspense(<MentoIntroduce />) },
-      { path: "/mento/introduce2", element: withSuspense(<MentoIntroduce2 />) },
-
-      { path: "/reviews", element: withSuspense(<Reviews />) },
+      { path: "/video", element: withSuspense(<HomeVideo />) },
       { path: "/ready", element: withSuspense(<Ready />) },
 
-      { path: "/chat", element: withSuspense(<ChatListPage />) },
-      { path: "/chat/:roomId", element: withSuspense(<ChatRoomPage />) },
-      { path: "/analytics", element: withSuspense(<AnalyticsPage />) },
+      // ----- (2) 보호 라우트 그룹 (RequireAuth) -----
+      {
+        element: withSuspense(<RequireAuth />),
+        children: [
+          // 멘티
+          { path: "/menti/mymentos", element: withSuspense(<MyMentosList role="menti" />) },
+          { path: "/menti/myprofile", element: withSuspense(<MyProfile />) },
 
+          // 멘토
+          { path: "/mento/my-list", element: withSuspense(<MyMentosList role="mento" />) },
+          { path: "/mento", element: withSuspense(<MentorProfile />) },
+          { path: "/mento/nearby", element: withSuspense(<MentorMapNearbyPage />) },
+          { path: "/create-mentos", element: withSuspense(<CreateMentos />) },
+          { path: "/edit/:id", element: withSuspense(<EditMentos />) },
+          { path: "/mento/certification", element: withSuspense(<CertificationRegister />) },
+          { path: "/mento/certification/:result", element: withSuspense(<CertificationPage />) },
+          { path: "/mento/introduce", element: withSuspense(<MentoIntroduce />) },
+          { path: "/mento/introduce2", element: withSuspense(<MentoIntroduce2 />) },
+
+          // 채팅/통계
+          { path: "/chat", element: withSuspense(<ChatListPage />) },
+          { path: "/chat/:roomId", element: withSuspense(<ChatRoomPage />) },
+          { path: "/analytics", element: withSuspense(<AnalyticsPage />) },
+
+          // 예약/결제
+          { path: "/booking", element: withSuspense(<BookingPage />) },
+          { path: "/booking/confirm", element: withSuspense(<BookingConfirm />) },
+          { path: "/payments/success", element: withSuspense(<PaySuccess />) },
+          { path: "/booking/success", element: withSuspense(<PaySuccess />) },
+          { path: "/reviews", element: withSuspense(<Reviews />) },
+        ],
+      },
+
+      // 관리자(보호 필요시 이쪽으로 옮기세요)
       { path: "/admin/report", element: withSuspense(<MemberReport />) },
       { path: "/admin/declaration", element: withSuspense(<ReportList />) },
-
-      { path: "/booking", element: withSuspense(<BookingPage />) },
-      { path: "/booking/confirm", element: withSuspense(<BookingConfirm />) },
-      { path: "/payments/success", element: withSuspense(<PaySuccess />) },
-      { path: "/booking/success", element: withSuspense(<PaySuccess />) }, // 임시 호환
-
-      { path: "/video", element: withSuspense(<HomeVideo />) },
     ],
   },
 

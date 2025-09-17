@@ -1,6 +1,6 @@
 // src/pages/MyProfile.tsx
 import { withdrawMember } from "@/entities/profile/api/withdrawMemeber";
-import { clearAccessToken } from "@/shared";
+import { clearAccessToken, clearUserSnapshot } from "@/shared";
 import DateField from "@/widgets/profile/BirthDate";
 import SectionCard from "@/widgets/profile/CardSection";
 import CommonInput from "@/widgets/profile/CommonInput";
@@ -140,6 +140,8 @@ export default function MyProfile() {
         const res = await withdrawMember();
         if (res.code === 1000) {
           // 완료 모달로 전환
+          clearAccessToken();
+          clearUserSnapshot();
           openModal("withdrawComplete");
         } else {
           openModal("withdrawFailed");
