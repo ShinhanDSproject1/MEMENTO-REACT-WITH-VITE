@@ -5,9 +5,14 @@ import CommonInput from "@/widgets/profile/CommonInput";
 import FieldRow from "@/widgets/profile/FieldRow";
 import PageContainer from "@/widgets/profile/PageContainer";
 import { updateMyPassword, useMyProfile, useUpdateMyProfile } from "@entities/profile";
-import type { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+/* ✅ 추가: 공통 모달 훅/컴포넌트 + 탈퇴 API & 토큰 클리어 */
+import { withdrawMember } from "@/entities/profile/api/withdrawMemeber";
+import { clearAccessToken } from "@/shared";
+import { useModal } from "@hooks/ui/useModal";
+import { CommonModal } from "@widgets/common";
 
 /* ---------- utils ---------- */
 const toDate = (v: string | null | undefined): Date | null => {
@@ -75,6 +80,10 @@ export default function MentorProfile() {
   const { data: profile, isLoading, isError, refetch } = useMyProfile();
   const { mutateAsync: updateProfile } = useUpdateMyProfile();
 
+  // ✅ 공통 모달
+  type ModalType = "profileUpdated" | "withdrawConfirm" | "withdrawComplete" | "withdrawFailed";
+  const { isOpen, modalType, openModal, closeModal } = useModal<ModalType>();
+
   // 로컬 상태
   const [user, setUser] = useState<User>({
     name: "",
@@ -91,9 +100,6 @@ export default function MentorProfile() {
   const [profileDraft, setProfileDraft] = useState<ProfileDraft>({ phone: "", dob: "" });
   const [infoDraft, setInfoDraft] = useState<InfoDraft>({ current: "", next: "", confirm: "" });
 
-  // ✅ 수정 완료 모달
-  const [isDoneOpen, setDoneOpen] = useState(false);
-
   // 서버 데이터 → 로컬 주입
   useEffect(() => {
     if (!profile) return;
@@ -109,32 +115,22 @@ export default function MentorProfile() {
 
   /* ---------- handlers ---------- */
   const handleProfileSave = async () => {
-    const input = {
-      memberPhoneNumber: profileDraft.phone,
-      memberBirthDate: profileDraft.dob,
-    };
     try {
-      await updateProfile(input);
+      await updateProfile({
+        memberPhoneNumber: profileDraft.phone,
+        memberBirthDate: profileDraft.dob,
+      });
       setUser((prev) => ({ ...prev, phone: profileDraft.phone, dob: profileDraft.dob }));
       setEditProfile(false);
-
-      // ✅ 성공 모달 오픈
-      setDoneOpen(true);
-    } catch (e) {
-      console.error("[update profile] failed:", e);
-      alert("프로필 수정에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      openModal("profileUpdated"); // ✅ 성공 모달
+    } catch {
+      openModal("withdrawFailed"); // 실패 모달 재사용
     }
   };
 
   const handleInfoSave = async () => {
-    if (!infoDraft.current || !infoDraft.next || !infoDraft.confirm) {
-      alert("모든 비밀번호 입력란을 채워주세요.");
-      return;
-    }
-    if (infoDraft.next !== infoDraft.confirm) {
-      alert("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
-      return;
-    }
+    if (!canSubmit) return;
+
     try {
       await updateMyPassword({
         currentPassword: infoDraft.current,
@@ -145,20 +141,44 @@ export default function MentorProfile() {
       setEditInfo(false);
       setInfoDraft({ current: "", next: "", confirm: "" });
       setUser((prev) => ({ ...prev, pw: "********" }));
-
-      // ✅ 여기 추가: 비밀번호 변경 성공 시에도 동일 모달 오픈
-      setDoneOpen(true);
-    } catch (err) {
-      const error = err as AxiosError<{ message?: string }>;
-      const msg =
-        error.response?.data?.message ??
-        "비밀번호 변경에 실패했습니다. 잠시 후 다시 시도해 주세요.";
-      alert(msg);
+      openModal("profileUpdated"); // ✅ 성공 모달
+    } catch {
+      openModal("withdrawFailed");
     }
   };
 
-  // mentor only (라우팅)
+  // 소개글 수정 (멘토 전용)
   const handleEditIntro = () => navigate("/mento/introduce");
+
+  // ✅ 탈퇴 버튼 → 확인 모달
+  const handleWithdrawClick = () => openModal("withdrawConfirm");
+
+  // ✅ 모달 confirm/cancel
+  const handleModalConfirm = async () => {
+    if (modalType === "withdrawConfirm") {
+      try {
+        const res = await withdrawMember();
+        if (res.code === 1000) {
+          openModal("withdrawComplete");
+        } else {
+          openModal("withdrawFailed");
+        }
+      } catch {
+        openModal("withdrawFailed");
+      }
+      return;
+    }
+    if (modalType === "withdrawComplete") {
+      closeModal();
+      clearAccessToken();
+      navigate("/login", { replace: true });
+      return;
+    }
+    // profileUpdated, withdrawFailed
+    closeModal();
+  };
+  const handleModalCancel = () => closeModal();
+
   const headingCls =
     "mb-6 text-left text-[24px] leading-[28px] tracking-tight font-bold text-[#121418]";
 
@@ -315,7 +335,6 @@ export default function MentorProfile() {
                               : "error"
                         }
                       />
-                      {/* ⬇️ 에러 메시지 */}
                       {infoDraft.confirm.length > 0 &&
                         infoDraft.next.trim() !== infoDraft.confirm.trim() && (
                           <p className="mt-1 text-sm text-red-500">비밀번호가 일치하지 않습니다.</p>
@@ -364,7 +383,11 @@ export default function MentorProfile() {
                 </button>
               </div>
 
-              <button className="w-fit cursor-pointer rounded-lg py-15 text-sm font-semibold text-black underline">
+              {/* ✅ 계정 탈퇴 버튼 */}
+              <button
+                className="w-fit cursor-pointer rounded-lg py-15 text-sm font-semibold text-black underline"
+                type="button"
+                onClick={handleWithdrawClick}>
                 계정 탈퇴
               </button>
             </div>
@@ -372,29 +395,15 @@ export default function MentorProfile() {
         </PageContainer>
       </main>
 
-      {/* ✅ 수정 완료 모달 */}
-      {isDoneOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-[1000] flex items-center justify-center">
-          {/* backdrop */}
-          <div className="absolute inset-0 bg-black/40" onClick={() => setDoneOpen(false)} />
-          {/* content */}
-          <div className="relative z-10 w-[86%] max-w-sm rounded-2xl bg-white p-5 shadow-xl">
-            <div className="mb-3 text-base font-semibold text-[#121418]">수정이 완료되었습니다</div>
-            <p className="mb-5 text-sm text-[#606264]">프로필 정보가 정상적으로 저장되었습니다.</p>
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                className="rounded-lg bg-[#005EF9] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0C2D62]"
-                onClick={() => setDoneOpen(false)}>
-                확인
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ✅ 공통 모달 한 번만 배치 */}
+      <CommonModal
+        type={modalType ?? "profileUpdated"}
+        isOpen={isOpen}
+        onConfirm={handleModalConfirm}
+        onCancel={handleModalCancel}
+        onSubmit={() => {}}
+        modalData={{}}
+      />
     </div>
   );
 }

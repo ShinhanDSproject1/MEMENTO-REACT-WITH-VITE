@@ -52,3 +52,4 @@ export interface UpdatePasswordInput {
 export type GetProfileSuccess = ApiEnvelope<GetProfile>;
 export type UpdateProfileSuccess = ApiEnvelope<null>;
 export type UpdatePasswordSuccess = ApiEnvelope<null>;
+export type WithdrawSuccess = ApiEnvelope<null>;
