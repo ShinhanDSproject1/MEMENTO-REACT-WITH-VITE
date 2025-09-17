@@ -1,113 +1,110 @@
 // src/pages/Review.tsx
 import PageContainer from "@/widgets/profile/PageContainer";
 import ReviewCard from "@/widgets/profile/ReviewCard";
-import { useEffect, useRef, useState } from "react";
+import { getMentoReviews, type MentorReview } from "@entities/review";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-type ReviewItem = {
+type UiReviewItem = {
   id: number;
   title: string;
-  date: string; // ISO or YYYY-MM-DD
-  rating: number; // 1~5
+  date: string;
+  rating: number;
   name: string;
   content: string;
 };
 
-type PageResult = {
-  list: ReviewItem[];
-  last: boolean;
-};
-
 export default function Review() {
-  const [items, setItems] = useState<ReviewItem[]>([]);
-  const [page, setPage] = useState(0);
+  const [items, setItems] = useState<UiReviewItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [cursor, setCursor] = useState<number | undefined>(undefined);
   const [error, setError] = useState("");
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  async function fetchPage(p: number): Promise<PageResult> {
-    const MOCK_DATA: ReviewItem[] = [
-      {
-        id: 1,
-        title: "[홍대] 하루에 100만원 버는 법",
-        date: "2025-08-01",
-        rating: 1,
-        name: "김**",
-        content: "아 100만원 개꿀~",
-      },
-      {
-        id: 2,
-        title: "[홍대] 에라모르겠다 조퇴나하자",
-        date: "2025-08-01",
-        rating: 2,
-        name: "김**",
-        content: "SQLD시험쳐야하는데 시간은없고 피곤하고 에라이 포기해야징!!!",
-      },
-      {
-        id: 3,
-        title: "[홍대] 안가연, 왜 늦었는가 그것이 궁금하다",
-        date: "2025-08-01",
-        rating: 3,
-        name: "안**",
-        content: "궁금하다",
-      },
-      {
-        id: 4,
-        title: "[홍대] 하루에 100만원 버는 법",
-        date: "2025-08-01",
-        rating: 4,
-        name: "김**",
-        content: "아 100만원 개꿀~",
-      },
-      {
-        id: 5,
-        title: "[홍대] 에라모르겠다 조퇴나하자",
-        date: "2025-08-01",
-        rating: 5,
-        name: "김**",
-        content: "SQLD시험쳐야하는데 시간은없고 피곤하고 에라이 포기해야징!!!",
-      },
-      {
-        id: 6,
-        title: "[홍대] 안가연, 왜 늦었는가 그것이 궁금하다",
-        date: "2025-08-01",
-        rating: 3,
-        name: "안**",
-        content: "궁금하다",
-      },
-    ];
+  // 최신 상태 추적용 ref
+  const loadingRef = useRef(false);
+  const hasMoreRef = useRef(true);
+  const cursorRef = useRef<number | undefined>(undefined);
 
-    // 데모: 첫 페이지만 데이터, 이후엔 last = true
-    if (p > 0) return { list: [], last: true };
-    return { list: MOCK_DATA, last: true };
-  }
+  useEffect(() => {
+    loadingRef.current = loading;
+  }, [loading]);
+  useEffect(() => {
+    hasMoreRef.current = hasMore;
+  }, [hasMore]);
+  useEffect(() => {
+    cursorRef.current = cursor;
+  }, [cursor]);
 
-  // 페이지 로드
+  const mapToUi = (r: MentorReview): UiReviewItem => ({
+    id: r.reviewId,
+    title: r.mentosTitle,
+    date: r.createdAt,
+    rating: r.reviewRating,
+    name: r.mentiName,
+    content: r.reviewContent,
+  });
+
+  // 무한 스크롤에서만 사용하는 fetchMore
+  const fetchMore = useCallback(async () => {
+    if (loadingRef.current || !hasMoreRef.current) return;
+    if (error) return; // 🚨 에러 상태에서는 재요청 막기
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await getMentoReviews(10, cursorRef.current);
+      const mapped = res.content.map(mapToUi);
+
+      setItems((prev) => {
+        const seen = new Set(prev.map((p) => p.id));
+        const next = [...prev];
+        for (const it of mapped) {
+          if (!seen.has(it.id)) {
+            next.push(it);
+          }
+        }
+        return next;
+      });
+
+      setHasMore(res.hasNext);
+      setCursor(res.nextCursor ?? undefined);
+    } catch {
+      setError("리뷰를 불러오지 못했습니다.");
+      setHasMore(false); // 🚨 실패 시 추가 요청 중단
+    } finally {
+      setLoading(false);
+    }
+  }, [error]); // error 의존 추가
+
+  // 초기 로드 (한번만 실행)
   useEffect(() => {
     let cancelled = false;
-
     (async () => {
       setLoading(true);
       setError("");
       try {
-        const { list, last } = await fetchPage(page);
-        if (!cancelled) {
-          setItems((prev) => [...prev, ...list]);
-          setHasMore(!last);
-        }
+        const res = await getMentoReviews(10, undefined);
+        if (cancelled) return;
+        setItems(res.content.map(mapToUi));
+        setHasMore(res.hasNext);
+        setCursor(res.nextCursor ?? undefined);
       } catch {
-        if (!cancelled) setError("리뷰를 불러오지 못했습니다.");
+        if (!cancelled) {
+          setError("리뷰를 불러오지 못했습니다.");
+          setHasMore(false); // 🚨 실패 시 중단
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
     })();
-
     return () => {
       cancelled = true;
     };
-  }, [page]);
+  }, []);
 
-  // 무한 스크롤
+  // 무한 스크롤 옵저버
   useEffect(() => {
     if (!hasMore || loading) return;
     const el = sentinelRef.current;
@@ -116,7 +113,7 @@ export default function Review() {
     const io = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          setPage((p) => p + 1);
+          fetchMore();
         }
       },
       { rootMargin: "200px", threshold: 0.01 },
@@ -124,14 +121,20 @@ export default function Review() {
 
     io.observe(el);
     return () => io.disconnect();
-  }, [hasMore, loading]);
+  }, [hasMore, loading, fetchMore]);
 
   return (
-    <div className="flex min-h-screen w-full justify-center overflow-x-hidden bg-[#f5f6f8] font-sans antialiased">
-      <section className="w-full overflow-x-hidden bg-white px-4 py-5">
-        <h1 className="font-WooridaumB mt-6 mb-15 pl-2 text-[20px] font-bold">리뷰 확인하기</h1>
+    <div className="flex min-h-screen w-full justify-center bg-[#f5f6f8]">
+      <section className="w-full bg-white px-4 py-5">
+        <h1 className="font-WooridaumB mb-6 text-[20px] font-bold">리뷰 확인하기</h1>
 
         <PageContainer className="space-y-4">
+          {error && (
+            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
           {items.map((it) => (
             <ReviewCard
               key={it.id}
@@ -140,18 +143,14 @@ export default function Review() {
               rating={it.rating}
               name={it.name}
               content={it.content}
-              className="w-full"
             />
           ))}
 
-          {error && (
-            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              {error}
-            </div>
+          {!loading && !error && items.length === 0 && (
+            <div className="text-center text-sm text-gray-500">표시할 리뷰가 없습니다.</div>
           )}
 
           {loading && <div className="text-center text-sm text-gray-500">불러오는 중…</div>}
-
           {!hasMore && !loading && items.length > 0 && (
             <div className="text-center text-xs text-gray-400">마지막 페이지입니다</div>
           )}
