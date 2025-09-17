@@ -174,10 +174,13 @@ export const MODAL_CONFIG = {
 
   reportMentos: {
     type: "form",
-    content: () => (
+    content: (modalData) => (
       <div className="flex flex-col gap-4 px-4">
-        <SelectBar />
-        <FileInput />
+        {/* 선택한 신고 유형을 modalData.reportType 에 저장 */}
+        <SelectBar onChange={(v) => ((modalData as any).reportType = v)} />
+
+        {/* 업로드한 파일을 modalData.imageFile 에 저장 */}
+        <FileInput onFileChange={(f) => ((modalData as any).imageFile = f)} />
       </div>
     ),
     buttons: [
@@ -188,21 +191,14 @@ export const MODAL_CONFIG = {
 
   reportDetail: {
     type: "form",
-    content: (modalData) => {
-      const { reporter, category, file } = modalData as {
-        reporter?: string;
-        category?: string;
-        file?: string;
-      };
-      return (
-        <div className="flex flex-col gap-3 px-4">
-          <TitleTextComponent subtitle="신고자" context={reporter ?? ""} />
-          <TitleTextComponent subtitle="멘토링" context="인생한방" />
-          <TitleTextComponent subtitle="신고항목" context={category ?? ""} />
-          <TitleTextComponent subtitle="파일" context={file ?? ""} />
-        </div>
-      );
-    },
+    content: (modalData) => (
+      <div className="flex flex-col gap-3 px-4">
+        <TitleTextComponent subtitle="신고자" context={(modalData as any).reporter} />
+        <TitleTextComponent subtitle="멘토링" context="인생한방" />
+        <TitleTextComponent subtitle="신고항목" context={(modalData as any).category} />
+        <TitleTextComponent subtitle="파일" context={(modalData as any).file} />
+      </div>
+    ),
     buttons: [
       { text: "승인", variant: "primary", size: "md", actionType: "submit" },
       { text: "거부", variant: "danger", size: "md", actionType: "confirm" },
@@ -242,5 +238,4 @@ export const MODAL_CONFIG = {
 } as const satisfies Record<string, ModalConfig>;
 
 export type ModalKey = keyof typeof MODAL_CONFIG;
-
 export const isFormConfig = (c: ModalConfig): c is FormConfig => "type" in c && c.type === "form";
