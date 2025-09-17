@@ -43,7 +43,7 @@ const MemberReport = React.lazy(() => import("@/pages/admin/MemberReport"));
 const ReportList = React.lazy(() => import("@/pages/admin/ReportList"));
 
 const HomeVideo = React.lazy(() => import("@/pages/home/HomeVideo"));
-const BookingPage = React.lazy(() => import("@/pages/book/Booking"));
+const BookingPage = React.lazy(() => import("@/pages/book/Booking"));
 const BookingConfirm = React.lazy(() => import("@/pages/book/BookingConfirm"));
 const MentoIntroduce2 = React.lazy(() => import("@/pages/book/MentoIntroduce2"));
 
@@ -81,7 +81,7 @@ export const router = createBrowserRouter([
 
       { path: "/mento/my-list", element: withSuspense(<MyMentosList role="mento" />) },
       { path: "/mento", element: withSuspense(<MentorProfile />) },
-      { path: "/mento/nearby", element: withSuspense(<MentorMapNearbyPage />) }, // ← 추가
+      { path: "/mento/nearby", element: withSuspense(<MentorMapNearbyPage />) },
       { path: "/create-mentos", element: withSuspense(<CreateMentos />) },
       { path: "/edit/:id", element: withSuspense(<EditMentos />) },
       { path: "/mento/certification", element: withSuspense(<CertificationRegister />) },
@@ -101,7 +101,8 @@ export const router = createBrowserRouter([
 
       { path: "/booking", element: withSuspense(<BookingPage />) },
       { path: "/booking/confirm", element: withSuspense(<BookingConfirm />) },
-      { path: "/booking/success", element: withSuspense(<PaySuccess />) }, // ← 추가
+      { path: "/payments/success", element: withSuspense(<PaySuccess />) },
+      { path: "/booking/success", element: withSuspense(<PaySuccess />) }, // 임시 호환
 
       { path: "/video", element: withSuspense(<HomeVideo />) },
     ],

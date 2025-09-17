@@ -21,9 +21,9 @@ export type ModalButton = Omit<ButtonProps, "children" | "onClick"> & {
 
 // 알림/결정 모달
 type AlertConfig = {
-  type?: "alert"; // 기본값처럼 사용 (생략 가능)
+  type?: "alert";
   icon?: string;
-  message: string;
+  message?: string; // optional (loading 등)
   buttons: ModalButton[];
 };
 
@@ -32,12 +32,11 @@ export type FormConfig = {
   content: (modalData: Record<string, unknown>) => ReactNode;
   buttons: ModalButton[];
 };
-// 전체 모달 설정 타입
+
 type ModalConfig = AlertConfig | FormConfig;
 
-// 🔥 리터럴 타입 유지 + 구조 검증을 동시에
 export const MODAL_CONFIG = {
-  // '확인/결정' 모달 케이스
+  // ---- 확인/결정
   deleteMentos: {
     icon: deleteIcon,
     message: "정말 삭제하시겠습니까?",
@@ -65,7 +64,7 @@ export const MODAL_CONFIG = {
     ],
   },
 
-  // '알림/완료' 모달 케이스
+  // ---- 알림/완료
   createMentos: {
     icon: checkBlueIcon,
     message: "생성이 완료되었습니다!",
@@ -93,16 +92,10 @@ export const MODAL_CONFIG = {
       },
     ],
   },
+
   paySuccess: {
     icon: checkBlueIcon,
-    buttons: [
-      {
-        text: "확인",
-        variant: "primary",
-        size: "lg",
-        actionType: "close",
-      },
-    ],
+    buttons: [{ text: "확인", variant: "primary", size: "lg", actionType: "close" }],
   },
 
   refundSuccess: {
@@ -121,6 +114,11 @@ export const MODAL_CONFIG = {
     icon: deleteIcon,
     message: "신고를 거절했습니다",
     buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
+  },
+
+  loading: {
+    message: "처리 중입니다...",
+    buttons: [],
   },
 
   reviewComplete: {
@@ -153,18 +151,21 @@ export const MODAL_CONFIG = {
     buttons: [{ text: "닫기", variant: "primary", size: "lg", actionType: "close" }],
   },
 
-  // '폼(form)' 모달 케이스
+  // ---- 폼
   reviewMentos: {
     type: "form",
-    content: (modalData) => (
-      <div className="flex flex-col px-4">
-        <StarRating onRatingChange={(modalData as any).onRatingChange} />
-        <textarea
-          className="h-24 w-full resize-none rounded-[10px] border-[1px] border-solid border-[#E6E7EA] p-2 outline-none focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
-          placeholder="내용을 입력하세요"
-        />
-      </div>
-    ),
+    content: (modalData) => {
+      const { onRatingChange } = modalData as { onRatingChange?: (rating: number) => void };
+      return (
+        <div className="flex flex-col px-4">
+          <StarRating onRatingChange={onRatingChange} />
+          <textarea
+            className="h-24 w-full resize-none rounded-[10px] border-[1px] border-solid border-[#E6E7EA] p-2 outline-none focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
+            placeholder="내용을 입력하세요"
+          />
+        </div>
+      );
+    },
     buttons: [
       { text: "등록", variant: "primary", size: "lg", actionType: "submit" },
       { text: "취소", variant: "cancelWhite", size: "lg", actionType: "close" },
@@ -204,9 +205,37 @@ export const MODAL_CONFIG = {
       { text: "취소", variant: "cancelWhite", size: "md", actionType: "close" },
     ],
   },
+  /* 프로필 수정 완료 */
+  profileUpdated: {
+    icon: checkBlueIcon,
+    message: "수정이 완료되었습니다.",
+    buttons: [{ text: "확인", variant: "primary", size: "lg", actionType: "close" }],
+  },
+
+  /* 회원 탈퇴 확인 */
+  withdrawConfirm: {
+    icon: deleteIcon,
+    message: "정말 탈퇴하시겠습니까?",
+    buttons: [
+      { text: "탈퇴", variant: "danger", size: "lg", actionType: "confirm" },
+      { text: "취소", variant: "cancelWhite", size: "lg", actionType: "close" },
+    ],
+  },
+
+  /* 회원 탈퇴 완료 */
+  withdrawComplete: {
+    icon: checkBlueIcon,
+    message: "회원 탈퇴가 완료되었습니다.",
+    buttons: [{ text: "확인", variant: "primary", size: "lg", actionType: "confirm" }],
+  },
+
+  /* (옵션) 회원 탈퇴 실패 */
+  withdrawFailed: {
+    icon: checkRedIcon,
+    message: "탈퇴 요청 처리 중 문제가 발생했습니다.",
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
+  },
 } as const satisfies Record<string, ModalConfig>;
 
 export type ModalKey = keyof typeof MODAL_CONFIG;
-
-// ✅ 타입 가드: 폼인지 확인
 export const isFormConfig = (c: ModalConfig): c is FormConfig => "type" in c && c.type === "form";

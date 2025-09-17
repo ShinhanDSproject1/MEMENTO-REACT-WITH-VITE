@@ -1,8 +1,10 @@
+// src/pages/MyMentosList.tsx
 import { useMyMentosInfiniteList } from "@/features/mentos-list/hooks/useMyMentosInfiniteList";
 import Button from "@/widgets/common/Button";
 import MentosCard from "@/widgets/common/MentosCard";
 import MentosMainTitleComponent from "@/widgets/mentos/MentosMainTitleComponent";
-import type { MyMentosItem } from "@entities/mentos";
+import type { MentorMentosItem, MyMentosItem } from "@entities/mentos";
+import { useMentoMentosInfiniteList } from "@features/mentos-list";
 import { useModal } from "@hooks/ui/useModal";
 import { CommonModal } from "@widgets/common";
 import { useEffect, useRef, type FC } from "react";
@@ -93,29 +95,49 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
     });
   const onRefundClick = (mentosSeq: number) => openModal("refundMentos", { mentosSeq });
 
-  // role === 'menti' → API 연결
-  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
-    useMyMentosInfiniteList(5);
+  /* -------------------- 멘토 / 멘티 각각의 데이터 훅 -------------------- */
+  // 멘티 목록(기존): 각 page가 ApiResponse 형태라서 p.result.content
+  const mentee = useMyMentosInfiniteList(5);
+  const menteeList = mentee.data?.pages.flatMap((p) => p.result.content) ?? [];
+  const menteeEmpty = !mentee.isLoading && !mentee.isError && menteeList.length === 0;
 
-  const list = data?.pages.flatMap((p) => p.result.content) ?? [];
-  const loaderRef = useRef<HTMLDivElement | null>(null);
+  // 멘토 목록(신규): API가 result만 반환하므로 각 page는 MentorMentosListResult,
+  // 즉 p.content 로 바로 접근
+  const mentor = useMentoMentosInfiniteList(5);
+  const mentorList = mentor.data?.pages.flatMap((p) => p.content) ?? [];
+  const mentorEmpty = !mentor.isLoading && !mentor.isError && mentorList.length === 0;
 
   const isEmpty = !isLoading && !isError && list.length === 0;
+  const loaderRef = useRef<HTMLDivElement | null>(null);
 
+  // 무한 스크롤 옵저버: role에 맞는 훅으로 분기
   useEffect(() => {
-    if (!loaderRef.current || !hasNextPage) return;
+    const hasNext = role === "mento" ? mentor.hasNextPage : mentee.hasNextPage;
+    const fetching = role === "mento" ? mentor.isFetchingNextPage : mentee.isFetchingNextPage;
+    const loadMore = role === "mento" ? mentor.fetchNextPage : mentee.fetchNextPage;
+
+    if (!loaderRef.current || !hasNext) return;
     const io = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting) && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
+        if (entries.some((e) => e.isIntersecting) && hasNext && !fetching) {
+          loadMore();
         }
       },
       { rootMargin: "200px" },
     );
     io.observe(loaderRef.current);
     return () => io.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }, [
+    role,
+    mentor.hasNextPage,
+    mentor.isFetchingNextPage,
+    mentor.fetchNextPage,
+    mentee.hasNextPage,
+    mentee.isFetchingNextPage,
+    mentee.fetchNextPage,
+  ]);
 
+  /* -------------------------------- 멘토 뷰 -------------------------------- */
   if (role === "mento") {
     return (
       <div className="flex min-h-screen w-full justify-center bg-[#f5f6f8] antialiased">
@@ -131,7 +153,23 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
             </Button>
           </div>
 
-          {/* ✅ 멘토도 API 연결 가능하도록 확장 예정 */}
+          {/* 로딩 / 에러 / 빈 상태 */}
+          {mentor.isLoading && <div className="py-6 text-center text-sm">불러오는 중…</div>}
+          {mentor.isError && (
+            <div className="py-6 text-center text-sm text-red-500">
+              데이터를 불러오지 못했습니다.
+              <button
+                onClick={() => mentor.refetch()}
+                className="ml-2 rounded bg-blue-500 px-2 py-1 text-white">
+                다시 시도
+              </button>
+            </div>
+          )}
+          {mentorEmpty && (
+            <div className="py-10 text-center text-sm text-gray-500">등록된 멘토링이 없습니다.</div>
+          )}
+
+          {/* 리스트 */}
           <section className="flex w-full flex-col items-center gap-4">
             {list.map((item: MyMentosItem) => (
               <MentosCard
@@ -148,6 +186,16 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
             ))}
           </section>
 
+          {/* 무한 스크롤 트리거 */}
+          {mentor.hasNextPage && !mentorEmpty && <div ref={loaderRef} className="h-10 w-full" />}
+          {mentor.isFetchingNextPage && (
+            <div className="py-4 text-center text-sm text-gray-500">더 불러오는 중…</div>
+          )}
+          {!mentor.hasNextPage && !mentorEmpty && mentorList.length > 0 && (
+            <div className="py-6 text-center text-xs text-gray-400">마지막 페이지입니다.</div>
+          )}
+
+          {/* 모달 */}
           <CommonModal
             type={modalType ?? undefined}
             onConfirm={handleConfirmAction}
@@ -161,29 +209,29 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
     );
   }
 
-  // role === 'menti'
+  /* -------------------------------- 멘티 뷰 -------------------------------- */
   return (
     <div className="no-scrollbar flex min-h-screen w-full flex-col gap-4 overflow-y-auto bg-white pb-4">
       <MentosMainTitleComponent mainTitle={"나의 멘토링 내역"} />
 
-      {isLoading && <div className="py-6 text-center text-sm">불러오는 중…</div>}
-      {isError && (
+      {mentee.isLoading && <div className="py-6 text-center text-sm">불러오는 중…</div>}
+      {mentee.isError && (
         <div className="py-6 text-center text-sm text-red-500">
           데이터를 불러오지 못했습니다.
           <button
-            onClick={() => refetch()}
+            onClick={() => mentee.refetch()}
             className="ml-2 rounded bg-blue-500 px-2 py-1 text-white">
             다시 시도
           </button>
         </div>
       )}
-
-      {/* ✅ 빈 상태 메시지 */}
-      {isEmpty && <div className="py-10 text-center text-sm text-gray-500">데이터가 없습니다.</div>}
+      {menteeEmpty && (
+        <div className="py-10 text-center text-sm text-gray-500">데이터가 없습니다.</div>
+      )}
 
       <section className="flex w-full flex-col items-center gap-3">
-        {!isEmpty &&
-          list.map((item: MyMentosItem) => (
+        {!menteeEmpty &&
+          menteeList.map((item: MyMentosItem) => (
             <MentosCard
               key={item.mentosSeq}
               mentosSeq={item.mentosSeq}
@@ -198,13 +246,11 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
             />
           ))}
 
-        {/* 빈 상태일 땐 무한스크롤 트리거도 숨김 */}
-        {hasNextPage && !isEmpty && <div ref={loaderRef} className="h-10 w-full" />}
-
-        {isFetchingNextPage && (
+        {mentee.hasNextPage && !menteeEmpty && <div ref={loaderRef} className="h-10 w-full" />}
+        {mentee.isFetchingNextPage && (
           <div className="py-4 text-center text-sm text-gray-500">더 불러오는 중…</div>
         )}
-        {!hasNextPage && !isEmpty && list.length > 0 && (
+        {!mentee.hasNextPage && !menteeEmpty && menteeList.length > 0 && (
           <div className="py-6 text-center text-xs text-gray-400">마지막 페이지입니다.</div>
         )}
       </section>

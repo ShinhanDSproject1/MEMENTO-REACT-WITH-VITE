@@ -1,38 +1,69 @@
-const BASE = "/api/mentos";
+import { http, type AppRequestConfig } from "@api/https";
 
-export interface MentosItem {
-  title: string;
-  content: string;
-  price: string | number;
-  location: string;
+const BASE = "/mentos";
+
+/** 공통 응답 */
+export interface ApiResponse<T> {
+  code: number;
+  status?: number;
+  message: string;
+  result: T;
 }
 
-// GET(상세 조회) - 지금은 목업
-export async function getMentos(id: string | number): Promise<MentosItem | null> {
-  await new Promise((r) => setTimeout(r, 150));
+export interface ReviewItem {
+  reviewSeq: number;
+  reviewRating: number;
+  reviewDate: string; // "YYYY-MM-DD"
+  reviewContent: string;
+}
+export interface MentoProfile {
+  mentoName: string;
+  mentoImg: string;
+  mentoDescription: string;
+}
+export interface MentosDetailResult {
+  mentosImage: string;
+  mentosTitle: string;
+  mentosLocation: string;
+  reviewTotalCnt: number;
+  reviewRatingAvg: number;
+  reviews: ReviewItem[];
+  mento: MentoProfile | MentoProfile[]; // 서버가 배열/객체 혼용 가능성
+  mentosDescription: string;
+  mentosPrice: number;
+}
 
-  // 데이터 없을 수도 있다고 가정
-  if (id === "1") {
-    return {
-      title: "공격적으로 저축하는 법 알려준다!!",
-      content: `
-        하이 나 김대현이다 이 강의 들어라 
-        들으면 하루 만에 백만원 벌 수 있음!!
-        거짓말이면 내가 200프로 보장해줌!!!
-      `,
-      price: "20,000",
-      location: "서울 강남구",
-    };
+/** (레거시) 간단 타입 */
+export type MentosDetail = {
+  mentosSeq: number;
+  mentosTitle: string;
+  price: number;
+};
+
+/**
+ * 상세 조회 (기본=로그인 필요 → 토큰 붙임)
+ * 공개로 호출하고 싶으면 opts.public = true 로 명시.
+ */
+export async function getMentosDetail(
+  mentosSeq: number,
+  opts?: { public?: boolean },
+): Promise<MentosDetailResult> {
+  const cfg: AppRequestConfig = {};
+  if (opts?.public) cfg._skipAuth = true; // 공개 호출만 명시적으로 스킵
+
+  const { data } = await http.get<ApiResponse<MentosDetailResult>>(
+    `${BASE}/detail/${mentosSeq}`,
+    cfg,
+  );
+
+  if (!(data.code === 1000 || data.status === 200)) {
+    throw new Error(data.message || "요청에 실패했습니다.");
   }
-  return null;
+  return data.result;
 }
 
-// PUT(수정) - 지금은 콘솔만
-export async function updateMentos(
-  id: string,
-  body: Partial<MentosItem>, // 일부만 수정할 수 있도록 Partial
-): Promise<{ ok: boolean }> {
-  await new Promise((r) => setTimeout(r, 150));
-  console.log("PUT", `${BASE}/${id}`, body);
-  return { ok: true };
+/** 기존 사용처 호환: 간단 타입으로 매핑 반환 */
+export async function fetchMentosDetail(mentosSeq: number): Promise<MentosDetail> {
+  const d = await getMentosDetail(mentosSeq);
+  return { mentosSeq, mentosTitle: d.mentosTitle, price: Number(d.mentosPrice) };
 }

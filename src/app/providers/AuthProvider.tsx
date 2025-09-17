@@ -18,6 +18,12 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     (async () => {
+      const hasLocalAuth =
+        !!localStorage.getItem("accessToken") || !!localStorage.getItem("memberSeq");
+      if (!hasLocalAuth) {
+        setBootstrapped(true);
+        return;
+      }
       try {
         const at = await refreshSilently(); // AT 발급
         if (at) {

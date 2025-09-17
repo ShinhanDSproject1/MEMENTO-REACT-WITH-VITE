@@ -58,6 +58,7 @@ export interface MyMentosItem {
   progressStatus: string;
 }
 
+
 export type ReportType =
   | "ABUSING"
   | "IDENTITY_THEFT"
@@ -78,3 +79,54 @@ export interface ReportMentosRequest {
   imageFile?: File | null;
   idemKey: string; // 헤더로 보낼 멱등키
 }
+
+// * 멘토스 생성 요청
+export interface CreateMentosRequest {
+  mentosTitle: string;
+  mentosContent: string;
+  mentosImage?: File | null;
+  categorySeq: number;
+  price: number;
+}
+
+// * 멘토스 생성 성공
+export interface CreateMentosResponse {
+  code: number;
+  message: string;
+  result: {
+    mentosSeq: number;
+    mentosTitle: string;
+    mentosContent: string;
+    mentosImage?: string;
+    categorySeq: number;
+    price: number;
+    approved: boolean;
+    region: string;
+    createdAt: string;
+  };
+}
+
+/** 공통 응답 래퍼 */
+export interface ApiResponse<T> {
+  code: number;
+  status: number;
+  message: string;
+  result: T;
+}
+
+export interface MentorMentosItem {
+  mentosSeq: number;
+  mentosTitle: string;
+  mentosImage?: string;
+  price: number;
+  region: string;
+  progressStatus?: string | null; // 멘토는 null 가능
+}
+
+export interface MentorMentosListResult {
+  content: MentorMentosItem[];
+  nextCursor?: number;
+  hasNext: boolean;
+}
+
+export type MentorMentosListResponse = ApiResponse<MentorMentosListResult>;

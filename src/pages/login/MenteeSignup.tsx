@@ -1,9 +1,11 @@
 import logo from "@assets/images/logo/memento-logo.svg";
+// import { set } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useMemo, useState, type FormEvent } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Link, useNavigate } from "react-router-dom";
+import { http } from "@api/https";
 
 export default function MenteeSignup() {
   const navigate = useNavigate();
@@ -17,12 +19,15 @@ export default function MenteeSignup() {
   const [birth, setBirth] = useState({ y: "", m: "", d: "" });
   const [agree, setAgree] = useState(false);
 
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
   // DatePicker 열림 상태
   const [isCalOpen, setIsCalOpen] = useState(false);
 
   // 전화번호/비번 검증
   const pwOk = pw.length >= 6 && pw === pw2;
-  const phoneOk = /^\d{9,13}$/.test(phone.replace(/\D/g, ""));
+  const phoneOk = /^010-\d{4}-\d{4}$/.test(phone);
 
   // 생년월일 검증(실제 날짜 유효성)
   const birthOk = useMemo(() => {
@@ -37,16 +42,43 @@ export default function MenteeSignup() {
 
   // 제출 가능 여부
   const canSubmit = useMemo(() => {
-    return id.trim() && pwOk && name.trim() && phoneOk && birthOk;
-  }, [id, pwOk, name, phoneOk, birthOk]);
+    return id.trim() !== "" && pwOk && name.trim() !== "" && phoneOk && birthOk && agree;
+  }, [id, pwOk, name, phoneOk, birthOk, agree]);
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!canSubmit) return;
-    // TODO: 실제 가입 API 호출
-    navigate("/signup-complete");
+  // 실제 가입 API
+  const submitSignup = async () => {
+    const payload = {
+      memberId: id.trim(),
+      memberPwd: pw,
+      memberName: name.trim(),
+      memberPhoneNumber: phone,
+      memberBirthDate: `${birth.y}-${birth.m.padStart(2, "0")}-${birth.d.padStart(2, "0")}`,
+    };
+
+    const { data } = await http.post("/auth/signup/menti", payload, {
+      headers: { "Idem-Key": "testIdempotencyKey" }, // 명세 필수
+    });
+    return data; // { code, status, message }
   };
-
+  // onSubmit
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!canSubmit || submitting) return;
+    setErrorMsg("");
+    setSubmitting(true);
+    try {
+      await submitSignup();
+      navigate("/signup-complete");
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || "요청에 실패했습니다.";
+      setErrorMsg(msg);
+      // 콘솔에 상태/응답 로그
+      // eslint-disable-next-line no-console
+      console.error("signup fail:", err?.response?.status, err?.response?.data);
+    } finally {
+      setSubmitting(false);
+    }
+  };
   return (
     <main className="mx-auto w-full max-w-md px-5 py-8">
       {/* 로고 + 인사 */}
@@ -235,12 +267,14 @@ export default function MenteeSignup() {
         <div className="mt-4 grid grid-cols-2 gap-3">
           <button
             type="submit"
-            disabled={!canSubmit}
+            disabled={!canSubmit || submitting}
             className={[
               "h-14 rounded-2xl text-base font-extrabold text-white transition",
-              canSubmit ? "bg-[#1161FF] hover:bg-[#0C2D62]" : "cursor-not-allowed bg-[#9BB9FF]",
+              !canSubmit || submitting
+                ? "cursor-not-allowed bg-[#9BB9FF]"
+                : "bg-[#1161FF] hover:bg-[#0C2D62]",
             ].join(" ")}>
-            가입
+            {submitting ? "가입 중..." : "가입"}
           </button>
           <button
             type="button"
@@ -249,6 +283,7 @@ export default function MenteeSignup() {
             취소
           </button>
         </div>
+        {errorMsg && <p className="mt-2 text-sm text-red-500">{errorMsg}</p>}
 
         {/* 로그인 링크 */}
         <p className="mt-6 text-center text-sm text-slate-500">
