@@ -96,7 +96,7 @@ export default function BookingPage({ mentorId = 1, defaultMonth = new Date() }:
     setSelectedTime("");
   };
 
-  // 예약하기: 여기서는 API 호출 X → 확인 페이지로 state만 전달
+  // 예약하기
   const handleReservation = () => {
     if (!selectedDate || !selectedTime) {
       alert("날짜와 시간을 선택해 주세요.");

@@ -1,19 +1,31 @@
-// src/shared/api/payments.ts
 import { http } from "@api/https";
+import { getAccessToken } from "@/shared/auth/token";
 
-export async function initMentosPayment(payload: {
+export async function initMentosPayment(body: {
   mentosSeq: number;
-  mentosAt: string; // "YYYY-MM-DD"
-  mentosTime: string; // "HH:mm"
+  mentosAt: string;
+  mentosTime: string;
 }) {
-  const { data } = await http.post("/mentos/payments/init", payload, {
-    headers: { "Content-Type": "application/json" },
-  });
-  const r = (data?.result ?? data) as any;
-  return {
-    orderId: String(r.orderId ?? ""),
-    amount: Number(r.amount ?? 0),
-    successUrl: r.successUrl ?? r.success, // 서버 키 변동 대비
-    failUrl: r.failUrl ?? r.fail,
-  };
+  const { data } = await http.post("/mentos/payments/init", body);
+  return data?.result ?? data;
+}
+
+export async function confirmPayment(
+  query: { orderId: string; paymentKey: string; amount: number },
+  body: { mentosSeq: number; mentosAt: string; mentosTime: string },
+) {
+  const config = {
+    params: {
+      orderId: query.orderId,
+      paymentKey: query.paymentKey,
+      amount: query.amount,
+    },
+    headers: {
+      Authorization: `Bearer ${getAccessToken?.() ?? ""}`,
+    },
+    withCredentials: true,
+  } as const;
+
+  const { data } = await http.post("/payments/success", body, config);
+  return data;
 }
