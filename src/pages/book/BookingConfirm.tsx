@@ -1,4 +1,3 @@
-// src/pages/booking/BookingConfirm.tsx
 import BookingSummaryCard from "@/widgets/booking/BookingSummaryCard";
 import TermsAccordion from "@/widgets/booking/TermsAccordion";
 import PrivacyCollectTerms from "@/widgets/booking/term/PrivacyCollectTerms";
@@ -13,8 +12,8 @@ import { getAccessToken } from "@/shared/auth/token";
 
 type BookingState = {
   title: string;
-  date: string; // "YYYY-MM-DD"
-  time: string; // "HH:mm"
+  date: string;
+  time: string;
   price: number;
   mentosSeq?: number;
 };
@@ -70,13 +69,36 @@ export default function BookingConfirm() {
         mentosTime: booking.time!,
       });
 
-      if (!init.successUrl) throw new Error("결제 리다이렉트 URL을 받지 못했습니다.");
-      const qs = new URLSearchParams({
+      if (!init?.successUrl || !init?.orderId) {
+        throw new Error("결제 리다이렉트 URL 또는 주문번호가 없습니다.");
+      }
+
+      sessionStorage.setItem(
+        "mentos.pay.ctx",
+        JSON.stringify({
+          mentosSeq,
+          date: booking.date!,
+          time: booking.time!,
+          title: booking.title ?? "멘토링",
+          price: booking.price ?? 0,
+        }),
+      );
+
+      const { loadTossPayments } = await import("@tosspayments/payment-sdk");
+      const toss = await loadTossPayments(import.meta.env.VITE_TOSS_CLIENT_KEY as string);
+
+      const successUrl = `${window.location.origin}/payments/success`;
+      const failUrl = `${window.location.origin}/payments/fail`;
+
+      await toss.requestPayment("카드", {
+        amount: init.amount,
         orderId: init.orderId,
-        amount: String(init.amount),
+        orderName: init.orderName,
+        successUrl,
+        failUrl,
       });
-      location.href = `${init.successUrl}?${qs.toString()}`;
     } catch (e: any) {
+      console.log("[RESERVATION/INIT ERR]", e?.response?.data ?? e);
       alert(e?.response?.data?.message ?? e.message ?? "오류가 발생했습니다.");
     } finally {
       setSubmitting(false);

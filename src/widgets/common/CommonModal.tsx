@@ -55,9 +55,11 @@ export default function CommonModal({
                     <img className="w-[15vw] max-w-[60px]" src={config.icon} alt="모달 아이콘" />
                   </div>
                 )}
-                <div>
+                {typeof config.message === "string" ? (
                   <p className="text-center font-semibold text-[#707070]">{config.message}</p>
-                </div>
+                ) : (
+                  <div className="text-center">{config.message}</div>
+                )}
               </>
             )}
             {/* 버튼 영역 */}
