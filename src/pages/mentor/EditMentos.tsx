@@ -1,98 +1,119 @@
-// src/pages/mentor/EditMentosPage.tsx
-import MentosForm from "@/pages/mentor/MentosForm";
-import {
-  getMentosDetail,
-  updateMentos,
-  type MentosDetailResult,
-  type MentosItem,
-} from "@api/mentos";
+// src/pages/EditMentosPage.tsx
+import MentosForm, { type MentosFormValues } from "@/pages/mentor/MentosForm";
+import type { MentosDetailResult } from "@entities/mentos";
+import { getMentosDetail, updateMentoMentos, type UpdateMentosRequest } from "@entities/mentos";
 import { useModal } from "@hooks/ui/useModal";
 import { CommonModal } from "@widgets/common";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-type RouteParams = { id: string };
-type ModalType = "updateMentos";
-type ModalData = Record<string, unknown>;
-
-// 상세 응답 → 폼 초기값 매핑
-function mapDetailToFormInitial(detail: MentosDetailResult) {
-  return {
-    title: detail.mentosTitle,
-    content: detail.mentosDescription, // 상세 설명을 에디터로
-    price: String(detail.mentosPrice),
-    location: detail.mentosLocation,
-    // category / imageFile은 스펙상 제외 (필요 시 확장)
-  };
-}
-
 export default function EditMentosPage() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { id } = useParams<RouteParams>();
-  const { isOpen, openModal, closeModal } = useModal<ModalType, ModalData>();
+  const { isOpen, openModal, closeModal } = useModal();
 
-  // 상세 조회 결과 상태 (undefined: 로딩, null: 에러/없음, 객체: 성공)
-  const [detail, setDetail] = useState<MentosDetailResult | null | undefined>(undefined);
+  // ✅ MentosForm의 initialValues가 fileName을 허용하므로 상태도 같은 형태로
+  type InitialValues = Partial<MentosFormValues> & { fileName?: string };
+
+  const [initialValues, setInitialValues] = useState<InitialValues | null>(null);
+  const [fetching, setFetching] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isSubmitting, setSubmitting] = useState(false);
+
+  // ✅ 서버 → 폼 매핑 (fileName 포함)
+  const toFormValues = (src: MentosDetailResult): InitialValues => ({
+    title: src.mentosTitle ?? "",
+    content: src.mentosDescription ?? "",
+    price: src.mentosPrice != null ? String(src.mentosPrice) : "",
+    location: src.mentosLocation ?? "",
+    category: "",
+    imageFile: null,
+    fileName: src.mentosImage ? src.mentosImage.split("/").pop() || "" : "",
+  });
 
   useEffect(() => {
-    if (!id) {
-      setDetail(null);
-      return;
-    }
-    let alive = true;
+    if (!id) return;
     (async () => {
+      setFetching(true);
+      setErrorMsg(null);
       try {
-        const res = await getMentosDetail(Number(id)); // ✅ number로 변환
-        if (alive) setDetail(res);
+        const detail = await getMentosDetail(Number(id));
+        setInitialValues(toFormValues(detail));
       } catch {
-        if (alive) setDetail(null);
+        setErrorMsg("멘토스 정보를 불러오지 못했습니다.");
+        setInitialValues(null);
+      } finally {
+        setFetching(false);
       }
     })();
-    return () => {
-      alive = false;
-    };
   }, [id]);
 
-  const handleUpdate = async (values: Partial<MentosItem>) => {
+  const handleUpdate = async (values: MentosFormValues) => {
     if (!id) return;
-    // MentosForm에서 넘어오는 값(MentosFormValues)을 Partial<MentosItem>로 맞춰 호출
-    await updateMentos(id, {
-      title: values.title ?? "",
-      content: values.content ?? "",
-      price: values.price ?? "",
-      location: values.location ?? "",
-    });
-    openModal("updateMentos");
+    setSubmitting(true);
+    setErrorMsg(null);
+    try {
+      const payload: UpdateMentosRequest = {
+        requestDto: {
+          mentosTitle: values.title,
+          mentosContent: values.content,
+          categorySeq: Number(values.category || 0),
+          price: Number(values.price),
+        },
+        imageFile: values.imageFile ?? null,
+      };
+      const res = await updateMentoMentos(Number(id), payload);
+      if (res.code === 1000) openModal("updateMentos");
+      else setErrorMsg(res.message || "수정에 실패했습니다.");
+    } catch {
+      setErrorMsg("수정 중 오류가 발생했습니다.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleClose = () => {
+  const handleConfirmClose = () => {
     closeModal();
     navigate("/mento/my-list");
   };
 
-  if (detail === undefined) return <div className="p-6">불러오는 중…</div>;
-  if (detail === null) return <div className="p-6 text-red-600">데이터를 불러오지 못했습니다.</div>;
+  if (fetching) return <div className="p-6">불러오는 중…</div>;
+  if (!initialValues) return <div className="p-6 text-red-600">{errorMsg ?? "데이터 없음"}</div>;
 
   return (
-    <div className="flex h-full w-full justify-center overflow-x-hidden bg-[#f5f6f8]">
+    <div className="flex min-h-full w-full justify-center bg-[#f5f6f8]">
       <section className="w-full bg-white px-4 py-5 shadow">
-        <h1 className="mt-6 mb-15 pl-2 text-[20px] font-bold">멘토링 수정하기</h1>
+        <h1 className="font-WooridaumB mb-6 text-[20px] font-bold">멘토링 수정하기</h1>
 
         <CommonModal
           type="updateMentos"
           isOpen={isOpen}
-          onConfirm={handleClose}
-          onCancel={handleClose}
+          onConfirm={handleConfirmClose}
+          onCancel={handleConfirmClose}
           onSubmit={() => {}}
           modalData={{}}
         />
 
-        <MentosForm
-          mode="edit"
-          // 상세 응답을 폼 초기값으로 매핑
-          initialValues={mapDetailToFormInitial(detail)}
-          onSubmit={handleUpdate}
-        />
+        {isSubmitting && (
+          <CommonModal
+            type="loading"
+            isOpen
+            onConfirm={() => {}}
+            onCancel={() => {}}
+            onSubmit={() => {}}
+            modalData={{
+              title: "멘토스를 수정 중입니다...",
+              description: "잠시만 기다려주세요 ⏳",
+            }}
+          />
+        )}
+
+        {errorMsg && (
+          <div className="mb-3 rounded bg-red-50 px-3 py-2 text-sm text-red-600">{errorMsg}</div>
+        )}
+
+        {/* ✅ fileName을 포함한 initialValues 전달 */}
+        <MentosForm mode="edit" initialValues={initialValues} onSubmit={handleUpdate} />
       </section>
     </div>
   );

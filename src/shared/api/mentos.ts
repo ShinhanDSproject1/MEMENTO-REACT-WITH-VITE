@@ -1,4 +1,5 @@
 import { http, type AppRequestConfig } from "@api/https";
+import type { AxiosRequestHeaders } from "axios";
 
 const BASE = "/mentos";
 
@@ -48,7 +49,9 @@ export async function getMentosDetail(
   mentosSeq: number,
   opts?: { public?: boolean },
 ): Promise<MentosDetailResult> {
-  const cfg: AppRequestConfig = {};
+  const cfg: AppRequestConfig = {
+    headers: {} as AxiosRequestHeaders, // 타입 강제 캐스팅
+  };
   if (opts?.public) cfg._skipAuth = true; // 공개 호출만 명시적으로 스킵
 
   const { data } = await http.get<ApiResponse<MentosDetailResult>>(

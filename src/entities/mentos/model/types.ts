@@ -128,4 +128,59 @@ export interface MentorMentosListResult {
   hasNext: boolean;
 }
 
+/** 멘토스 수정 요청 DTO */
+export interface UpdateMentosRequestDto {
+  mentosTitle: string;
+  mentosContent: string;
+  categorySeq: number;
+  price: number;
+}
+
+/** 멘토스 수정 요청 페이로드 */
+export interface UpdateMentosRequest {
+  requestDto: UpdateMentosRequestDto;
+  imageFile?: File | null;
+}
+
+/** 서버 공통 응답(이번 API는 result 없음) */
+export type BareApiResponse = {
+  code: number;
+  status: number;
+  message: string;
+  timestamp?: string;
+};
+
+/* 상세 페이지에 사용되는 타입들 */
+export interface ReviewItem {
+  reviewSeq: number;
+  reviewRating: number;
+  reviewDate: string; // "YYYY-MM-DD"
+  reviewContent: string;
+}
+
+export interface MentoProfile {
+  mentoName: string;
+  mentoImg: string;
+  mentoDescription: string;
+}
+
+export interface MentosDetailResult {
+  mentosImage: string;
+  mentosTitle: string;
+  mentosLocation: string;
+  reviewTotalCnt: number;
+  reviewRatingAvg: number;
+  reviews: ReviewItem[];
+  mento: MentoProfile | MentoProfile[];
+  mentosDescription: string;
+  mentosPrice: number;
+  imageFileName: string;
+}
+
+export interface SimpleMentosDetail {
+  mentosTitle: string;
+  mentosContent: string;
+  price: number;
+}
+
 export type MentorMentosListResponse = ApiResponse<MentorMentosListResult>;
