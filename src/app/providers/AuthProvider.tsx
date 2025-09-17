@@ -16,41 +16,49 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const [user, setUser] = useState<AuthContextValue["user"]>(null);
   const [bootstrapped, setBootstrapped] = useState(false);
 
+  // 부트스트랩: 스냅샷 우선 반영 → 가능하면 조용히 리프레시
   useEffect(() => {
     (async () => {
-      const hasLocalAuth =
-        !!localStorage.getItem("accessToken") || !!localStorage.getItem("memberSeq");
-      if (!hasLocalAuth) {
-        setBootstrapped(true);
-        return;
-      }
       try {
-        const at = await refreshSilently(); // AT 발급
+        // 1) 로컬 스냅샷을 먼저 세팅 (새로고침 깜빡임 방지)
+        const snap = loadUserSnapshot(); // 예: { accessToken?: string, ... }
+        if (snap) {
+          setUser(snap);
+          if (snap.accessToken) {
+            saveAccessToken(snap.accessToken);
+            setAccessToken(snap.accessToken);
+          }
+        }
+
+        // 2) 조용한 리프레시 시도(쿠키/조건 충족 시)
+        //    실패해도 스냅샷은 그대로 두어 "로그아웃처럼 보이는 현상" 방지
+        const at = await refreshSilently().catch(() => null);
         if (at) {
           saveAccessToken(at);
           setAccessToken(at);
-          const cached = loadUserSnapshot();
-          if (cached) setUser(cached);
-        } else {
-          clearAccessToken();
-          clearUserSnapshot();
+          if (snap) {
+            const next = { ...snap, accessToken: at };
+            saveUserSnapshot(next);
+            setUser(next);
+          }
         }
-      } catch {
-        clearAccessToken();
-        setAccessToken(null);
-        setUser(null);
       } finally {
         setBootstrapped(true);
       }
     })();
   }, []);
 
-  // * 브라우저 탭 간 동기화
+  // 브라우저 탭 간 동기화
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === "auth:user") {
         const cached = loadUserSnapshot();
         setUser(cached);
+        setAccessToken(cached?.accessToken ?? null);
+      }
+      if (e.key === "accessToken") {
+        const at = localStorage.getItem("accessToken");
+        setAccessToken(at);
       }
     };
     window.addEventListener("storage", onStorage);
@@ -73,6 +81,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       await logoutApi();
     } finally {
       clearAccessToken();
+      clearUserSnapshot();
       setAccessToken(null);
       setUser(null);
     }
@@ -82,7 +91,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     () => ({
       user,
       accessToken,
-      isAuthenticated: !!accessToken,
+      isAuthenticated: !!(accessToken ?? user?.accessToken),
       login,
       logout,
     }),

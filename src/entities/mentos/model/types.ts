@@ -165,21 +165,18 @@ export interface MentoProfile {
 }
 
 export interface MentosDetailResult {
-  mentosImage: string;
+  mentosSeq: number;
   mentosTitle: string;
-  mentosLocation: string;
-  reviewTotalCnt: number;
-  reviewRatingAvg: number;
-  reviews: ReviewItem[];
-  mento: MentoProfile | MentoProfile[];
-  mentosDescription: string;
-  mentosPrice: number;
-  imageFileName: string;
+  categorySeq: number;
+  mentosContent: string;
+  mentosImage: string;
+  price: number;
 }
 
 export interface SimpleMentosDetail {
   mentosTitle: string;
   mentosContent: string;
+  imageFileName: string;
   price: number;
 }
 
