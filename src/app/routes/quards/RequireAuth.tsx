@@ -1,12 +1,11 @@
-import { loadUserSnapshot } from "@shared/auth";
+import { useAuth } from "@/entities/auth";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 export default function RequireAuth() {
-  const snap = loadUserSnapshot();
+  const { isAuthenticated } = useAuth(); // 컨텍스트만 신뢰
   const location = useLocation();
 
-  // accessToken 없으면 로그인으로
-  if (!snap?.accessToken) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
   return <Outlet />;

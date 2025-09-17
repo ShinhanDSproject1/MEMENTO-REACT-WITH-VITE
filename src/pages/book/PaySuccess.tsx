@@ -1,9 +1,9 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
-import CommonModal from "@/widgets/common/CommonModal";
-import { MODAL_CONFIG } from "@/shared/ui/ModalConfig";
 import { confirmPayment } from "@/shared/api/payments";
 import { getAccessToken } from "@/shared/auth/token";
+import { MODAL_CONFIG } from "@/shared/ui/ModalConfig";
+import CommonModal from "@/widgets/common/CommonModal";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const weekdayKo = ["일", "월", "화", "수", "목", "금", "토"];
 const fmt = (ymd?: string, time?: string) => {
@@ -121,7 +121,7 @@ export default function PaySuccess() {
     setOpen(false);
     const id = roomIdRef.current;
     if (id) navigate(`/chat/${id}`, { replace: true });
-    else navigate("/mentee/mymentos", { replace: true, state: { fromPaymentSuccess: true } });
+    else navigate("/menti/mymentos", { replace: true, state: { fromPaymentSuccess: true } });
   };
 
   return (
