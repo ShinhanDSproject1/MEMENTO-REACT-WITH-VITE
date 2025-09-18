@@ -1,30 +1,15 @@
 // src/pages/MentorSignup.tsx
 import logo from "@assets/images/logo/memento-logo.svg";
 import { ko } from "date-fns/locale";
-import React, {
-  forwardRef,
-  useMemo,
-  useState,
-  type ChangeEvent,
-  type FormEvent,
-  type ForwardedRef,
-} from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Link, useNavigate } from "react-router-dom";
 
 import { loadMentorOnboardingDraft } from "@/shared/lib/mentorProfileStorage";
 
-// 숨김 input (DatePicker 등에서 사용 가능)
-const HiddenInput = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
-  (props, ref: ForwardedRef<HTMLInputElement>) => (
-    <input ref={ref} {...props} className="sr-only" readOnly aria-hidden="true" tabIndex={-1} />
-  ),
-);
-
 type Birth = { y: string; m: string; d: string };
 
-// 한글 요일 → ISO
 const KOR_TO_ISO_DAY: Record<string, string> = {
   일: "SUN",
   월: "MON",
@@ -35,10 +20,8 @@ const KOR_TO_ISO_DAY: Record<string, string> = {
   토: "SAT",
 };
 
-// 9 → "09:00"
 const toHHMM = (h: number) => String(h).padStart(2, "0") + ":00";
 
-// dataURL → File
 async function dataUrlToFile(dataUrl: string, filename = "profile.png"): Promise<File> {
   const res = await fetch(dataUrl);
   const blob = await res.blob();
@@ -58,9 +41,13 @@ export default function MentorSignup() {
   const [phone, setPhone] = useState("");
   const [birth, setBirth] = useState<Birth>({ y: "", m: "", d: "" });
 
+  // 달력 popover 열림
+  const [isCalOpen, setIsCalOpen] = useState(false);
+  const popoverRef = useRef<HTMLDivElement | null>(null);
+
   const [certOwn, setCertOwn] = useState(false);
   const [certFile, setCertFile] = useState<File | null>(null);
-  const [certName, setCertName] = useState(""); // 🔹 새 API: certificationName 전송용
+  const [certName, setCertName] = useState("");
 
   const [agree, setAgree] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -83,16 +70,31 @@ export default function MentorSignup() {
     return id.trim() !== "" && pwOk && name.trim() !== "" && phoneOk && birthOk && certOk && agree;
   }, [id, pwOk, name, phoneOk, birthOk, certOwn, certFile, certName, agree]);
 
-  // ===== 온보딩(소개) 페이지에서 저장한 임시값 불러오기 =====
-  const draft = loadMentorOnboardingDraft(); // { profileImageDataUrl, profileContent, days, start, end, zonecode, address, detail, bname }
+  // 온보딩 임시값
+  const draft = loadMentorOnboardingDraft();
 
-  // ===== 전송 함수 (새 API 스펙) =====
+  // ESC / 바깥 클릭으로 닫기
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setIsCalOpen(false);
+    const onClickOutside = (e: MouseEvent) => {
+      if (!popoverRef.current) return;
+      if (!popoverRef.current.contains(e.target as Node)) setIsCalOpen(false);
+    };
+    if (isCalOpen) {
+      document.addEventListener("keydown", onKey);
+      document.addEventListener("mousedown", onClickOutside);
+    }
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onClickOutside);
+    };
+  }, [isCalOpen]);
+
+  // ===== 전송 함수 (서버 스펙 맞춤) =====
   const submitSignup = async () => {
     const BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
-    // 1) 온보딩 값 정리
     const daysFromDraft: string[] = Array.isArray(draft?.days) ? draft!.days : [];
-    // "월,화" → "MON,TUE" (draft가 이미 ISO면 그대로 유지)
     const availableDays =
       daysFromDraft.length > 0
         ? daysFromDraft
@@ -109,9 +111,6 @@ export default function MentorSignup() {
     const mentoDetail = draft?.detail ?? "";
     const mentoProfileContent = draft?.profileContent ?? "";
 
-    // 2) 멘토 프로필 이미지 파일 준비(선택)
-    // - 온보딩에서 dataURL을 저장했다면 파일로 변환하여 mentoImage에 첨부
-    // - 이미지 없어도 null 가능(요구사항)
     let mentoImageFile: File | null = null;
     if (draft?.profileImageDataUrl && draft.profileImageDataUrl.startsWith("data:")) {
       try {
@@ -121,10 +120,7 @@ export default function MentorSignup() {
       }
     }
 
-    // 3) 가입 폼 값 + 온보딩 값 → multipart/form-data
     const form = new FormData();
-
-    // --- 회원 기본 정보 ---
     form.append("memberId", id.trim());
     form.append("memberPwd", pw);
     form.append("memberName", name.trim());
@@ -134,8 +130,6 @@ export default function MentorSignup() {
       `${birth.y}-${birth.m.padStart(2, "0")}-${birth.d.padStart(2, "0")}`,
     );
 
-    // --- 자격증 (파일 자체는 전송 X, 파일명/이름만 보냄 규격) ---
-    // certificationImgUrl: 파일명(혹은 URL), certificationName: 자격증명
     if (certOwn && certFile) {
       form.append("certificationImgUrl", certFile.name);
       form.append("certificationName", certName.trim());
@@ -144,30 +138,21 @@ export default function MentorSignup() {
       form.append("certificationName", "");
     }
 
-    // --- 멘토 프로필 정보(온보딩) ---
     form.append("mentoProfileContent", mentoProfileContent);
     form.append("startTime", startTime);
     form.append("endTime", endTime);
-    form.append("availableDays", availableDays); // "TUE,THU,SAT" 등
+    form.append("availableDays", availableDays);
     form.append("mentoPostcode", mentoPostcode);
     form.append("mentoRoadAddress", mentoRoadAddress);
     form.append("mentoBname", mentoBname);
     form.append("mentoDetail", mentoDetail);
-
-    // --- 멘토 이미지(선택) ---
-    if (mentoImageFile) {
-      form.append("mentoImage", mentoImageFile);
-    } else {
-      // 백엔드가 null 허용이면 생략해도 되지만 명시하고 싶으면 빈 블랍 전송 X → 그냥 append 안 하는게 일반적
-    }
+    if (mentoImageFile) form.append("mentoImage", mentoImageFile);
 
     const res = await fetch(`${BASE}/auth/signup/mento`, {
       method: "POST",
       body: form,
       credentials: "include",
-      headers: {
-        "Idem-Key": "mento-signup-" + Date.now(), // 멱등키 예시
-      },
+      headers: { "Idem-Key": "mento-signup-" + Date.now() },
     });
 
     const payload = await res.json().catch(() => ({}));
@@ -186,9 +171,12 @@ export default function MentorSignup() {
     if (!canSubmit || submitting) return;
     setErrorMsg("");
     setSubmitting(true);
-
     try {
-      await submitSignup(); // 성공 시 {code:1000,status:200,message:"..."}
+      await submitSignup();
+
+      // ✅ 가입 성공 → 세션스토리지 제거
+      sessionStorage.removeItem("mentorProfile.v1");
+
       navigate("/signup-complete");
     } catch (err: any) {
       const status = err?.response?.status ?? err?.status;
@@ -294,71 +282,71 @@ export default function MentorSignup() {
           )}
         </label>
 
-        {/* 생년월일 (인라인 DatePicker) */}
+        {/* 생년월일 — 버튼 아래 popover */}
         <div>
           <div className="mb-2 text-sm font-semibold text-slate-600">생년월일</div>
-          <div className="relative">
-            <div className="grid grid-cols-4 gap-2">
-              <input
-                placeholder="년도"
-                readOnly
-                value={birth.y}
-                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
-              />
-              <input
-                placeholder="월"
-                readOnly
-                value={birth.m}
-                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
-              />
-              <input
-                placeholder="일"
-                readOnly
-                value={birth.d}
-                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
-              />
+
+          <div className="grid grid-cols-4 gap-2">
+            <input
+              placeholder="년도"
+              readOnly
+              value={birth.y}
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
+            />
+            <input
+              placeholder="월"
+              readOnly
+              value={birth.m}
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
+            />
+            <input
+              placeholder="일"
+              readOnly
+              value={birth.d}
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
+            />
+
+            {/* 트리거 + popover 래퍼 (relative) */}
+            <div className="relative">
               <button
                 type="button"
-                onClick={() => {
-                  const now = new Date();
-                  if (!birth.y) {
-                    setBirth({
-                      y: String(now.getFullYear()),
-                      m: String(now.getMonth() + 1).padStart(2, "0"),
-                      d: String(now.getDate()).padStart(2, "0"),
-                    });
-                  }
-                }}
-                className="flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#1161FF] shadow-sm hover:bg-slate-50">
+                onClick={() => setIsCalOpen((v) => !v)}
+                className="flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#1161FF] shadow-sm hover:bg-slate-50">
                 📅 선택
               </button>
-            </div>
 
-            <div className="mt-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
-              <DatePicker
-                selected={
-                  birth.y && birth.m && birth.d
-                    ? new Date(Number(birth.y), Number(birth.m) - 1, Number(birth.d))
-                    : null
-                }
-                onChange={(date: Date | null) => {
-                  if (!date) return;
-                  setBirth({
-                    y: String(date.getFullYear()),
-                    m: String(date.getMonth() + 1).padStart(2, "0"),
-                    d: String(date.getDate()).padStart(2, "0"),
-                  });
-                }}
-                inline
-                showMonthDropdown
-                showYearDropdown
-                locale={ko}
-                openToDate={
-                  birth.y && birth.m
-                    ? new Date(Number(birth.y), Number(birth.m) - 1, 1)
-                    : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-                }
-              />
+              {/* Popover (absolute, 버튼 아래로) */}
+              {isCalOpen && (
+                <div
+                  ref={popoverRef}
+                  className="absolute right-0 z-50 mt-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+                  <DatePicker
+                    selected={
+                      birth.y && birth.m && birth.d
+                        ? new Date(Number(birth.y), Number(birth.m) - 1, Number(birth.d))
+                        : null
+                    }
+                    onChange={(date: Date | null) => {
+                      if (!date) return;
+                      setBirth({
+                        y: String(date.getFullYear()),
+                        m: String(date.getMonth() + 1).padStart(2, "0"),
+                        d: String(date.getDate()).padStart(2, "0"),
+                      });
+                      setIsCalOpen(false);
+                    }}
+                    inline
+                    showMonthDropdown
+                    showYearDropdown
+                    locale={ko}
+                    openToDate={
+                      birth.y && birth.m
+                        ? new Date(Number(birth.y), Number(birth.m) - 1, 1)
+                        : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+                    }
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -392,11 +380,11 @@ export default function MentorSignup() {
           </div>
         </div>
 
-        {/* 자격증 업로드/이름 입력 (보유 시) */}
+        {/* 자격증 입력(보유 시) */}
         {certOwn && (
           <div className="mt-4 space-y-2">
             <div className="text-xs text-slate-500">
-              * 새 API: 파일 자체는 올리지 않고, 파일명과 자격증명만 전송합니다.
+              * 새 API: 파일 자체는 업로드하지 않고 파일명과 자격증명만 전송합니다.
             </div>
             <div className="flex items-center gap-2">
               <input
@@ -438,7 +426,6 @@ export default function MentorSignup() {
           <span className="text-sm">이용약관 및 개인정보처리방침에 동의합니다</span>
         </label>
 
-        {/* 오류 메시지 */}
         {errorMsg && <p className="text-sm text-red-500">{errorMsg}</p>}
 
         {/* 버튼들 */}
