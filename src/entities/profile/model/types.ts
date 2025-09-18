@@ -49,7 +49,20 @@ export interface UpdatePasswordInput {
   confirmPassword: string;
 }
 
+export type MentoProfileDetail = {
+  mentoProfileImage?: string | null;
+  mentoProfileContent?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
+  availableDays?: string | null;
+  mentoPostcode?: string | null;
+  mentoRoadAddress?: string | null;
+  mentoBname?: string | null;
+  mentoDetail?: string | null;
+};
+
 export type GetProfileSuccess = ApiEnvelope<GetProfile>;
 export type UpdateProfileSuccess = ApiEnvelope<null>;
 export type UpdatePasswordSuccess = ApiEnvelope<null>;
 export type WithdrawSuccess = ApiEnvelope<null>;
+export type GetMentoProfileDetailSuccess = ApiEnvelope<MentoProfileDetail>;
