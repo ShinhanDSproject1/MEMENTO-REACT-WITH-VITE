@@ -19,6 +19,7 @@ export interface MentosCardProps {
   onRefundClick?: () => void;
   onReportClick?: () => void;
   onUpdateClick?: () => void;
+  refundDisabled?: boolean;
 }
 
 const statusStyles: Record<MentosStatus, string> = {
