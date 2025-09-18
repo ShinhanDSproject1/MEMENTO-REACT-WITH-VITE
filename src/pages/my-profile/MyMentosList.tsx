@@ -1,6 +1,7 @@
 // src/pages/MyMentosList.tsx
 import { createReview } from "@/entities/review/api/createReview";
 import { useMyMentosInfiniteList } from "@/features/mentos-list/hooks/useMyMentosInfiniteList";
+import { refundPayment } from "@/shared/api/payments";
 import Button from "@/widgets/common/Button";
 import MentosCard from "@/widgets/common/MentosCard";
 import MentosMainTitleComponent from "@/widgets/mentos/MentosMainTitleComponent";
@@ -14,7 +15,6 @@ import type { ModalKey } from "@shared/ui/ModalConfig"; // ★ 설정의 키 재
 import { CommonModal } from "@widgets/common";
 import { useEffect, useMemo, useRef, type FC } from "react";
 import { useNavigate } from "react-router-dom";
-import { refundPayment } from "@/shared/api/payments";
 
 // ----- Types -----
 type Role = "mento" | "menti";
@@ -96,11 +96,11 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
           openModal("refundComplete");
           await mentee.refetch?.();
         } else {
-          openModal("deleteFailed", { message: res?.message ?? "환불에 실패했습니다." });
+          openModal("faildPayment", { message: res?.message ?? "환불에 실패했습니다." });
         }
       } catch (e: any) {
         closeModal();
-        openModal("deleteFailed", {
+        openModal("faildPayment", {
           message: e?.response?.data?.message ?? "환불 중 오류가 발생했습니다.",
         });
       }
@@ -135,18 +135,6 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
     }
 
     if (modalType === "dismissUser") return (closeModal(), openModal("dismissSuccess"));
-    // if (modalType === "refundMentos") return (closeModal(), openModal("refundComplete"));
-
-    // if (modalType === "dismissUser") {
-    //   closeModal();
-    //   openModal("dismissSuccess");
-    //   return;
-    // }
-    // if (modalType === "refundMentos") {
-    //   closeModal();
-    //   openModal("refundComplete");
-    //   return;
-    // }
 
     // 나머지 모달은 단순 닫기
     closeModal();
@@ -198,7 +186,7 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
     if (modalType === "reportMentos") {
       const { mentosSeq, reportType, imageFile, idemKey } = (modalData ?? {}) as ReportModalData;
       if (!mentosSeq || !reportType || !idemKey) {
-        openModal("withdrawFailed", { message: "신고 정보가 올바르지 않습니다." });
+        openModal("withdrawFailed", { message: "신고 분류와 파일을 입력해주세요." });
         return;
       }
 
@@ -420,10 +408,16 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
                 onReportClick={() => onReportClick(item.mentosSeq)}
                 onReviewClick={() => onReviewClick(item.mentosSeq)}
                 onRefundClick={() =>
-                  pseq ? onRefundClick(pseq) : alert("해당 항목에는 결제 내역이 없습니다.")
+                  pseq
+                    ? onRefundClick(pseq)
+                    : pseq
+                      ? onRefundClick(pseq)
+                      : openModal("noPaymentInfo", {
+                          message: "해당 항목에는 결제 내역이 없습니다.",
+                        })
                 }
                 // 선택: 결제 PK 없으면 버튼 비활성화(컴포넌트 prop이 있다면 사용)
-                refundDisabled={!pseq}
+                //refundDisabled={!pseq}
               />
             );
           })}
