@@ -21,14 +21,12 @@ export default function LocationField({ onChange }: LocationFieldProps) {
   const [bname, setBname] = useState<string | undefined>();
   const { loaded, openPostcode } = useDaumPostcode();
 
-  // ✅ location 은 address만 사용 (detail 합치지 않음)
   const emit = (z = zonecode, a = address, d = detail, b = bname) => {
     onChange?.({
       zonecode: z,
       address: a,
       detail: d,
       bname: b,
-      location: a, // ← 여기! 기본 주소만 넘깁니다.
     });
   };
 

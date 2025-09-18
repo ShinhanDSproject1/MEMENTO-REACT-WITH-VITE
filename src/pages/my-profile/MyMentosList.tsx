@@ -1,6 +1,7 @@
 import { createReview } from "@/entities/review/api/createReview";
 
 import { useMyMentosInfiniteList } from "@/features/mentos-list/hooks/useMyMentosInfiniteList";
+import { refundPayment } from "@/shared/api/payments";
 import Button from "@/widgets/common/Button";
 import MentosCard from "@/widgets/common/MentosCard";
 import MentosMainTitleComponent from "@/widgets/mentos/MentosMainTitleComponent";
@@ -11,11 +12,10 @@ import type { ReportType } from "@entities/mentos/model/types";
 import { useMentoMentosInfiniteList } from "@features/mentos-list";
 import { useModal } from "@hooks/ui/useModal";
 import type { ModalKey } from "@shared/ui/ModalConfig"; // ★ 설정의 키 재사용
+import { useQueryClient } from "@tanstack/react-query";
 import { CommonModal } from "@widgets/common";
 import { useEffect, useMemo, useRef, type FC } from "react";
 import { useNavigate } from "react-router-dom";
-import { refundPayment } from "@/shared/api/payments";
-import { useQueryClient } from "@tanstack/react-query";
 
 // ----- Types -----
 type Role = "mento" | "menti";
@@ -99,11 +99,11 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
 
           openModal("refundComplete");
         } else {
-          openModal("deleteFailed", { message: res?.message ?? "환불에 실패했습니다." });
+          openModal("faildPayment", { message: res?.message ?? "환불에 실패했습니다." });
         }
       } catch (e: any) {
         closeModal();
-        openModal("deleteFailed", {
+        openModal("faildPayment", {
           message: e?.response?.data?.message ?? "환불 중 오류가 발생했습니다.",
         });
       }

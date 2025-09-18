@@ -1,6 +1,5 @@
 // src/pages/MentoIntroduce.tsx
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
-import { useNavigate } from "react-router-dom";
 
 import Button from "@/widgets/common/Button";
 import DayChips, { DAYS, type Day } from "@/widgets/common/DayChips";
@@ -10,6 +9,11 @@ import { SimpleEditor } from "@/widgets/common/tiptap-templates/simple/simple-ed
 
 import kogiriFace from "@assets/images/character/character-kogiri-face.svg";
 import { updateMentoProfileDetail, useMentoProfileDetail } from "@entities/profile";
+
+// ★ 모달 훅 & 컴포넌트
+import { useModal } from "@hooks/ui/useModal";
+import type { ModalKey } from "@shared/ui/ModalConfig";
+import { CommonModal } from "@widgets/common";
 
 // ---------- 유틸: 서버 ↔ UI 매핑 ----------
 const ISO_TO_KOR_DAY: Record<string, Day> = {
@@ -55,10 +59,17 @@ function parseHour(hhmm?: string | null, fallback: number): number {
 const toHHMM = (h: number) => String(h).padStart(2, "0") + ":00";
 
 export default function MentoIntroduce() {
-  const navigate = useNavigate();
-
   // 서버 조회 훅 (react-query 등)
   const { data, isLoading, isError, error, refetch, isFetching } = useMentoProfileDetail();
+
+  // ★ 모달
+  const { isOpen, modalType, modalData, openModal, closeModal } = useModal() as {
+    isOpen: boolean;
+    modalType?: ModalKey;
+    modalData?: Record<string, unknown>;
+    openModal: (type: ModalKey, data?: Record<string, unknown>) => void;
+    closeModal: () => void;
+  };
 
   // 이미지 (미리보기 + 실제 업로드 파일)
   const [overrideImage, setOverrideImage] = useState<string | null>(null);
@@ -84,7 +95,7 @@ export default function MentoIntroduce() {
 
   // ✅ 페이지 진입 시 항상 서버 재조회 (세션 값 사용 안 함)
   useEffect(() => {
-    // 폼을 빈 상태로 초기화해서 이전 화면 잔상이 보이지 않도록 함
+    // 폼 초기화
     setOverrideImage(null);
     setImageFile(null);
     setProfileContent("");
@@ -97,7 +108,7 @@ export default function MentoIntroduce() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 최초 1회
 
-  // 서버 데이터 → 폼 상태 반영 (세션 사용 X)
+  // 서버 데이터 → 폼 상태 반영
   useEffect(() => {
     if (!data) return;
 
@@ -133,7 +144,7 @@ export default function MentoIntroduce() {
     reader.readAsDataURL(file);
   };
 
-  // 저장 (PATCH) 후 재조회
+  // 저장 (PATCH) 후 재조회 — 모든 alert → 모달로 변경
   const handleSubmit = async () => {
     const requestDto = {
       mentoProfileContent: profileContent,
@@ -146,20 +157,30 @@ export default function MentoIntroduce() {
       mentoDetail: location.detail ?? "",
     };
 
+    // 로딩 모달
+    openModal("loading", { title: "저장 중입니다…", description: "잠시만 기다려주세요 ⏳" });
+
     try {
       const res = await updateMentoProfileDetail({
         requestDto,
         imageFile,
       });
 
+      closeModal(); // loading 닫기
+
       if (res.code === 1000) {
-        alert("프로필이 저장되었습니다.");
-        await refetch(); // 저장 직후 최신 데이터 재조회
+        // ✅ 성공 모달 (프로젝트의 완료용 키로 교체 가능: e.g. "saveComplete")
+        openModal("reviewComplete", { message: "프로필이 저장되었습니다." });
+        await refetch();
       } else {
-        alert(res.message || "프로필 저장에 실패했습니다.");
+        // ✅ 에러 모달
+        openModal("withdrawFailed", { message: res.message || "프로필 저장에 실패했습니다." });
       }
     } catch (e: any) {
-      alert(e?.response?.data?.message || "프로필 저장 중 오류가 발생했습니다.");
+      closeModal(); // loading 닫기
+      openModal("withdrawFailed", {
+        message: e?.response?.data?.message || "프로필 저장 중 오류가 발생했습니다.",
+      });
     }
   };
 
@@ -281,6 +302,18 @@ export default function MentoIntroduce() {
           </Button>
         </footer>
       </div>
+
+      {/* ★ 공통 모달 렌더 */}
+      {isOpen && modalType ? (
+        <CommonModal
+          type={modalType}
+          isOpen={isOpen}
+          onCancel={closeModal}
+          onConfirm={closeModal}
+          onSubmit={closeModal}
+          modalData={modalData}
+        />
+      ) : null}
     </main>
   );
 }
