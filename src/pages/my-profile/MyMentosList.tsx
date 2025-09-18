@@ -32,7 +32,6 @@ interface MyMentosListProps {
   role: Role;
 }
 
-
 // 컴포넌트 상단에 유틸 추가
 function getPaymentSeq(it: any): number | undefined {
   return (
@@ -49,7 +48,7 @@ function getPaymentSeq(it: any): number | undefined {
 function getPaymentSeqFromLS(mentosSeq: number): number | undefined {
   const v = localStorage.getItem(`paymentSeqByMentos:${mentosSeq}`);
   return v ? Number(v) : undefined;
-
+}
 interface ReviewModalData {
   mentosSeq?: number;
   initialRating?: number;
@@ -64,7 +63,6 @@ interface ReportModalData {
   reportType?: ReportType;
   imageFile?: File | null;
   idemKey?: string; // 신고는 멱등키 사용
-
 }
 
 const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
@@ -78,7 +76,6 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
 
   /** 공통 확인 핸들러 */
   const handleConfirmAction = async () => {
-
     // 환불
     if (modalType === "refundMentos") {
       const { paymentsSeq } = (modalData ?? {}) as { paymentsSeq?: number };
@@ -137,21 +134,19 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
       return;
     }
 
-
     if (modalType === "dismissUser") return (closeModal(), openModal("dismissSuccess"));
     // if (modalType === "refundMentos") return (closeModal(), openModal("refundComplete"));
 
-    if (modalType === "dismissUser") {
-      closeModal();
-      openModal("dismissSuccess");
-      return;
-    }
-    if (modalType === "refundMentos") {
-      closeModal();
-      openModal("refundComplete");
-      return;
-    }
-
+    // if (modalType === "dismissUser") {
+    //   closeModal();
+    //   openModal("dismissSuccess");
+    //   return;
+    // }
+    // if (modalType === "refundMentos") {
+    //   closeModal();
+    //   openModal("refundComplete");
+    //   return;
+    // }
 
     // 나머지 모달은 단순 닫기
     closeModal();
@@ -247,10 +242,6 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
     openModal("reportMentos", { title: "신고하기", mentosSeq, idemKey: crypto.randomUUID() });
 
   const onRefundClick = (paymentsSeq: number) => openModal("refundMentos", { paymentsSeq });
-
-
-
-  const onRefundClick = (mentosSeq: number) => openModal("refundMentos", { mentosSeq });
 
   /* -------------------- 데이터 훅 -------------------- */
 
