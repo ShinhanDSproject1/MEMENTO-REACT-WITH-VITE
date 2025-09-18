@@ -1,82 +1,120 @@
-// src/pages/admin/ReportList.tsx
+import { http } from "@/shared/api/https";
+import { translateReportType } from "@/utils/reportUtils";
+import type { Report, ReportDetail, ApiResponse, ApiDetailResponse } from "@/utils/reportUtils";
 import { useModal } from "@hooks/ui/useModal";
 import { CommonModal } from "@widgets/common";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-// ---- 타입 정의 ----
-type ReportRow = {
-  id: number;
-  name: string;
-  role: string;
-  category: string;
-};
-
-type ModalType = "reportDetail" | "reportAgree" | "reportReject";
-
-interface ModalData {
-  title?: string;
-  reporter?: string;
-  role?: string;
-  category?: string;
-  file?: string;
-  [key: string]: unknown;
-}
-
-const MOCK: ReportRow[] = [
-  { id: 1, name: "최다희", role: "멘토", category: "금전" },
-  { id: 2, name: "김정은", role: "멘티", category: "부적절한 언행" },
-  { id: 3, name: "김대현", role: "멘티", category: "잦은 조퇴" },
-  { id: 4, name: "김기도", role: "멘티", category: "잦은 지각" },
-  { id: 5, name: "조상호", role: "멘티", category: "부적절한 언행" },
-];
+// ModalType에 확인 모달 키를 추가
+type ModalType =
+  | "reportDetail"
+  | "reportAgree"
+  | "reportReject"
+  | "confirmReportAgree"
+  | "confirmReportReject";
 
 export default function ReportList() {
-  const [rows] = useState<ReportRow[]>(MOCK);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reportDetail, setReportDetail] = useState<ReportDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState<boolean>(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
-  const { isOpen, modalType, openModal, closeModal, modalData } = useModal<ModalType, ModalData>();
+  // useModal의 modalData에 'onConfirm' 시 실행할 함수를 담을 수 있도록 타입 지정
+  const { isOpen, modalType, openModal, closeModal, modalData } = useModal<
+    ModalType,
+    {
+      onConfirm?: () => void;
+    }
+  >();
 
-  const handleSubmit = () => {
-    if (modalType === "reportDetail") {
-      openModal("reportAgree");
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        setLoading(true);
+
+        // 'http'를 사용 API 호출
+        const response = await http.get<ApiResponse>("/manager/reports", {
+          params: { limit: 10 },
+        });
+
+        setReports(response.data.result.content);
+      } catch (err: any) {
+        console.error("API Error:", err);
+        setError(err.message || "데이터를 불러오는 중 오류가 발생했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReports();
+  }, []);
+
+  const onClickDetail = async (report: Report) => {
+    openModal("reportDetail"); // 먼저 모달을 엽니다 (내부는 로딩 상태)
+    setDetailLoading(true);
+    setDetailError(null);
+    setReportDetail(null);
+
+    try {
+      // 상세조회 API 호출 (엔드포인트는 실제 API 명세에 맞게 조정 필요)
+      const response = await http.get<ApiDetailResponse>(`/manager/reports/${report.reportSeq}`);
+      setReportDetail(response.data.result); // 성공 시 상세 데이터 저장
+    } catch (err) {
+      setDetailError("상세 정보를 불러오는 데 실패했습니다.");
+    } finally {
+      setDetailLoading(false);
     }
   };
 
-  const handleConfirm = () => {
-    if (modalType === "reportDetail") {
-      openModal("reportReject");
+  const handleReportAction = async (action: "approval" | "rejection") => {
+    if (!reportDetail) return;
+    try {
+      openModal("loading");
+      const path = `/manager/reports/${action}/${reportDetail.reportSeq}`;
+      await http.patch(path);
+      openModal(action === "approval" ? "reportAgree" : "reportReject");
+      setReports((prevReports) =>
+        prevReports.filter((report) => report.reportSeq !== reportDetail.reportSeq),
+      );
+    } catch (err) {
+      console.error("신고 처리 중 에러 발생:", err);
+      alert("신고 처리에 실패했습니다. 다시 시도해주세요.");
+      closeModal();
     }
   };
 
-  const onClickDetail = (row: ReportRow) => {
-    openModal("reportDetail", {
-      title: "상세보기",
-      reporter: row.name,
-      role: row.role,
-      category: row.category,
-      file: `${row.name}의 신고.pdf`,
+  // '승인' 버튼 클릭 시 실행될 함수
+  const handleApproveClick = () => {
+    openModal("confirmReportAgree", {
+      onConfirm: () => handleReportAction("approval"),
     });
   };
+
+  // '거부' 버튼 클릭 시 실행될 함수
+  const handleRejectClick = () => {
+    openModal("confirmReportReject", {
+      onConfirm: () => handleReportAction("rejection"),
+    });
+  };
+
+  if (loading) return <div className="p-10 text-center">로딩 중...</div>;
+  if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
 
   return (
     <div className="font-woori flex min-h-screen w-full items-start justify-center">
       <div className="mx-auto my-6 w-[375px] bg-white text-[#111]">
         <h1 className="mb-3 text-left text-[28px] leading-[32px] font-bold">신고 확인</h1>
-
         <div className="overflow-auto rounded-[12px] border border-[#E5E7ED]">
           <table className="w-full table-fixed border-separate border-spacing-0">
-            <colgroup>
-              <col style={{ width: "28%" }} />
-              <col style={{ width: "18%" }} />
-              <col style={{ width: "34%" }} />
-              <col style={{ width: "20%" }} />
-            </colgroup>
             <thead className="sticky top-0 z-10">
               <tr className="text-[13px] font-extrabold text-white">
                 <th className="h-10 border-r border-white/35 bg-[#0b76ff] px-3 text-center first:rounded-tl-[12px]">
                   신고자
                 </th>
                 <th className="h-10 border-r border-white/35 bg-[#0b76ff] px-3 text-center">
-                  역할
+                  신고 대상
                 </th>
                 <th className="h-10 border-r border-white/35 bg-[#0b76ff] px-3 text-center">
                   분류
@@ -86,19 +124,19 @@ export default function ReportList() {
                 </th>
               </tr>
             </thead>
-
             <tbody className="text-[13px] [&>tr:last-child>td]:border-b [&>tr>td]:h-10 [&>tr>td]:border-t [&>tr>td]:border-l [&>tr>td]:border-[#E5E7ED] [&>tr>td]:px-3 [&>tr>td]:text-center [&>tr>td]:align-middle [&>tr>td:first-child]:border-l-0">
-              {rows.map((r) => (
-                <tr key={r.id} className="bg-white">
-                  <td>{r.name}</td>
-                  <td>{r.role}</td>
-                  <td className="overflow-hidden text-ellipsis whitespace-nowrap">{r.category}</td>
+              {reports.map((report) => (
+                <tr key={report.reportSeq} className="bg-white">
+                  <td>{report.reporterName}</td>
+                  <td>{report.reportedMentosTitle}</td>
+                  <td className="overflow-hidden text-ellipsis whitespace-nowrap">
+                    {translateReportType(report.reportType)}
+                  </td>
                   <td>
                     <button
                       type="button"
-                      className="inline-flex h-6 cursor-pointer items-center justify-center rounded-full bg-[#005EF9] px-3 text-[12px] leading-none whitespace-nowrap text-white hover:bg-[#0048C7] focus:ring-2 focus:ring-[#005EF9]/30 focus:outline-none"
-                      onClick={() => onClickDetail(r)}
-                      aria-label={`${r.name} 신고 상세보기`}>
+                      onClick={() => onClickDetail(report)}
+                      className="inline-flex h-6 cursor-pointer items-center justify-center rounded-full bg-[#005EF9] px-3 text-[12px] leading-none whitespace-nowrap text-white hover:bg-[#0048C7] focus:ring-2 focus:ring-[#005EF9]/30 focus:outline-none">
                       상세
                     </button>
                   </td>
@@ -108,15 +146,18 @@ export default function ReportList() {
           </table>
         </div>
       </div>
-
-      {isOpen && modalType && (
+      {isOpen && (
         <CommonModal
-          type={modalType}
+          type={modalType!}
           isOpen={isOpen}
-          onConfirm={handleConfirm}
+          onSubmit={handleApproveClick}
+          onConfirm={modalData?.onConfirm || handleRejectClick}
           onCancel={closeModal}
-          onSubmit={handleSubmit}
-          modalData={modalData}
+          modalData={
+            modalType === "reportDetail"
+              ? { detail: reportDetail, loading: detailLoading, error: detailError }
+              : {}
+          }
         />
       )}
     </div>
