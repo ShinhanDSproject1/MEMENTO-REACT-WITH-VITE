@@ -1,15 +1,13 @@
-// src/hooks/useDaumPostcode.ts
 import { useEffect, useState } from "react";
 
-// ✅ Daum Postcode API 타입 정의
 interface DaumPostcodeData {
-  zonecode: string; // 우편번호
-  address: string; // 기본 주소
+  zonecode: string;
+  address: string;
   roadAddress?: string;
   jibunAddress?: string;
   buildingName?: string;
   apartment?: string;
-  [key: string]: unknown; // 확장 가능
+  [key: string]: unknown;
 }
 
 interface DaumPostcodeConstructor {
@@ -18,7 +16,6 @@ interface DaumPostcodeConstructor {
   };
 }
 
-// ✅ window 객체에 daum 타입 확장
 declare global {
   interface Window {
     daum?: {
