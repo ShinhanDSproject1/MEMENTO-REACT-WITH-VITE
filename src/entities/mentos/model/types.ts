@@ -56,6 +56,7 @@ export interface MyMentosItem {
   price: number;
   region: string;
   progressStatus: string;
+  reservationSeq?: number;
 }
 
 export type ReportType =

@@ -406,7 +406,6 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
       <section className="flex w-full flex-col items-center gap-3">
         {!menteeEmpty &&
           menteeList.map((item: MyMentosItem) => {
-            const pseq = getPaymentSeq(item);
             return (
               <MentosCard
                 key={item.mentosSeq}
@@ -421,7 +420,9 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
                 onRefundClick={() =>
                   item.reservationSeq
                     ? onRefundClick(item.reservationSeq)
-                    : alert("해당 항목에는 예약 내역이 없습니다.")
+                    : openModal("withdrawFailed", {
+                        message: "해당 항목에는 예약 내역이 없습니다.",
+                      })
                 }
                 refundDisabled={!item.reservationSeq}
               />
