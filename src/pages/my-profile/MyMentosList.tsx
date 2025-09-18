@@ -1,6 +1,7 @@
 // src/pages/MyMentosList.tsx
 import { createReview } from "@/entities/review/api/createReview";
 import { useMyMentosInfiniteList } from "@/features/mentos-list/hooks/useMyMentosInfiniteList";
+import { refundPayment } from "@/shared/api/payments";
 import Button from "@/widgets/common/Button";
 import MentosCard from "@/widgets/common/MentosCard";
 import MentosMainTitleComponent from "@/widgets/mentos/MentosMainTitleComponent";
@@ -31,7 +32,23 @@ interface MyMentosListProps {
   role: Role;
 }
 
-/** 모달로 넘겨 받는 데이터 안전 타입 */
+// 컴포넌트 상단에 유틸 추가
+function getPaymentSeq(it: any): number | undefined {
+  return (
+    it?.paymentsSeq ??
+    it?.paymentSeq ??
+    it?.paySeq ??
+    it?.paymentId ??
+    it?.payment?.paymentsSeq ??
+    it?.payment?.paymentSeq ??
+    // ★ 최후 fallback: 결제 직후 저장해 둔 값 사용
+    getPaymentSeqFromLS(it?.mentosSeq)
+  );
+}
+function getPaymentSeqFromLS(mentosSeq: number): number | undefined {
+  const v = localStorage.getItem(`paymentSeqByMentos:${mentosSeq}`);
+  return v ? Number(v) : undefined;
+}
 interface ReviewModalData {
   mentosSeq?: number;
   initialRating?: number;
@@ -59,7 +76,38 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
 
   /** 공통 확인 핸들러 */
   const handleConfirmAction = async () => {
-    // 삭제 확인
+    // 환불
+    if (modalType === "refundMentos") {
+      const { paymentsSeq } = (modalData ?? {}) as { paymentsSeq?: number };
+      if (!paymentsSeq) {
+        alert("결제 정보가 없습니다. 새로고침 후 다시 시도해주세요.");
+        return closeModal();
+      }
+
+      openModal("loading", {
+        title: "환불 처리 중입니다…",
+        description: "잠시만 기다려주세요 ⏳",
+      });
+
+      try {
+        const res = await refundPayment(paymentsSeq);
+        closeModal(); // loading 닫기
+        if (res?.status === 200 || res?.code === 1000) {
+          openModal("refundComplete");
+          await mentee.refetch?.();
+        } else {
+          openModal("faildPayment", { message: res?.message ?? "환불에 실패했습니다." });
+        }
+      } catch (e: any) {
+        closeModal();
+        openModal("faildPayment", {
+          message: e?.response?.data?.message ?? "환불 중 오류가 발생했습니다.",
+        });
+      }
+      return;
+    }
+    // 삭제 확인 모달에서 확인 클릭 시
+
     if (modalType === "deleteMentos") {
       const { mentosSeq } = (modalData ?? {}) as { mentosSeq?: number };
       if (!mentosSeq) return closeModal();
@@ -86,16 +134,7 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
       return;
     }
 
-    if (modalType === "dismissUser") {
-      closeModal();
-      openModal("dismissSuccess");
-      return;
-    }
-    if (modalType === "refundMentos") {
-      closeModal();
-      openModal("refundComplete");
-      return;
-    }
+    if (modalType === "dismissUser") return (closeModal(), openModal("dismissSuccess"));
 
     // 나머지 모달은 단순 닫기
     closeModal();
@@ -147,7 +186,7 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
     if (modalType === "reportMentos") {
       const { mentosSeq, reportType, imageFile, idemKey } = (modalData ?? {}) as ReportModalData;
       if (!mentosSeq || !reportType || !idemKey) {
-        openModal("withdrawFailed", { message: "신고 정보가 올바르지 않습니다." });
+        openModal("withdrawFailed", { message: "신고 분류와 파일을 입력해주세요." });
         return;
       }
 
@@ -190,9 +229,10 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
   const onReportClick = (mentosSeq: number) =>
     openModal("reportMentos", { title: "신고하기", mentosSeq, idemKey: crypto.randomUUID() });
 
-  const onRefundClick = (mentosSeq: number) => openModal("refundMentos", { mentosSeq });
+  const onRefundClick = (paymentsSeq: number) => openModal("refundMentos", { paymentsSeq });
 
   /* -------------------- 데이터 훅 -------------------- */
+
   // 멘티
   const mentee = useMyMentosInfiniteList(5, { enabled: role === "menti" });
   const menteeList = useMemo(() => {
@@ -206,6 +246,18 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
       });
   }, [mentee.data]);
   const menteeEmpty = !mentee.isLoading && !mentee.isError && menteeList.length === 0;
+
+  // MyMentosList 컴포넌트 안, menteeList 계산 아래 아무 데나
+  useEffect(() => {
+    if (menteeList.length) {
+      console.log("[refund-debug] first item:", menteeList[0]);
+    }
+  }, [menteeList]);
+
+  // ✅ 새로고침 강제
+  useEffect(() => {
+    if (role === "menti") mentee.refetch();
+  }, [role]);
 
   // 멘토
   const mentor = useMentoMentosInfiniteList(5, { enabled: role === "mento" });
@@ -342,20 +394,33 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
 
       <section className="flex w-full flex-col items-center gap-3">
         {!menteeEmpty &&
-          menteeList.map((item: MyMentosItem) => (
-            <MentosCard
-              key={item.mentosSeq}
-              mentosSeq={item.mentosSeq}
-              title={item.mentosTitle}
-              price={item.price}
-              location={item.region}
-              status={item.progressStatus === "진행 완료" ? "completed" : "pending"}
-              imageUrl={item.mentosImage}
-              onReportClick={() => onReportClick(item.mentosSeq)}
-              onReviewClick={() => onReviewClick(item.mentosSeq)}
-              onRefundClick={() => onRefundClick(item.mentosSeq)}
-            />
-          ))}
+          menteeList.map((item: MyMentosItem) => {
+            const pseq = getPaymentSeq(item);
+            return (
+              <MentosCard
+                key={item.mentosSeq}
+                mentosSeq={item.mentosSeq}
+                title={item.mentosTitle}
+                price={item.price}
+                location={item.region}
+                status={item.progressStatus === "진행 완료" ? "completed" : "pending"}
+                imageUrl={item.mentosImage}
+                onReportClick={() => onReportClick(item.mentosSeq)}
+                onReviewClick={() => onReviewClick(item.mentosSeq)}
+                onRefundClick={() =>
+                  pseq
+                    ? onRefundClick(pseq)
+                    : pseq
+                      ? onRefundClick(pseq)
+                      : openModal("noPaymentInfo", {
+                          message: "해당 항목에는 결제 내역이 없습니다.",
+                        })
+                }
+                // 선택: 결제 PK 없으면 버튼 비활성화(컴포넌트 prop이 있다면 사용)
+                //refundDisabled={!pseq}
+              />
+            );
+          })}
 
         {mentee.hasNextPage && !menteeEmpty && <div ref={loaderRef} className="h-10 w-full" />}
         {mentee.isFetchingNextPage && (

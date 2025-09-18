@@ -176,7 +176,7 @@ export default function MentosDetail() {
     if (!id || !data) return;
     navigate("/booking", {
       state: {
-        mentorId: Number(id),
+        mentosSeq: Number(id),
         title: data.mentosTitle,
         price: data.mentosPrice,
       },

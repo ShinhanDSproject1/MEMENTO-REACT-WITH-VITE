@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const DAYS = ["일", "월", "화", "수", "목", "금", "토"] as const;
-export type Day = (typeof DAYS)[number]; // 👈 Day 타입 export
+export type Day = (typeof DAYS)[number];
 
 export interface DayChipsProps {
   defaultDays?: Day[];
@@ -9,13 +9,20 @@ export interface DayChipsProps {
 }
 
 export default function DayChips({ defaultDays = [], onChange }: DayChipsProps) {
-  const [days, setDays] = useState<Set<Day>>(new Set(defaultDays));
+  const [days, setDays] = useState<Set<Day>>(() => new Set(defaultDays));
+
+  useEffect(() => {
+    setDays(new Set(defaultDays));
+  }, [defaultDays]);
+
+  useEffect(() => {
+    onChange?.(Array.from(days));
+  }, [days, onChange]);
 
   const toggle = (d: Day) => {
     setDays((prev) => {
       const next = new Set(prev);
       next.has(d) ? next.delete(d) : next.add(d);
-      onChange?.(Array.from(next));
       return next;
     });
   };

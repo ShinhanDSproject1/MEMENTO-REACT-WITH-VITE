@@ -3,6 +3,7 @@ import { SimpleEditor } from "@/widgets/common/tiptap-templates/simple/simple-ed
 import kogiriFace from "@assets/images/character/character-kogiri-face.svg";
 import { useMentoProfileDetail } from "@entities/profile";
 import { useState, type ChangeEvent } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function MentoIntroduce() {
   const { data, isLoading, isError, refetch, error } = useMentoProfileDetail();
@@ -11,6 +12,8 @@ export default function MentoIntroduce() {
 
   const profileImage = overrideImage ?? data?.mentoProfileImage ?? kogiriFace;
   const hasRealImage = Boolean(overrideImage || data?.mentoProfileImage);
+
+  const navigate = useNavigate();
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0];
@@ -38,6 +41,14 @@ export default function MentoIntroduce() {
         </div>
       </div>
     );
+
+  const goNext = () => {
+    navigate("/mento/introduce2");
+    sessionStorage.setItem(
+      "mentorOnboarding.step1",
+      JSON.stringify({ profileImageDataUrl: profileImage, profileContent: "" }),
+    );
+  };
 
   return (
     <div className="flex h-full w-full flex-col justify-between gap-10 bg-white p-4">
@@ -80,7 +91,12 @@ export default function MentoIntroduce() {
       </div>
 
       <div className="flex w-full justify-center">
-        <Button className="w-full" size="lg" variant="primary">
+        <Button
+          type="button"
+          onClick={goNext}
+          className="w-full cursor-pointer"
+          size="lg"
+          variant="primary">
           다음
         </Button>
       </div>

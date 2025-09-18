@@ -99,7 +99,7 @@ export default function CommonModal<K extends ModalKey>({
             ) : null}
 
             {typeof finalAlertMessage === "string" ? (
-              <p className="text-center font-semibold text-red-600">{finalAlertMessage}</p>
+              <p className="text-center font-semibold text-black">{finalAlertMessage}</p>
             ) : finalAlertMessage ? (
               <div className="text-center text-red-600">{finalAlertMessage}</div>
             ) : null}
