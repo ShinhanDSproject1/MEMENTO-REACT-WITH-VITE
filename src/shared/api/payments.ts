@@ -27,5 +27,29 @@ export async function confirmPayment(
   } as const;
 
   const { data } = await http.post("/payments/success", body, config);
+
+  console.log("[confirm] data:", data);
+
+  const pseq =
+    data?.result?.paymentsSeq ?? data?.paymentsSeq ?? data?.result?.paymentSeq ?? data?.paymentSeq;
+
+  console.log("[confirm] pseq saved:", pseq, "mentosSeq:", body.mentosSeq);
+
+  if (pseq) {
+    // 멘토스별로 저장 (환불 버튼 눌렀을 때 쓸 수 있도록)
+    localStorage.setItem(`paymentSeqByMentos:${body.mentosSeq}`, String(pseq));
+  }
+  return data;
+}
+
+export async function refundPayment(paymentsSeq: number) {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${getAccessToken?.() ?? ""}`,
+    },
+    withCredentials: true,
+  } as const;
+
+  const { data } = await http.post(`/mentos/refund/${paymentsSeq}`, {}, config);
   return data;
 }

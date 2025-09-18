@@ -1,10 +1,11 @@
-// src/pages/MentoIntroduce.tsx
 import Button from "@/widgets/common/Button";
 import { SimpleEditor } from "@/widgets/common/tiptap-templates/simple/simple-editor";
 import kogiriFace from "@assets/images/character/character-kogiri-face.svg";
 import { useState, type ChangeEvent } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function MentoIntroduce() {
+  const navigate = useNavigate();
   const [profileImage, setProfileImage] = useState<string>(kogiriFace);
   const [text, setText] = useState<string>("사진을 추가하세요");
 
@@ -15,13 +16,20 @@ export default function MentoIntroduce() {
     const reader = new FileReader();
     reader.onloadend = () => {
       const result = reader.result;
-      // result: string | ArrayBuffer | null
       if (typeof result === "string") {
         setProfileImage(result);
         setText(file.name);
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  const goNext = () => {
+    navigate("/mento/introduce2");
+    sessionStorage.setItem(
+      "mentorOnboarding.step1",
+      JSON.stringify({ profileImageDataUrl: profileImage, profileContent: "" }),
+    );
   };
 
   return (
@@ -49,12 +57,16 @@ export default function MentoIntroduce() {
       <p className="font-WooridaumB ml-4 text-lg font-bold">소개글 입력</p>
 
       <div className="flex h-80 max-w-[90vw] items-center justify-center overflow-hidden rounded-[5px] border-[1px] border-gray-200">
-        {/* SimpleEditor가 value/onChange를 받지 않는 구현이면 그대로 사용 */}
         <SimpleEditor />
       </div>
 
       <div className="flex w-full justify-center">
-        <Button className="w-full" size="lg" variant="primary">
+        <Button
+          type="button"
+          onClick={goNext}
+          className="w-full cursor-pointer"
+          size="lg"
+          variant="primary">
           다음
         </Button>
       </div>
