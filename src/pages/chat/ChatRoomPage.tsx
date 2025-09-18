@@ -1,11 +1,12 @@
-// src/pages/chat/ChatRoomPage.tsx
-import { getMessages, getRooms, sendMessage } from "@/pages/chat/services/chat";
+import { getMessages, getRooms } from "@/pages/chat/services/chat";
+import { ensureConnected, subscribeRoom, sendChatMessage } from "@/pages/chat/services/chatSocket";
 import defaultimage from "@assets/images/character/character-gom.svg";
 import { Send } from "lucide-react";
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useLocation, useParams } from "react-router-dom";
 
-// 공용 타입 (프로젝트에선 src/types/chat.ts 등으로 분리 권장)
+import { http } from "@/shared/api/https";
+
 export interface Room {
   id: string;
   name: string;
@@ -25,26 +26,90 @@ export interface ChatMessage {
 
 type LocationState = { room?: Room } | null;
 
+function useMe() {
+  const [memberSeq, setMemberSeq] = useState<number | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await http.get(`/chat/rooms/${chattingRoomSeq}/messages`);
+        const r = res?.data ?? {};
+        const seq =
+          r?.result?.memberSeq ??
+          r?.data?.memberSeq ??
+          r?.memberSeq ??
+          r?.result?.member?.memberSeq ??
+          null;
+        if (alive) setMemberSeq(typeof seq === "number" ? seq : null);
+      } catch {
+        if (alive) setMemberSeq(null);
+      } finally {
+        if (alive) setLoaded(true);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return { memberSeq, loaded };
+}
+
 export default function ChatRoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
   const { state } = useLocation() as { state: LocationState };
+
+  const { memberSeq, loaded } = useMe();
+  const mySeqRef = useRef<number | null>(null);
+  useEffect(() => {
+    mySeqRef.current = memberSeq ?? null;
+  }, [memberSeq]);
 
   const [room, setRoom] = useState<Room | null>(state?.room ?? null);
   const [msgs, setMsgs] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState<string>("");
 
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // 메시지 로드
+  // 과거 메시지 로드 + 소켓 연결/구독
   useEffect(() => {
     if (!roomId) return;
+
+    let unsub: { unsubscribe: () => void } | null = null;
     (async () => {
-      const data = await getMessages(roomId);
-      setMsgs(data);
+      // 1) 과거 메시지(REST)
+      const old = await getMessages(roomId);
+      setMsgs(old);
+
+      // 2) STOMP 연결 및 구독
+      await ensureConnected();
+      unsub = subscribeRoom(roomId, (body: any) => {
+        const text = body?.message ?? body?.content ?? "";
+        const tsStr = body?.sentAt ?? body?.timestamp ?? new Date().toISOString();
+        const sender = body?.senderSeq ?? body?.senderMemberSeq ?? body?.memberSeq;
+
+        setMsgs((prev) => [
+          ...prev,
+          {
+            id: `${body?.chattingRoomSeq ?? roomId}-${tsStr}-${sender ?? ""}`,
+            roomId,
+            role: sender && mySeqRef.current && sender === mySeqRef.current ? "me" : "bot",
+            text,
+            ts: new Date(String(tsStr).replace(" ", "T")).getTime(),
+          },
+        ]);
+      });
     })();
+
+    return () => {
+      unsub?.unsubscribe?.();
+    };
   }, [roomId]);
 
-  // 방 정보가 없으면 rooms에서 찾아서 채워주기
   useEffect(() => {
     if (room || !roomId) return;
     (async () => {
@@ -54,7 +119,6 @@ export default function ChatRoomPage() {
     })();
   }, [room, roomId]);
 
-  // 새 메시지 추가될 때 스크롤 맨 아래로
   useEffect(() => {
     if (!scrollRef.current) return;
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -65,13 +129,31 @@ export default function ChatRoomPage() {
     const text = input.trim();
     if (!text || !roomId) return;
 
-    const newMsg = await sendMessage(roomId, text);
-    setMsgs((prev) => [...prev, newMsg]);
+    if (!loaded) {
+      alert("로그인 정보를 불러오는 중입니다. 잠시만요.");
+      return;
+    }
+
+    const now = Date.now();
+    setMsgs((prev) => [...prev, { id: `local-${now}`, roomId, role: "me", text, ts: now }]);
     setInput("");
+    await sendChatMessage({ roomId, senderMemberSeq: memberSeq, content: text });
   };
 
   const onChangeInput = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
+    const el = e.target;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+  };
+
+  const onKeyDownInput = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const isComposing = (e.nativeEvent as any).isComposing || (e as any).isComposing;
+    if (isComposing) return;
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (input.trim()) formRef.current?.requestSubmit();
+    }
   };
 
   return (
@@ -102,17 +184,23 @@ export default function ChatRoomPage() {
       </div>
 
       <form
+        ref={formRef}
         onSubmit={onSend}
         className="sticky bottom-0 z-10 flex min-h-[60px] shrink-0 items-center gap-3 border-t border-[#e9eef4] bg-white px-4 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_6px_rgba(0,0,0,0.08)]">
         <div className="flex flex-1 items-center rounded-full border border-[#e6eaf0] bg-[#f9fafb] px-4 py-2">
           <textarea
+            ref={textareaRef}
             value={input}
             onChange={onChangeInput}
+            onKeyDown={onKeyDownInput}
             rows={1}
-            className="w-full resize-none bg-transparent text-[14px] outline-none placeholder:text-[#c0c7d2]"
-            placeholder="채팅을 입력하세요"
+            className="w-full resize-none overflow-hidden bg-transparent text-[14px] outline-none placeholder:text-[#c0c7d2]"
+            placeholder="채팅을 입력하세요 (Enter: 전송, Shift+Enter: 줄바꿈)"
           />
-          <button type="submit" className="ml-2 flex items-center justify-center hover:opacity-80">
+          <button
+            type="submit"
+            disabled={!input.trim()}
+            className="ml-2 flex items-center justify-center hover:opacity-80 disabled:opacity-40">
             <Send size={20} strokeWidth={2} className="text-[#2563eb]" fill="currentColor" />
           </button>
         </div>
