@@ -1,5 +1,5 @@
 // src/components/StarRating.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type StarIconProps = {
   colorClass: string;
@@ -28,6 +28,11 @@ export type StarRatingProps = {
 export function StarRating({ onRatingChange, initialRating = 3, totalStars = 5 }: StarRatingProps) {
   const [rating, setRating] = useState<number>(initialRating);
   const [hoverRating, setHoverRating] = useState<number>(0);
+
+  useEffect(() => {
+    onRatingChange?.(initialRating);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // initialRating이 바뀌지 않는 전제면 빈 배열로 충분
 
   const handleClick = (starValue: number) => {
     setRating(starValue);
