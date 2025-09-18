@@ -7,6 +7,9 @@ import FileInput from "@widgets/common/FileInput";
 import SelectBar from "@widgets/common/SelectBar";
 import { StarRating } from "@widgets/common/StarRating";
 import TitleTextComponent from "@widgets/common/TitleTextComponent";
+import type { ReportDetail } from "@/utils/reportUtils";
+import { translateReportType } from "@/utils/reportUtils";
+import { downloadImage } from "@/utils/downloadUtils";
 
 import type { ButtonProps } from "@/widgets/common/Button";
 import type { ReactNode } from "react";
@@ -60,6 +63,24 @@ export const MODAL_CONFIG = {
     message: "정말 환불하시겠습니까?",
     buttons: [
       { text: "확인", variant: "primary", size: "lg", actionType: "confirm" },
+      { text: "취소", variant: "cancelWhite", size: "lg", actionType: "close" },
+    ],
+  },
+
+  confirmReportAgree: {
+    icon: questionIcon,
+    message: "이 신고를 정말로 승인하시겠습니까?",
+    buttons: [
+      { text: "승인", variant: "primary", size: "lg", actionType: "confirm" },
+      { text: "취소", variant: "cancelWhite", size: "lg", actionType: "close" },
+    ],
+  },
+
+  confirmReportReject: {
+    icon: questionIcon,
+    message: "이 신고를 정말로 거부하시겠습니까?",
+    buttons: [
+      { text: "거부", variant: "danger", size: "lg", actionType: "confirm" },
       { text: "취소", variant: "cancelWhite", size: "lg", actionType: "close" },
     ],
   },
@@ -191,14 +212,63 @@ export const MODAL_CONFIG = {
 
   reportDetail: {
     type: "form",
-    content: (modalData) => (
-      <div className="flex flex-col gap-3 px-4">
-        <TitleTextComponent subtitle="신고자" context={(modalData as any).reporter} />
-        <TitleTextComponent subtitle="멘토링" context="인생한방" />
-        <TitleTextComponent subtitle="신고항목" context={(modalData as any).category} />
-        <TitleTextComponent subtitle="파일" context={(modalData as any).file} />
-      </div>
-    ),
+    content: (modalData) => {
+      const { detail, loading, error } = modalData as {
+        detail: ReportDetail | null;
+        loading: boolean;
+        error: string | null;
+      };
+
+      // 로딩 중일 때
+      if (loading) {
+        return <div className="p-4 text-center text-gray-500">상세 정보를 불러오는 중...</div>;
+      }
+      // 에러가 발생했을 때
+      if (error) {
+        return <div className="p-4 text-center text-red-500">{error}</div>;
+      }
+      // 데이터가 비어있는 예외 상황 처리
+      if (!detail) {
+        return <div className="p-4 text-center text-gray-500">표시할 데이터가 없습니다.</div>;
+      }
+
+      // 성공 시
+      return (
+        <div className="flex flex-col gap-4 p-4">
+          <TitleTextComponent subtitle="신고자" context={detail.reporterName} />
+          <TitleTextComponent subtitle="신고 대상" context={detail.reportedMentosTitle} />
+          <TitleTextComponent subtitle="분류" context={translateReportType(detail.reportType)} />
+
+          <div>
+            <p className="mb-1 text-sm font-bold text-gray-700">첨부 이미지</p>
+            {detail.reportImage ? (
+              <div>
+                <img
+                  src={detail.reportImage}
+                  alt="신고 첨부 이미지"
+                  className="w-full rounded-lg border border-gray-200 object-contain"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    // CORS 위반 예방
+                    const proxyImageUrl = detail.reportImage.replace(
+                      "https://memento.shinhanacademy.co.kr",
+                      "/api",
+                    );
+                    downloadImage(proxyImageUrl);
+                  }}
+                  className="mt-2 inline-block w-full rounded-md bg-gray-600 px-3 py-1.5 text-center text-xs font-semibold text-white hover:bg-gray-700">
+                  이미지 다운로드
+                </button>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">첨부된 이미지가 없습니다.</p>
+            )}
+          </div>
+        </div>
+      );
+    },
     buttons: [
       { text: "승인", variant: "primary", size: "md", actionType: "submit" },
       { text: "거부", variant: "danger", size: "md", actionType: "confirm" },
