@@ -1,5 +1,5 @@
 export interface MentorReview {
-  reviewId: number;
+  reviewSeq: number;
   mentosTitle: string;
   reviewRating: number;
   mentiName: string;
@@ -8,7 +8,7 @@ export interface MentorReview {
 }
 
 export interface MentorReviewsResult {
-  content: MentorReview[];
+  reviews: MentorReview[];
   hasNext: boolean;
   nextCursor: number | null;
 }

@@ -61,6 +61,22 @@ export type MentoProfileDetail = {
   mentoDetail?: string | null;
 };
 
+export type UpdateMentoProfileDto = {
+  mentoProfileContent: string;
+  startTime: string; // "HH:MM"
+  endTime: string; // "HH:MM"
+  availableDays: string; // 예: "화,목" 또는 "MON,WED" — 서버 요구 형식대로
+  mentoPostcode: string;
+  mentoRoadAddress: string;
+  mentoBname?: string;
+  mentoDetail?: string;
+};
+
+export type UpdateMentoProfileRequest = {
+  requestDto: UpdateMentoProfileDto;
+  imageFile?: File | null;
+};
+
 export type GetProfileSuccess = ApiEnvelope<GetProfile>;
 export type UpdateProfileSuccess = ApiEnvelope<null>;
 export type UpdatePasswordSuccess = ApiEnvelope<null>;

@@ -1,5 +1,6 @@
 export * from "./api/getMentoProfileDetail";
 export * from "./api/getMyProfile";
+export * from "./api/updateMentoProfileDetail";
 export * from "./api/updateMyPassword";
 export * from "./api/updateMyProfile";
 export * from "./hooks/useMentoProfileDetail";

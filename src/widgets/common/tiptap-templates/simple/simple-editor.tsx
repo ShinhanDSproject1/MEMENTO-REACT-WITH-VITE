@@ -56,10 +56,7 @@ import { useIsMobile } from "@hooks/device/useMobile";
 import { useWindowSize } from "@hooks/dom/useWindowSize";
 
 // --- Lib ---
-import {
-  handleImageUpload,
-  MAX_FILE_SIZE,
-} from "@entities/editor/tiptap-utils";
+import { handleImageUpload, MAX_FILE_SIZE } from "@entities/editor/tiptap-utils";
 
 // --- Styles ---
 import "@widgets/common/tiptap-templates/simple/simple-editor.scss";
@@ -147,11 +144,7 @@ const MobileToolbarContent = ({
 
     <ToolbarSeparator />
 
-    {type === "highlighter" ? (
-      <ColorHighlightPopoverContent />
-    ) : (
-      <LinkContent />
-    )}
+    {type === "highlighter" ? <ColorHighlightPopoverContent /> : <LinkContent />}
   </>
 );
 
@@ -165,9 +158,7 @@ export function SimpleEditor({
 }: SimpleEditorProps) {
   const isMobile = useIsMobile();
   const { height } = useWindowSize();
-  const [mobileView, setMobileView] = React.useState<
-    "main" | "highlighter" | "link"
-  >("main");
+  const [mobileView, setMobileView] = React.useState<"main" | "highlighter" | "link">("main");
   const toolbarRef = React.useRef<HTMLDivElement>(null);
 
   // 초기 content: controlled이면 value, 아니면 defaultValue, 둘 다 없으면 빈 문자열
@@ -184,9 +175,7 @@ export function SimpleEditor({
         autocapitalize: "off",
         "aria-label": "Main content area, start typing to enter text.",
         class: "simple-editor",
-        style: `min-height: ${
-          typeof minHeight === "number" ? `${minHeight}px` : minHeight
-        };`,
+        style: `min-height: ${typeof minHeight === "number" ? `${minHeight}px` : minHeight};`,
       },
     },
     extensions: [
@@ -261,8 +250,7 @@ export function SimpleEditor({
                   bottom: `calc(100% - ${height - rect.y}px)`,
                 }
               : {}),
-          }}
-        >
+          }}>
           {mobileView === "main" ? (
             <MainToolbarContent
               onHighlighterClick={() => setMobileView("highlighter")}
@@ -277,11 +265,7 @@ export function SimpleEditor({
           )}
         </Toolbar>
 
-        <EditorContent
-          editor={editor}
-          role="presentation"
-          className="simple-editor-content"
-        />
+        <EditorContent editor={editor} role="presentation" className="simple-editor-content" />
       </EditorContext.Provider>
     </div>
   );
