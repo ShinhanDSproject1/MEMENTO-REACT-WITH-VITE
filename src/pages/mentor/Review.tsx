@@ -37,7 +37,7 @@ export default function Review() {
   }, [cursor]);
 
   const mapToUi = (r: MentorReview): UiReviewItem => ({
-    id: r.reviewId,
+    id: r.reviewSeq,
     title: r.mentosTitle,
     date: r.createdAt,
     rating: r.reviewRating,
@@ -55,7 +55,7 @@ export default function Review() {
       setError("");
 
       const res = await getMentoReviews(10, cursorRef.current);
-      const mapped = res.content.map(mapToUi);
+      const mapped = res.reviews.map(mapToUi);
 
       setItems((prev) => {
         const seen = new Set(prev.map((p) => p.id));
@@ -70,9 +70,11 @@ export default function Review() {
 
       setHasMore(res.hasNext);
       setCursor(res.nextCursor ?? undefined);
-    } catch {
-      setError("리뷰를 불러오지 못했습니다.");
-      setHasMore(false); // 🚨 실패 시 추가 요청 중단
+    } catch (err: any) {
+      // ✅ 서버 응답 메시지 반영
+      const msg = err?.response?.data?.message || err?.message || "리뷰를 불러오지 못했습니다.";
+      setError(msg);
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
@@ -87,13 +89,15 @@ export default function Review() {
       try {
         const res = await getMentoReviews(10, undefined);
         if (cancelled) return;
-        setItems(res.content.map(mapToUi));
+        setItems(res.reviews.map(mapToUi));
         setHasMore(res.hasNext);
         setCursor(res.nextCursor ?? undefined);
-      } catch {
+      } catch (err: any) {
         if (!cancelled) {
-          setError("리뷰를 불러오지 못했습니다.");
-          setHasMore(false); // 🚨 실패 시 중단
+          // ✅ 서버 응답 메시지 반영
+          const msg = err?.response?.data?.message || err?.message || "리뷰를 불러오지 못했습니다.";
+          setError(msg);
+          setHasMore(false);
         }
       } finally {
         if (!cancelled) setLoading(false);

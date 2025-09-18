@@ -32,7 +32,7 @@ const EditMentos = React.lazy(() => import("@/pages/mentor/EditMentos"));
 
 const CertificationRegister = React.lazy(() => import("@/pages/mentos/CertificationRegister"));
 const CertificationPage = React.lazy(() => import("@/pages/mentos/CertificationPage"));
-const MentoIntroduce = React.lazy(() => import("@/pages/mentos/MentoIntroduce"));
+const MentoIntroduce = React.lazy(() => import("@/pages/login/MentoIntroduce"));
 const Reviews = React.lazy(() => import("@/pages/mentor/Review"));
 const Ready = React.lazy(() => import("@/pages/home/Ready"));
 
