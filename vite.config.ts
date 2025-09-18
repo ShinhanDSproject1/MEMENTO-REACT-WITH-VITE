@@ -31,6 +31,9 @@ export default defineConfig({
       "@api": r("src/shared/api"),
     },
   },
+  define: {
+    global: "window",
+  },
   server: {
     // mkcert가 만든 로컬 인증서를 사용해 https로 띄움
     https: {
@@ -70,6 +73,12 @@ export default defineConfig({
             });
           });
         },
+      },
+      "/ws-stomp": {
+        target: "https://memento.shinhanacademy.co.kr",
+        changeOrigin: true,
+        secure: true,
+        ws: true,
       },
     },
   },
