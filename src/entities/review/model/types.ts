@@ -12,3 +12,15 @@ export interface MentorReviewsResult {
   hasNext: boolean;
   nextCursor: number | null;
 }
+
+export type CreateReviewBody = {
+  mentosSeq: number;
+  reviewRating: number;
+  reviewContent: string;
+};
+
+export type CreateReviewResponse = {
+  code: number;
+  status: number;
+  message: string;
+};

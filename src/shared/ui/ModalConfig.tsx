@@ -9,8 +9,12 @@ import { StarRating } from "@widgets/common/StarRating";
 import TitleTextComponent from "@widgets/common/TitleTextComponent";
 
 import type { ButtonProps } from "@/widgets/common/Button";
+import type { ReportType } from "@entities/mentos/model/types";
 import type { ReactNode } from "react";
 
+/* =========================
+ * 공용 타입
+ * ========================= */
 type ModalActionType = "confirm" | "submit" | "close" | "cancel";
 
 export type ModalButton = Omit<ButtonProps, "children" | "onClick"> & {
@@ -19,23 +23,93 @@ export type ModalButton = Omit<ButtonProps, "children" | "onClick"> & {
   to?: string;
 };
 
-// 알림/결정 모달
 type AlertConfig = {
   type?: "alert";
   icon?: string;
-  message?: string; // optional (loading 등)
+  message?: string;
   buttons: ModalButton[];
 };
 
-export type FormConfig = {
+export type FormConfig<TData> = {
   type: "form";
-  content: (modalData: Record<string, unknown>) => ReactNode;
+  content: (modalData: TData) => ReactNode;
   buttons: ModalButton[];
 };
 
-type ModalConfig = AlertConfig | FormConfig;
+/* =========================
+ * 모달별 modalData 타입 정의
+ * ========================= */
+type BaseData = {
+  title?: string;
+  description?: string;
+};
 
-export const MODAL_CONFIG = {
+export type ReviewMentosData = BaseData & {
+  mentosSeq?: number;
+  initialRating?: number;
+  initialContent?: string;
+  onRatingChange?: (rating: number) => void;
+  onContentChange?: (text: string) => void;
+};
+
+export type ReportMentosData = BaseData & {
+  reportType?: ReportType;
+  imageFile?: File | null;
+};
+
+export type ReportDetailData = {
+  reporter: string;
+  category: string;
+  file: string;
+};
+
+/* =========================
+ * MODAL_CONFIG 레코드 타입
+ * ========================= */
+type ModalConfigRecord = {
+  // 확인/결정
+  deleteMentos: AlertConfig;
+  dismissUser: AlertConfig;
+  refundMentos: AlertConfig;
+
+  // 알림/완료
+  createMentos: AlertConfig;
+  updateMentos: AlertConfig;
+  paySuccess: AlertConfig;
+  refundSuccess: AlertConfig;
+  reportComplete: AlertConfig;
+  reportReject: AlertConfig;
+  loading: AlertConfig;
+  reviewComplete: AlertConfig;
+  refundComplete: AlertConfig;
+  deleteComplete: AlertConfig;
+  dismissSuccess: AlertConfig;
+  reportAgree: AlertConfig;
+
+  // 폼
+  reviewMentos: FormConfig<ReviewMentosData>;
+  reportMentos: FormConfig<ReportMentosData>;
+  reportDetail: FormConfig<ReportDetailData>;
+
+  // 프로필/회원탈퇴
+  profileUpdated: AlertConfig;
+  withdrawConfirm: AlertConfig;
+  withdrawComplete: AlertConfig;
+  withdrawFailed: AlertConfig;
+
+  //리뷰
+  needReviewContent: AlertConfig;
+};
+
+/** 키 → 해당 modalData 타입 매핑 (Alert는 BaseData로 통일) */
+export type ModalDataMap = {
+  [K in keyof ModalConfigRecord]: ModalConfigRecord[K] extends FormConfig<infer T> ? T : BaseData;
+};
+
+/* =========================
+ * MODAL_CONFIG 구현
+ * ========================= */
+export const MODAL_CONFIG: ModalConfigRecord = {
   // ---- 확인/결정
   deleteMentos: {
     icon: deleteIcon,
@@ -155,20 +229,23 @@ export const MODAL_CONFIG = {
   reviewMentos: {
     type: "form",
     content: (modalData) => {
-      const { onRatingChange } = modalData as { onRatingChange?: (rating: number) => void };
+      const { onRatingChange, onContentChange, initialRating = 0, initialContent = "" } = modalData;
+
       return (
         <div className="flex flex-col px-4">
-          <StarRating onRatingChange={onRatingChange} />
+          <StarRating initialRating={initialRating} onRatingChange={onRatingChange} />
           <textarea
             className="h-24 w-full resize-none rounded-[10px] border-[1px] border-solid border-[#E6E7EA] p-2 outline-none focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
             placeholder="내용을 입력하세요"
+            defaultValue={initialContent}
+            onChange={(e) => onContentChange?.(e.target.value)}
           />
         </div>
       );
     },
     buttons: [
       { text: "등록", variant: "primary", size: "lg", actionType: "submit" },
-      { text: "취소", variant: "cancelWhite", size: "lg", actionType: "close" },
+      { text: "취소", variant: "cancelWhite", size: "lg", actionType: "cancel" },
     ],
   },
 
@@ -176,11 +253,16 @@ export const MODAL_CONFIG = {
     type: "form",
     content: (modalData) => (
       <div className="flex flex-col gap-4 px-4">
-        {/* 선택한 신고 유형을 modalData.reportType 에 저장 */}
-        <SelectBar onChange={(v) => ((modalData as any).reportType = v)} />
-
-        {/* 업로드한 파일을 modalData.imageFile 에 저장 */}
-        <FileInput onFileChange={(f) => ((modalData as any).imageFile = f)} />
+        <SelectBar
+          onChange={(v) => {
+            modalData.reportType = v as ReportType;
+          }}
+        />
+        <FileInput
+          onFileChange={(f) => {
+            modalData.imageFile = f;
+          }}
+        />
       </div>
     ),
     buttons: [
@@ -193,10 +275,10 @@ export const MODAL_CONFIG = {
     type: "form",
     content: (modalData) => (
       <div className="flex flex-col gap-3 px-4">
-        <TitleTextComponent subtitle="신고자" context={(modalData as any).reporter} />
+        <TitleTextComponent subtitle="신고자" context={modalData.reporter} />
         <TitleTextComponent subtitle="멘토링" context="인생한방" />
-        <TitleTextComponent subtitle="신고항목" context={(modalData as any).category} />
-        <TitleTextComponent subtitle="파일" context={(modalData as any).file} />
+        <TitleTextComponent subtitle="신고항목" context={modalData.category} />
+        <TitleTextComponent subtitle="파일" context={modalData.file} />
       </div>
     ),
     buttons: [
@@ -205,6 +287,7 @@ export const MODAL_CONFIG = {
       { text: "취소", variant: "cancelWhite", size: "md", actionType: "close" },
     ],
   },
+
   /* 프로필 수정 완료 */
   profileUpdated: {
     icon: checkBlueIcon,
@@ -231,11 +314,26 @@ export const MODAL_CONFIG = {
 
   /* (옵션) 회원 탈퇴 실패 */
   withdrawFailed: {
-    icon: checkRedIcon,
+    icon: deleteIcon,
     message: "탈퇴 요청 처리 중 문제가 발생했습니다.",
     buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
   },
-} as const satisfies Record<string, ModalConfig>;
 
-export type ModalKey = keyof typeof MODAL_CONFIG;
-export const isFormConfig = (c: ModalConfig): c is FormConfig => "type" in c && c.type === "form";
+  needReviewContent: {
+    icon: deleteIcon,
+    message: undefined,
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
+  },
+};
+
+/* =========================
+ * 내보내기
+ * ========================= */
+export type ModalKey = keyof ModalConfigRecord;
+
+/** 제네릭 type guard (any/unknown 없이) */
+export function isFormConfig<K extends ModalKey>(
+  c: ModalConfigRecord[K] | undefined,
+): c is Extract<ModalConfigRecord[K], FormConfig<ModalDataMap[K]>> {
+  return !!c && typeof c === "object" && "type" in c && (c as { type?: string }).type === "form";
+}
