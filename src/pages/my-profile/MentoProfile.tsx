@@ -148,7 +148,7 @@ export default function MentorProfile() {
   };
 
   // 소개글 수정 (멘토 전용)
-  const handleEditIntro = () => navigate("/mento/introduce");
+  const handleEditIntro = () => navigate("/mento/introduce2");
 
   // ✅ 탈퇴 버튼 → 확인 모달
   const handleWithdrawClick = () => openModal("withdrawConfirm");

@@ -9,11 +9,11 @@ export type SnapshotUser = {
 
 export const saveUserSnapshot = (u: SnapshotUser) => {
   const str = JSON.stringify(u);
-  localStorage.setItem(KEY, str);
+  sessionStorage.setItem(KEY, str);
 };
 
 export const loadUserSnapshot = (): SnapshotUser | null => {
-  const s = localStorage.getItem(KEY);
+  const s = sessionStorage.getItem(KEY);
   try {
     return s ? (JSON.parse(s) as SnapshotUser) : null;
   } catch {
@@ -21,4 +21,4 @@ export const loadUserSnapshot = (): SnapshotUser | null => {
   }
 };
 
-export const clearUserSnapshot = () => localStorage.removeItem(KEY);
+export const clearUserSnapshot = () => sessionStorage.removeItem(KEY);
