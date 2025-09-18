@@ -1,26 +1,24 @@
 // src/components/mentee/MentosCard.tsx
 import Button from "@/widgets/common/Button";
-import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 type MentosStatus = "completed" | "pending" | "mento" | "guest";
 
-export interface MentosCardProps {
+type MentosCardProps = {
   mentosSeq: number;
   title: string;
-  price: number;
+  price?: number;
   location?: string;
+  status: "pending" | "completed" | "mento";
   imageUrl?: string;
-  status: MentosStatus;
-  children?: ReactNode;
-
-  onReviewClick?: () => void;
-  onDeleteClick?: () => void;
-  onRefundClick?: () => void;
   onReportClick?: () => void;
+  onReviewClick?: () => void;
+  onRefundClick?: () => void;
   onUpdateClick?: () => void;
+  onDeleteClick?: () => void;
   refundDisabled?: boolean;
-}
+  reviewDisabled?: boolean; // ✅ 리뷰 완료 시 true로 들어옴
+};
 
 const statusStyles: Record<MentosStatus, string> = {
   completed: "bg-[#2E3849]",
@@ -46,30 +44,58 @@ export default function MentosCard({
   location,
   status,
   imageUrl,
+  refundDisabled,
+  reviewDisabled,
 }: MentosCardProps) {
   const statusClassName = statusStyles[status] ?? "";
   const statusText = statusTextMap[status] ?? "";
-  const formattedPrice = Number.isFinite(price) ? price.toLocaleString() : String(price);
+  const formattedPrice =
+    typeof price === "number" && Number.isFinite(price)
+      ? price.toLocaleString()
+      : String(price ?? "");
 
+  // 액션 버튼 영역
   const actionButton = (() => {
     switch (status) {
-      case "completed":
+      case "completed": {
+        // 리뷰 버튼: 완료 시 완전 비활성화 + onClick 제거 + 라벨 변경
+        const isDisabled = !!reviewDisabled;
         return (
           <>
-            <Button className="text-xs" variant="lightBlue" size="sm" onClick={onReviewClick}>
-              리뷰 작성
+            <Button
+              className={`text-xs ${isDisabled ? "cursor-not-allowed bg-blue-950 opacity-100 hover:bg-blue-950" : ""}`}
+              variant="lightBlue"
+              size="sm"
+              disabled={isDisabled}
+              aria-disabled={isDisabled}
+              onClick={isDisabled ? undefined : onReviewClick}
+              title={isDisabled ? "이미 리뷰를 작성했습니다" : "리뷰 작성"}>
+              {isDisabled ? "리뷰 완료" : "리뷰 작성"}
             </Button>
+
             <Button className="text-xs" variant="danger" size="sm" onClick={onReportClick}>
               신고하기
             </Button>
           </>
         );
-      case "pending":
+      }
+
+      case "pending": {
+        const isDisabled = !!refundDisabled;
         return (
-          <Button className="text-xs" variant="refund" size="sm" onClick={onRefundClick}>
+          <Button
+            className={`text-xs ${isDisabled ? "cursor-not-allowed opacity-60" : ""}`}
+            variant="refund"
+            size="sm"
+            disabled={isDisabled}
+            aria-disabled={isDisabled}
+            onClick={isDisabled ? undefined : onRefundClick}
+            title={isDisabled ? "환불이 불가한 항목입니다" : "환불하기"}>
             환불하기
           </Button>
         );
+      }
+
       case "mento":
         return (
           <>
@@ -81,7 +107,7 @@ export default function MentosCard({
             </Button>
           </>
         );
-      case "guest":
+
       default:
         return null;
     }

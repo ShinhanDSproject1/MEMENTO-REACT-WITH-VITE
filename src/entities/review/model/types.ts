@@ -14,7 +14,7 @@ export interface MentorReviewsResult {
 }
 
 export type CreateReviewBody = {
-  mentosSeq: number;
+  reservationSeq: number;
   reviewRating: number;
   reviewContent: string;
 };
