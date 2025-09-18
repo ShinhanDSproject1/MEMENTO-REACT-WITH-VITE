@@ -28,8 +28,12 @@ export async function confirmPayment(
 
   const { data } = await http.post("/payments/success", body, config);
 
+  console.log("[confirm] data:", data);
+
   const pseq =
     data?.result?.paymentsSeq ?? data?.paymentsSeq ?? data?.result?.paymentSeq ?? data?.paymentSeq;
+
+  console.log("[confirm] pseq saved:", pseq, "mentosSeq:", body.mentosSeq);
 
   if (pseq) {
     // 멘토스별로 저장 (환불 버튼 눌렀을 때 쓸 수 있도록)
