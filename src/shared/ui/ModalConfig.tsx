@@ -236,7 +236,16 @@ export const MODAL_CONFIG = {
       return (
         <div className="flex flex-col gap-4 p-4">
           <TitleTextComponent subtitle="신고자" context={detail.reporterName} />
-          <TitleTextComponent subtitle="신고 대상" context={detail.reportedMentosTitle} />
+          <TitleTextComponent
+            subtitle={
+              <>
+                신고
+                <br />
+                대상
+              </>
+            }
+            context={detail.reportedMentosTitle}
+          />
           <TitleTextComponent subtitle="분류" context={translateReportType(detail.reportType)} />
 
           <div>
@@ -270,9 +279,27 @@ export const MODAL_CONFIG = {
       );
     },
     buttons: [
-      { text: "승인", variant: "primary", size: "md", actionType: "submit" },
-      { text: "거부", variant: "danger", size: "md", actionType: "confirm" },
-      { text: "취소", variant: "cancelWhite", size: "md", actionType: "close" },
+      {
+        text: "승인",
+        variant: "primary",
+        size: "md",
+        actionType: "submit",
+        className: "whitespace-nowrap",
+      },
+      {
+        text: "거부",
+        variant: "danger",
+        size: "md",
+        actionType: "confirm",
+        className: "whitespace-nowrap",
+      },
+      {
+        text: "취소",
+        variant: "cancelWhite",
+        size: "md",
+        actionType: "close",
+        className: "whitespace-nowrap",
+      },
     ],
   },
   /* 프로필 수정 완료 */
