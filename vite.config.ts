@@ -71,6 +71,12 @@ export default defineConfig({
           });
         },
       },
+      "/py": {
+        target: "http://192.168.0.180:8000",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/py/, ""),
+      },
     },
   },
   assetsInclude: ["**/*.mp4", "**/*.ttf"],
