@@ -1,5 +1,4 @@
-import { http, type AppRequestConfig } from "@api/https";
-import type { AxiosRequestHeaders } from "axios";
+import { http } from "@api/https";
 
 const BASE = "/mentos";
 
@@ -17,19 +16,23 @@ export interface ReviewItem {
   reviewDate: string; // "YYYY-MM-DD"
   reviewContent: string;
 }
+
 export interface MentoProfile {
   mentoName: string;
   mentoImg: string;
   mentoDescription: string;
 }
+
 export interface MentosDetailResult {
   mentosImage: string;
   mentosTitle: string;
   mentosLocation: string;
   reviewTotalCnt: number;
   reviewRatingAvg: number;
-  reviews: ReviewItem[];
-  mento: MentoProfile | MentoProfile[]; // 서버가 배열/객체 혼용 가능성
+  /** 상세 응답에는 없을 수 있으므로 옵셔널 */
+  reviews?: ReviewItem[];
+  /** 서버가 객체/배열 혼용 가능성 */
+  mento: MentoProfile | MentoProfile[];
   mentosDescription: string;
   mentosPrice: number;
 }
@@ -41,24 +44,16 @@ export type MentosDetail = {
   price: number;
 };
 
-/**
- * 상세 조회 (기본=로그인 필요 → 토큰 붙임)
- * 공개로 호출하고 싶으면 opts.public = true 로 명시.
- */
-export async function getMentosDetail(
-  mentosSeq: number,
-  opts?: { public?: boolean },
-): Promise<MentosDetailResult> {
-  const cfg: AppRequestConfig = {
-    headers: {} as AxiosRequestHeaders, // 타입 강제 캐스팅
-  };
-  if (opts?.public) cfg._skipAuth = true; // 공개 호출만 명시적으로 스킵
+/** 리뷰 페이지네이션 응답 */
+export interface ReviewsPage {
+  reviews: ReviewItem[];
+  hasNext: boolean;
+  nextCursor: string | null;
+}
 
-  const { data } = await http.get<ApiResponse<MentosDetailResult>>(
-    `${BASE}/detail/${mentosSeq}`,
-    cfg,
-  );
-
+/** 상세 조회: 공개 엔드포인트 호출 (토큰 불필요) */
+export async function getMentosDetail(mentosSeq: number): Promise<MentosDetailResult> {
+  const { data } = await http.get<ApiResponse<MentosDetailResult>>(`${BASE}/detail/${mentosSeq}`);
   if (!(data.code === 1000 || data.status === 200)) {
     throw new Error(data.message || "요청에 실패했습니다.");
   }
@@ -69,4 +64,36 @@ export async function getMentosDetail(
 export async function fetchMentosDetail(mentosSeq: number): Promise<MentosDetail> {
   const d = await getMentosDetail(mentosSeq);
   return { mentosSeq, mentosTitle: d.mentosTitle, price: Number(d.mentosPrice) };
+}
+
+/**
+ * 리뷰 무한 스크롤 페이지 조회
+ * - hasNext=true -> nextCursor 로 다음 페이지 재호출
+ * - limit 디폴트 5
+ */
+export async function getMentosReviewsPage(
+  mentosSeq: number,
+  params?: { limit?: number; cursor?: string | null },
+): Promise<ReviewsPage> {
+  const limit = params?.limit ?? 5;
+  const cursor = params?.cursor ?? null;
+
+  const qs = new URLSearchParams();
+  qs.set("limit", String(limit));
+  if (cursor) qs.set("cursor", cursor);
+
+  const { data } = await http.get<ApiResponse<ReviewsPage>>(
+    `${BASE}/detail/${mentosSeq}/reviews?${qs.toString()}`,
+  );
+
+  if (!(data.code === 1000 || data.status === 200)) {
+    throw new Error(data.message || "리뷰 조회에 실패했습니다.");
+  }
+
+  // 응답의 result 안쪽을 정확히 매핑
+  return {
+    reviews: data.result.reviews,
+    hasNext: data.result.hasNext,
+    nextCursor: data.result.nextCursor,
+  };
 }
