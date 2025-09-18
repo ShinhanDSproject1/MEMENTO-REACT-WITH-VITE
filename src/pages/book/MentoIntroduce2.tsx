@@ -1,13 +1,14 @@
-// src/pages/MentoIntroduce2.tsx
 import Button from "@/widgets/common/Button";
 import DayChips, { type Day } from "@/widgets/common/DayChips";
 import HourRangePicker, { type HourRange } from "@/widgets/common/HourRangePicker";
 import LocationField, { type LocationFieldValue } from "@/widgets/common/LocationField";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function MentoIntroduce2() {
-  // ✅ 타입 명시
+  const navigate = useNavigate();
   const [selectedDays, setSelectedDays] = useState<Day[]>([]);
+  const emptyDays = useMemo<Day[]>(() => [], []);
   const [hours, setHours] = useState<HourRange>({ start: 10, end: 18 });
   const [location, setLocation] = useState<LocationFieldValue>({
     zonecode: "",
@@ -21,6 +22,7 @@ export default function MentoIntroduce2() {
   const handleSubmit = () => {
     console.log("payload:", payload);
     // TODO: 실제 API 호출
+    navigate("/signup/mentor");
   };
 
   return (
@@ -28,7 +30,8 @@ export default function MentoIntroduce2() {
       <div className="mx-auto w-full max-w-screen-sm px-4 pt-10 pb-8 sm:max-w-md md:max-w-lg">
         <section className="mb-6">
           <p className="font-WooridaumB mb-3 ml-4 text-[18px] font-bold text-[#0F172A]">요일</p>
-          <DayChips defaultDays={[]} onChange={setSelectedDays} />
+          {/* <DayChips defaultDays={[]} onChange={setSelectedDays} /> */}
+          <DayChips defaultDays={emptyDays} onChange={setSelectedDays} />
         </section>
 
         <section className="mb-6">
@@ -44,7 +47,11 @@ export default function MentoIntroduce2() {
         </section>
 
         <footer className="mt-21.5 flex w-full justify-center">
-          <Button className="w-full" size="lg" variant="primary" onClick={handleSubmit}>
+          <Button
+            className="w-full cursor-pointer"
+            size="lg"
+            variant="primary"
+            onClick={handleSubmit}>
             등록
           </Button>
         </footer>

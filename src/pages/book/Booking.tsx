@@ -22,9 +22,10 @@ type NavState = Partial<{
   mentosSeq: number;
 }>;
 
-export default function BookingPage({ mentorId = 1, defaultMonth = new Date() }: BookingPageProps) {
+export default function BookingPage({ mentorId, defaultMonth = new Date() }: BookingPageProps) {
   const navigate = useNavigate();
-  const { state } = useLocation() as { state?: NavState };
+  const location = useLocation() as { pathname: string; search: string; state?: NavState };
+  const state = location.state;
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("");
@@ -76,15 +77,25 @@ export default function BookingPage({ mentorId = 1, defaultMonth = new Date() }:
   }, [monthKey]);
 
   const ymd = selectedDate ? toYMD(selectedDate) : "";
+
+  if (!mentosSeq) {
+    return (
+      <div className="p-6">
+        <p className="mb-3 font-semibold">멘토 정보가 없습니다.</p>
+      </div>
+    );
+  }
   const days = generateCalendar(currentMonth);
 
   // 가용 시간 조회
-  const { data: availableTimes = [], isFetching: isLoadingTimes } = useQuery({
+  const { data: availability, isFetching: isLoadingTimes } = useQuery({
     queryKey: ["availability", mentosSeq, ymd],
     queryFn: () => fetchAvailability(mentosSeq, ymd),
     enabled: !!mentosSeq && !!ymd,
     staleTime: 60_000,
   });
+
+  const availableTimes = availability?.availableTime ?? [];
 
   // 날짜 클릭
   const handleDateClick = (date: Date) => {
@@ -96,7 +107,7 @@ export default function BookingPage({ mentorId = 1, defaultMonth = new Date() }:
     setSelectedTime("");
   };
 
-  // 예약하기
+  // 예약하기: 여기서는 API 호출 X → 확인 페이지로 state만 전달
   const handleReservation = () => {
     if (!selectedDate || !selectedTime) {
       alert("날짜와 시간을 선택해 주세요.");

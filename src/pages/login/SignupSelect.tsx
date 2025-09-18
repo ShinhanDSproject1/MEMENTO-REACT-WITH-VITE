@@ -11,10 +11,13 @@ export default function SignupSelect({ onSelect }: SignupSelectProps) {
   const navigate = useNavigate();
 
   const handleSelect = (role: "mentee" | "mentor") => {
-    if (onSelect) {
-      onSelect(role);
+    if (onSelect) return onSelect(role);
+    if (role === "mentor") {
+      // 멘토: 온보딩 1로 진입
+      navigate("/mento/introduce");
     } else {
-      navigate(`/signup/${role}`);
+      // 멘티: 바로 멘티 폼
+      navigate("/signup/mentee");
     }
   };
 

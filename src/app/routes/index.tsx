@@ -75,6 +75,8 @@ export const router = createBrowserRouter([
       { path: "/signup/mentor", element: withSuspense(<MentorSignup />) },
       { path: "/signup/mentee", element: withSuspense(<MenteeSignup />) },
       { path: "/signup-complete", element: withSuspense(<SignupComplete />) },
+      { path: "/mento/introduce", element: withSuspense(<MentoIntroduce />) },
+      { path: "/mento/introduce2", element: withSuspense(<MentoIntroduce2 />) },
 
       { path: "/menti/:category", element: withSuspense(<MentosList />) },
       { path: "/menti/mentos-detail/:id", element: withSuspense(<MentosDetail />) },
@@ -97,8 +99,6 @@ export const router = createBrowserRouter([
           { path: "/edit/:id", element: withSuspense(<EditMentos />) },
           { path: "/mento/certification", element: withSuspense(<CertificationRegister />) },
           { path: "/mento/certification/:result", element: withSuspense(<CertificationPage />) },
-          { path: "/mento/introduce", element: withSuspense(<MentoIntroduce />) },
-          { path: "/mento/introduce2", element: withSuspense(<MentoIntroduce2 />) },
 
           // 채팅/통계
           { path: "/chat", element: withSuspense(<ChatListPage />) },
