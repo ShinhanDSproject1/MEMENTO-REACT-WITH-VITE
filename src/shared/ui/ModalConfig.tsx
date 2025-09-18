@@ -99,6 +99,10 @@ type ModalConfigRecord = {
 
   //리뷰
   needReviewContent: AlertConfig;
+
+  //결제
+  faildPayment: AlertConfig;
+  noPaymentInfo: AlertConfig;
 };
 
 /** 키 → 해당 modalData 타입 매핑 (Alert는 BaseData로 통일) */
@@ -322,6 +326,17 @@ export const MODAL_CONFIG: ModalConfigRecord = {
   needReviewContent: {
     icon: deleteIcon,
     message: undefined,
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
+  },
+
+  faildPayment: {
+    icon: deleteIcon,
+    message: undefined,
+    buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
+  },
+
+  noPaymentInfo: {
+    icon: deleteIcon,
     buttons: [{ text: "닫기", variant: "danger", size: "lg", actionType: "close" }],
   },
 };
