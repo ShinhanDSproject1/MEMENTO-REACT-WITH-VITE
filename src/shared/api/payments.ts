@@ -42,7 +42,7 @@ export async function confirmPayment(
   return data;
 }
 
-export async function refundPayment(paymentsSeq: number) {
+export async function refundPayment(reservationSeq: number) {
   const config = {
     headers: {
       Authorization: `Bearer ${getAccessToken?.() ?? ""}`,
@@ -50,6 +50,6 @@ export async function refundPayment(paymentsSeq: number) {
     withCredentials: true,
   } as const;
 
-  const { data } = await http.post(`/mentos/refund/${paymentsSeq}`, {}, config);
+  const { data } = await http.post(`/mentos/refund/${reservationSeq}`, {}, config);
   return data;
 }
