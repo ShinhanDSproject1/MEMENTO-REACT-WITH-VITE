@@ -41,10 +41,13 @@ export default function ChatListPage() {
     let alive = true;
     (async () => {
       try {
+        console.log("🚀 채팅방 목록 조회 시작...");
         const list = await getRooms();
+        console.log("✅ 채팅방 목록 조회 완료:", list);
         if (!alive) return;
         setRooms(list);
       } catch (e: any) {
+        console.error("❌ 채팅방 목록 조회 실패:", e);
         if (!alive) return;
         setError(e?.message ?? "채팅방 목록 조회 실패");
       }
@@ -54,11 +57,26 @@ export default function ChatListPage() {
     };
   }, []);
 
-  const grouped = useMemo(() => groupBy(rooms ?? [], "group"), [rooms]);
-  const groupEntries = useMemo(
-    () => Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b, "ko", { numeric: true })),
-    [grouped],
-  );
+  const grouped = useMemo(() => {
+    console.log("📊 그룹화 시작 - rooms:", rooms);
+    const result = groupBy(rooms ?? [], "group");
+    console.log("📊 그룹화 결과:", result);
+    return result;
+  }, [rooms]);
+
+  const groupEntries = useMemo(() => {
+    const entries = Object.entries(grouped).sort(([a], [b]) =>
+      a.localeCompare(b, "ko", { numeric: true }),
+    );
+    console.log("📋 그룹 엔트리:", entries);
+    return entries;
+  }, [grouped]);
+
+  console.log("🎯 렌더링 상태:");
+  console.log("  - rooms:", rooms);
+  console.log("  - error:", error);
+  console.log("  - grouped:", grouped);
+  console.log("  - groupEntries:", groupEntries);
 
   return (
     <div className="l flex min-h-screen w-full justify-center overflow-x-hidden bg-[#f5f6f8] antialiased">
