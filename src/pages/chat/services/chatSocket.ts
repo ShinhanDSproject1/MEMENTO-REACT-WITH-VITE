@@ -2,15 +2,29 @@ import { Client, type IMessage } from "@stomp/stompjs";
 import { getAccessToken as _getAccessToken } from "@/shared/auth/token";
 
 function resolveWsUrl() {
+  // 1. 개발 환경(DEV)일 경우 (npm run dev)
+  // Vite 프록시를 사용하지 않고, 배포된 백엔드 서버의 주소로 직접 연결
+  if (import.meta.env.DEV) {
+    return "wss://memento.shinhanacademy.co.kr/ws/chat";
+  }
+
+  // 2. 배포 환경(PROD)일 경우 (npm run build)
+  // VITE_WS_ABSOLUTE 환경 변수가 있으면 그 값을 우선적으로 사용.
   const abs = import.meta.env.VITE_WS_ABSOLUTE as string | undefined;
-  if (import.meta.env.PROD && abs) return abs;
+  if (import.meta.env.PROD && abs) {
+    return abs;
+  }
+
+  // 3. 배포 환경에서 위 환경 변수가 없으면, 현재 웹사이트 주소를 기준으로 상대 경로 생성
+  // (예: 프론트엔드가 https://memento.com에 배포되면, wss://memento.com/ws/chat으로 자동 설정)
   const scheme = location.protocol === "https:" ? "wss" : "ws";
-  return `${scheme}://${location.host}/ws-stomp/websocket`; // 프록시 경유
+  return `${scheme}://${location.host}/ws/chat`;
 }
+
 export const WS_URL = resolveWsUrl();
 
 /** 브로커 경로들 (백엔드 설정과 반드시 일치) */
-export const TOPIC_BASE = import.meta.env.VITE_STOMP_TOPIC_BASE ?? "/topic/chat/rooms";
+export const TOPIC_BASE = import.meta.env.VITE_STOMP_TOPIC_BASE ?? "/topic/chat/room";
 export const SEND_DEST = import.meta.env.VITE_STOMP_SEND_DEST ?? "/app/chat/send";
 
 /** 토큰(있으면 헤더로 추가 — 쿠키 인증이면 없어도 무방) */
@@ -96,8 +110,8 @@ export async function sendChatMessage(params: {
   await ensureConnected();
   const payload = {
     chattingRoomSeq: Number(params.roomId),
-    senderMemberSeq: params.senderMemberSeq,
-    content: params.content,
+    senderSeq: params.senderMemberSeq, // senderMemberSeq -> senderSeq
+    message: params.content, // content -> message
   };
   stompClient.publish({
     destination: SEND_DEST,
