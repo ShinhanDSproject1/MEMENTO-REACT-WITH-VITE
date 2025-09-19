@@ -74,6 +74,11 @@ export default defineConfig({
           });
         },
       },
+      "/map": {
+        target: "https://memento.shinhanacademy.co.kr",
+        changeOrigin: true,
+        secure: true,
+      },
       "/ws-stomp": {
         target: "https://memento.shinhanacademy.co.kr",
         changeOrigin: true,
