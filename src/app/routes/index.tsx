@@ -51,6 +51,7 @@ const MentoIntroduce2 = React.lazy(() => import("@/pages/book/MentoIntroduce2"))
 // ✅ 새로 추가된 페이지
 const PaySuccess = React.lazy(() => import("@/pages/book/PaySuccess"));
 const MentorMapNearbyPage = React.lazy(() => import("@/pages/mentos/MentorMapNearbyPage"));
+const CertificationFailPage = React.lazy(() => import("@/pages/mentos/CertificationFailPage"));
 
 const withSuspense = (el: React.ReactNode) => (
   <Suspense fallback={<div className="p-6 text-sm text-gray-500">로딩 중…</div>}>{el}</Suspense>
@@ -99,6 +100,7 @@ export const router = createBrowserRouter([
           { path: "/edit/:id", element: withSuspense(<EditMentos />) },
           { path: "/mento/certification", element: withSuspense(<CertificationRegister />) },
           { path: "/mento/certification/:result", element: withSuspense(<CertificationPage />) },
+          { path: "/mento/certification/fail", element: withSuspense(<CertificationFailPage />) },
 
           // 채팅/통계
           { path: "/chat", element: withSuspense(<ChatListPage />) },

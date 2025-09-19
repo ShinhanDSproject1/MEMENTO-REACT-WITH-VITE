@@ -18,9 +18,9 @@ export default function CertificationRegister() {
 
   const [dragOver, setDragOver] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [scanning, setScanning] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // 미리보기 URL 정리
   useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -37,9 +37,7 @@ export default function CertificationRegister() {
   };
 
   const makePreview = (f: File) => {
-    // 이전 URL 정리
     if (previewUrl) URL.revokeObjectURL(previewUrl);
-
     const url = URL.createObjectURL(f);
     setPreviewUrl(url);
     setPreviewKind(f.type === "application/pdf" ? "pdf" : "image");
@@ -65,7 +63,6 @@ export default function CertificationRegister() {
     handleFilePicked(f);
   };
 
-  // 드래그&드롭
   const onDrop = useCallback((e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     setDragOver(false);
@@ -82,48 +79,55 @@ export default function CertificationRegister() {
     setDragOver(false);
   };
 
+  const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
   const handleUpload = async () => {
     if (!file) {
-      setErrorMsg("파일을 선택해주세요.");
+      setErrorMsg("자격증을 업로드해주세요.");
       return;
     }
 
     setErrorMsg(null);
     setLoading(true);
+    setScanning(true);
 
     const ctl = new AbortController();
-    const timer = setTimeout(() => ctl.abort(), 15_000); // 15초 타임아웃
+    const timer = setTimeout(() => ctl.abort(), 15_000);
 
     try {
       const form = new FormData();
       form.append("file", file);
 
-      // HTTPS 페이지에서 로컬 HTTP 서버와 통신하려면 개발 프록시(/py) 필요
-      const res = await fetch("/py/certs/extract", {
+      const req = fetch("/py/certs/extract", {
         method: "POST",
         body: form,
         signal: ctl.signal,
+      }).then(async (res) => {
+        let payload: any = {};
+        try {
+          payload = await res.json();
+        } catch {}
+        if (!res.ok) {
+          const msg =
+            payload?.message ||
+            (res.status === 404
+              ? "서버 주소를 확인해주세요. (404)"
+              : res.status === 500
+                ? "서버 내부 오류입니다. (500)"
+                : `업로드 실패 (${res.status})`);
+          throw new Error(msg);
+        }
+        return payload;
       });
 
-      let payload: any = {};
-      try {
-        payload = await res.json();
-      } catch {
-        /* no body */
-      }
+      const [payload] = await Promise.all([req, delay(5000)]);
 
-      if (!res.ok) {
-        const msg =
-          payload?.message ||
-          (res.status === 404
-            ? "서버 주소를 확인해주세요. (404)"
-            : res.status === 500
-              ? "서버 내부 오류입니다. (500)"
-              : `업로드 실패 (${res.status})`);
-        throw new Error(msg);
+      // ✅ name 값이 없으면 실패 페이지로
+      if (!payload?.name) {
+        navigate("/mento/certification/fail", { state: { ...payload, file } });
+      } else {
+        navigate("/mento/certification/inprogress", { state: payload });
       }
-
-      navigate("/mento/certification/inprogress", { state: payload });
     } catch (err: any) {
       if (err?.name === "AbortError") {
         setErrorMsg("요청 시간이 초과되었습니다. 서버가 실행 중인지 확인해주세요.");
@@ -134,6 +138,7 @@ export default function CertificationRegister() {
       } else {
         setErrorMsg(err?.message || "업로드 실패");
       }
+      setScanning(false);
     } finally {
       clearTimeout(timer);
       setLoading(false);
@@ -146,12 +151,26 @@ export default function CertificationRegister() {
     setPreviewUrl(null);
     setPreviewKind(null);
     setErrorMsg(null);
-    // input 값도 리셋: 라벨 내부 FileInput은 ref 없이도, 아래처럼 강제로 초기화하려면 key 바꾸는 패턴을 써야 함
-    // 여기선 굳이 불필요하니 생략
   };
 
   return (
-    <div className="flex h-[80vh] w-full flex-col justify-between gap-4 bg-white p-4 py-4">
+    <div className="flex min-h-[80vh] w-full flex-col justify-between gap-4 bg-white p-4 py-4">
+      {/* keyframes */}
+      <style>
+        {`
+        @keyframes scan-move {
+          0% { transform: translateY(-100%); opacity: 0.0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { transform: translateY(100%); opacity: 0.0; }
+        }
+        @keyframes glossy {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        `}
+      </style>
+
       {/* 제목 */}
       <div className="flex w-full">
         <p className="font-WooridaumB text-black">
@@ -160,7 +179,7 @@ export default function CertificationRegister() {
         </p>
       </div>
 
-      {/* 업로드 영역 */}
+      {/* 업로드 + 미리보기 */}
       <div className="flex w-full flex-col items-center justify-center gap-3">
         <Label
           htmlFor="dropzone-file"
@@ -168,15 +187,19 @@ export default function CertificationRegister() {
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
           className={[
-            "flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed",
+            "relative",
+            // ⬇️ 드롭존 세로 확대
+            "flex w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-4 py-10",
+            "min-h-[340px] sm:min-h-[420px]",
             dragOver ? "border-blue-400 bg-blue-50" : "border-gray-300 bg-gray-50",
             "hover:bg-gray-100",
+            "transition-colors",
           ].join(" ")}>
-          <div className="flex flex-col items-center justify-center px-4 pt-5 pb-6 text-center">
+          <div className="flex w-full flex-col items-center justify-center px-3 pt-8 text-center">
             {!previewUrl ? (
               <>
                 <svg
-                  className="mb-4 h-8 w-8 text-gray-500"
+                  className="mb-5 h-12 w-12 text-gray-500"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -192,32 +215,58 @@ export default function CertificationRegister() {
                        8m2-2 2 2"
                   />
                 </svg>
-                <p className="mb-2 text-sm text-gray-700">
+                <p className="mb-2 text-base text-gray-800">
                   <span className="font-semibold">클릭</span> 또는{" "}
                   <span className="font-semibold">파일을 끌어다 놓기</span>
                 </p>
-                <p className="text-xs text-gray-500">PNG, JPG, PDF (MAX. {MAX_SIZE_MB}MB)</p>
+                <p className="text-sm text-gray-500">PNG, JPG, PDF (MAX. {MAX_SIZE_MB}MB)</p>
               </>
             ) : (
               <div className="w-full">
-                {previewKind === "image" ? (
-                  <img
-                    src={previewUrl}
-                    alt="미리보기 이미지"
-                    className="mx-auto max-h-48 w-auto rounded-md object-contain shadow-sm"
-                  />
-                ) : (
-                  <object
-                    data={previewUrl}
-                    type="application/pdf"
-                    className="mx-auto h-48 w-full rounded-md">
-                    <p className="text-xs text-gray-500">
-                      브라우저가 PDF 미리보기를 지원하지 않습니다. 파일을 다운로드해 확인해주세요.
-                    </p>
-                  </object>
-                )}
+                <div className="relative mx-auto max-h-[60vh] w-full overflow-hidden rounded-xl">
+                  {previewKind === "image" ? (
+                    <img
+                      src={previewUrl}
+                      alt="미리보기 이미지"
+                      className="mx-auto max-h-[60vh] w-auto object-contain"
+                    />
+                  ) : (
+                    <object
+                      data={previewUrl}
+                      type="application/pdf"
+                      className="mx-auto h-[60vh] w-full">
+                      <p className="text-xs text-gray-500">
+                        브라우저가 PDF 미리보기를 지원하지 않습니다. 파일을 다운로드해 확인해주세요.
+                      </p>
+                    </object>
+                  )}
+
+                  {scanning && (
+                    <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-md">
+                      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+                      <div
+                        className="absolute inset-0 h-[40%] w-[150%] -rotate-6 bg-gradient-to-b from-transparent via-blue-500/90 to-transparent"
+                        style={{
+                          animation: "scan-move 3s linear infinite",
+                          boxShadow: "0 0 30px rgba(59,130,246,0.9), 0 0 80px rgba(59,130,246,0.6)",
+                        }}
+                      />
+                      <div
+                        className="absolute inset-0 bg-gradient-to-tr from-transparent via-blue-200/20 to-transparent"
+                        style={{
+                          backgroundSize: "200% 200%",
+                          animation: "glossy 2.5s linear infinite",
+                        }}
+                      />
+                      <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-4 py-1 text-xs font-bold whitespace-nowrap text-white shadow-lg shadow-blue-500/40">
+                        🔍 AI가 자격증을 스캔하는 중…
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {file && (
-                  <p className="mt-2 text-xs break-all text-gray-600">
+                  <p className="mt-3 text-xs break-all text-gray-600">
                     선택된 파일: <span className="font-medium">{file.name}</span>
                   </p>
                 )}
@@ -225,7 +274,6 @@ export default function CertificationRegister() {
             )}
           </div>
 
-          {/* 라벨-인풋 연결: onClick 없이 htmlFor와 id만으로 작동 */}
           <FileInput
             id="dropzone-file"
             className="hidden"
@@ -234,8 +282,7 @@ export default function CertificationRegister() {
           />
         </Label>
 
-        {/* 선택 해제 버튼 */}
-        {file && (
+        {file && !scanning && (
           <button
             type="button"
             onClick={clearFile}
@@ -245,24 +292,23 @@ export default function CertificationRegister() {
         )}
       </div>
 
-      {/* 오류 메시지 */}
       {errorMsg && <p className="text-sm text-red-500">{errorMsg}</p>}
 
-      {/* 버튼 */}
       <div className="flex flex-col items-center justify-center gap-2">
         <Button
           onClick={handleUpload}
           variant="primary"
           className="font-WooridaumB w-full px-8 py-4 font-bold"
           size="xl"
-          disabled={loading || !file}>
-          {loading ? "업로드 중..." : "추가하기"}
+          disabled={loading || !file || scanning}>
+          {scanning ? "스캔 중..." : loading ? "업로드 중..." : "추가하기"}
         </Button>
         <Button
           onClick={() => navigate("/mento")}
           variant="cancelGray"
           className="font-WooridaumB w-full px-8 py-4 font-bold"
-          size="xl">
+          size="xl"
+          disabled={scanning}>
           돌아가기
         </Button>
       </div>
