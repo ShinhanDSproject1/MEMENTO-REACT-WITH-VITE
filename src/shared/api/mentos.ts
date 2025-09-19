@@ -12,6 +12,7 @@ export interface ApiResponse<T> {
 
 export interface ReviewItem {
   reviewSeq: number;
+  memberName: string;
   reviewRating: number;
   reviewDate: string; // "YYYY-MM-DD"
   reviewContent: string;
