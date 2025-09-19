@@ -448,3 +448,39 @@ select {
     transform: rotate(360deg);
   }
 }
+
+@keyframes scan-move {
+  0% {
+    transform: translate(-100%, -100%);
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(100%, 100%);
+    opacity: 0.7;
+  }
+}
+
+@keyframes glossy {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes dash-move {
+  0% {
+    background-position-x: 0;
+  }
+
+  100% {
+    background-position-x: 40px;
+  }
+}
