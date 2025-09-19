@@ -1,22 +1,20 @@
 import { getAccessToken as _getAccessToken } from "@/shared/auth/token";
 
 export interface Room {
-  id: number;
+  id: string;
   name: string;
   group: string;
   preview?: string;
   unread?: boolean;
-  lastAt?: number; // epoch(ms)
+  lastAt?: number;
 }
-
 type ApiEnvelope<T> = { code: number; status: number; message: string; result: T };
 
-// --- 명세 DTO (키/구조 고정) ---
 type ChatRoomDTO = {
   chatRoomId: number;
   mentiName: string;
-  lastMessage: string; // 빈 문자열 허용
-  lastMessageAt: string; // "YYYY-MM-DD HH:mm:ss" or ISO
+  lastMessage: string | null;
+  lastMessageAt: string | null;
   hasUnreadMessage: boolean;
 };
 
@@ -26,9 +24,27 @@ type MentosGroupDTO = {
   chatRooms: ChatRoomDTO[];
 };
 
+/** --- 상세/메시지 DTO --- */
+export type MessageDTO = {
+  chattingRoomSeq: number;
+  senderSeq: number;
+  senderName: string;
+  senderProfileImage?: string;
+  message: string;
+  sentAt: string;
+  memberSeq: number;
+};
+
+export type ChatMessage = {
+  id: string;
+  roomId: string;
+  role: "me" | "bot";
+  text: string;
+  ts: number;
+};
+
 const BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
-// utils
 function getToken(): string {
   try {
     return (_getAccessToken?.() as string) ?? localStorage.getItem("accessToken") ?? "";
@@ -36,55 +52,62 @@ function getToken(): string {
     return "";
   }
 }
-function toEpochStrict(s: string): number {
+
+function toEpoch(s?: string | null): number {
   if (!s) return 0;
   const v = s.includes(" ") ? s.replace(" ", "T") : s;
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? 0 : d.getTime();
 }
-// 숫자 or 숫자문자 허용(빈값/엉뚱한 값은 에러)
-function asNum(v: unknown, label: string): number {
-  if (label === "" || label === null || label === undefined) {
-    throw new Error(`${label}가 숫자가 아닙니다.`);
-  }
-  const n = typeof label === "number" ? label : Number(label);
-  if (!Number.isFinite(n)) throw new Error(`${label}가 숫자ddd가 아닙니다.`);
-  return n;
+
+function assertArray(a: unknown, label: string): asserts a is any[] {
+  if (!Array.isArray(a)) throw new Error(`${label}가 배열이 아닙니다.`);
 }
 
-// 서버 응답을 명세 형태로 보정(키는 명세만 읽음, 타입만 최소 보정)
-function normalizeToSpec(raw: any): ApiEnvelope<MentosGroupDTO[]> {
+function assertNumber(v: unknown, label: string): asserts v is number {
+  if (typeof v !== "number" || !Number.isFinite(v)) {
+    throw new Error(`${label}가 숫자가 아닙니다.`);
+  }
+}
+/** --- 목록 응답 보정 --- */
+function normalizeToSpec(raw: any): MentosGroupDTO[] {
   if (!raw || typeof raw !== "object" || !Array.isArray(raw.result)) {
     throw new Error("menti-list 응답이 명세(result 배열)가 아닙니다.");
   }
 
-  const groups: MentosGroupDTO[] = (raw.result as any[]).map((g, gi) => {
-    const mentosId = asNum(g?.mentosId, "mentosId"); // "1" → 1
-    const mentosTitle = String(g?.mentosTitle ?? "");
-    const roomsRaw: any[] = Array.isArray(g?.chatRooms) ? g.chatRooms : []; // 명세 키만 사용
+  const groups = raw.result as any[];
 
-    const chatRooms: ChatRoomDTO[] = roomsRaw.map((r, ri) => {
-      const chatRoomId = asNum(r?.chatRoomId, "chatRoomId"); // "3" → 3
+  return groups.map((g, gi) => {
+    assertNumber(g?.mentosId, "mentosId");
+    const mentosTitle = String(g?.mentosTitle ?? "");
+    assertArray(g?.chatRooms, "chatRooms");
+
+    const chatRooms: ChatRoomDTO[] = (g.chatRooms as any[]).map((r, ri) => {
+      assertNumber(r?.chatRoomId, "chatRoomId");
       const mentiName = String(r?.mentiName ?? "");
-      const lastMessage = String(r?.lastMessage ?? "");
-      const lastMessageAt = String(r?.lastMessageAt ?? "");
+      if (!mentiName) throw new Error(`mentiName 누락 (index: ${gi}/${ri})`);
+
+      const lastMessage = r?.lastMessage ?? null;
+      const lastMessageAt = r?.lastMessageAt ?? null;
       const hasUnreadMessage = Boolean(r?.hasUnreadMessage);
 
-      if (!mentiName) throw new Error(`mentiName 누락 (index: ${gi}/${ri})`);
-      if (typeof lastMessageAt !== "string") {
-        throw new Error(`lastMessageAt 타입 오류 (index: ${gi}/${ri})`);
-      }
-
-      return { chatRoomId, mentiName, lastMessage, lastMessageAt, hasUnreadMessage };
+      return {
+        chatRoomId: r.chatRoomId,
+        mentiName,
+        lastMessage,
+        lastMessageAt,
+        hasUnreadMessage,
+      };
     });
 
-    return { mentosId, mentosTitle, chatRooms };
+    return {
+      mentosId: g.mentosId,
+      mentosTitle,
+      chatRooms,
+    };
   });
-
-  return { code: raw.code, status: raw.status, message: raw.message, result: groups };
 }
 
-// API
 export async function getRooms(): Promise<Room[]> {
   const token = getToken();
   if (!token) throw new Error("로그인 정보가 없습니다. 먼저 로그인해 주세요.");
@@ -101,23 +124,86 @@ export async function getRooms(): Promise<Room[]> {
     throw new Error(`채팅방 목록 조회 실패: ${res.status} ${msg}`);
   }
 
-  const normalized = normalizeToSpec(await res.json());
+  const json: ApiEnvelope<MentosGroupDTO[]> = await res.json();
+  const groups = normalizeToSpec(json);
 
   const rooms: Room[] = [];
-  for (const g of normalized.result) {
+  for (const g of groups) {
     const sorted = [...g.chatRooms].sort(
-      (a, b) => toEpochStrict(b.lastMessageAt) - toEpochStrict(a.lastMessageAt),
+      (a, b) => toEpoch(b.lastMessageAt) - toEpoch(a.lastMessageAt),
     );
+
     for (const r of sorted) {
       rooms.push({
         id: String(r.chatRoomId),
         name: r.mentiName,
         group: g.mentosTitle,
-        preview: r.lastMessage, // 채팅이 없으면 빈 문자열 → UI에서 문구 처리
+        preview: (r.lastMessage ?? "").trim() || "메시지가 없습니다.",
         unread: r.hasUnreadMessage,
-        lastAt: toEpochStrict(r.lastMessageAt),
+        lastAt: toEpoch(r.lastMessageAt),
       });
     }
   }
+
   return rooms;
+}
+
+/** --- 특정 방 메시지 조회 --- */
+export async function getMessages(roomId: string): Promise<ChatMessage[]> {
+  const token = getToken();
+  if (!token) throw new Error("로그인이 필요합니다.");
+
+  const res = await fetch(`${BASE}/chat/rooms/${roomId}/messages`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const msg = await res.text().catch(() => "");
+    throw new Error(`메시지 조회 실패: ${res.status} ${msg}`);
+  }
+
+  const json: ApiEnvelope<{ messages: MessageDTO[] }> = await res.json();
+  const msgs = json.result.messages ?? [];
+
+  return msgs.map((m) => ({
+    id: `${m.chattingRoomSeq}-${m.sentAt}-${m.senderSeq}`,
+    roomId,
+    role: "bot",
+    text: m.message,
+    ts: new Date(m.sentAt.replace(" ", "T")).getTime(),
+  }));
+}
+
+/** --- 메시지 전송 --- */
+export async function sendMessage(roomId: string, text: string): Promise<ChatMessage> {
+  const token = getToken();
+  if (!token) throw new Error("로그인이 필요합니다.");
+
+  const res = await fetch(`${BASE}/chat/rooms/${roomId}/messages`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ message: text }),
+  });
+
+  if (!res.ok) {
+    const msg = await res.text().catch(() => "");
+    throw new Error(`메시지 전송 실패: ${res.status} ${msg}`);
+  }
+
+  const json: ApiEnvelope<MessageDTO> = await res.json();
+  const m = json.result;
+
+  return {
+    id: `${m.chattingRoomSeq}-${m.sentAt}-${m.senderSeq}`,
+    roomId,
+    role: "me",
+    text: m.message,
+    ts: new Date(m.sentAt.replace(" ", "T")).getTime(),
+  };
 }

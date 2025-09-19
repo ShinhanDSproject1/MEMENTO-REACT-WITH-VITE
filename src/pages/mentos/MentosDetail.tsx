@@ -377,7 +377,7 @@ export default function MentosDetail() {
                 <ReviewMentosDetailCard
                   value={rv.reviewRating}
                   context={rv.reviewContent}
-                  name={mento?.mentoName ?? "익명 멘토"}
+                  name={rv.memberName ?? "익명 멘토"}
                 />
               </div>
             ))}
