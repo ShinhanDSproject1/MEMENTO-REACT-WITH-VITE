@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import Button from "@/widgets/common/Button";
 import SnapCarousel from "@/widgets/common/SnapCarousel";
 import ReviewMentosDetailCard from "@/widgets/mentos/ReviewMentosDetailCard";
@@ -102,6 +102,7 @@ export default function MentosDetail() {
   const [data, setData] = useState<MentosDetailResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const location = useLocation();
 
   // --- 리뷰 무한 스크롤 상태 ---
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
@@ -324,6 +325,11 @@ export default function MentosDetail() {
   const handleGoBooking = () => {
     if (!id || !data) return;
     if (isMentor) return;
+
+    if (!user) {
+      navigate("/login", { state: { from: location } });
+      return;
+    }
     navigate("/booking", {
       state: {
         mentosSeq: Number(id),

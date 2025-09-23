@@ -39,6 +39,14 @@ interface MyMentosListProps {
 // ─────────────────────────────────────────────────────────────
 const MY_MENTOS_QK = ["my-mentos-list"] as const;
 
+const fmtDateTime = (ymd?: string, time?: string) => {
+  if (!ymd) return "";
+  const [y, m, d] = ymd.split("-").map(Number);
+  if (!y || !m || !d) return ymd; // 방어
+  const weekday = ["일", "월", "화", "수", "목", "금", "토"][new Date(y, m - 1, d).getDay()];
+  return `${m}.${d}(${weekday})${time ? ` ${time}` : ""}`;
+};
+
 function getPaymentSeqFromLS(mentosSeq: number): number | undefined {
   const v = localStorage.getItem(`paymentSeqByMentos:${mentosSeq}`);
   return v ? Number(v) : undefined;
@@ -165,8 +173,6 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
       openModal("dismissSuccess");
       return;
     }
-
-    // 나머지 모달은 단순 닫기
     closeModal();
   };
 
@@ -333,6 +339,8 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
 
   /* -------------------------------- 멘토 뷰 -------------------------------- */
   if (role === "mento") {
+    console.log("멘티 첫 아이템 원본:", mentee.data?.pages?.[0]?.result?.content?.[0]);
+    console.log("멘티 가공 리스트 첫 아이템:", menteeList?.[0]);
     return (
       <div className="flex min-h-screen w-full justify-center bg-[#f5f6f8] antialiased">
         <section className="w-full bg-white px-4 py-5 shadow">
@@ -424,13 +432,17 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
       <section className="flex w-full flex-col items-center gap-3">
         {!menteeEmpty &&
           menteeList.map((item: MyMentosItem) => {
+            const dateLabel = fmtDateTime(item.mentosAt, item.mentosTime);
+            const locationLabel = dateLabel
+              ? `${dateLabel}${item.region ? ` · ${item.region}` : ""}`
+              : item.region;
             return (
               <MentosCard
                 key={item.mentosSeq}
                 mentosSeq={item.mentosSeq}
                 title={item.mentosTitle}
                 price={item.price}
-                location={item.region}
+                location={locationLabel}
                 status={item.progressStatus === "진행 완료" ? "completed" : "pending"}
                 imageUrl={item.mentosImage}
                 onReportClick={() => onReportClick(item.mentosSeq)}

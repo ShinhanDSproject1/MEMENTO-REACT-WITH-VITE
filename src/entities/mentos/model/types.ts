@@ -58,6 +58,9 @@ export interface MyMentosItem {
   progressStatus: string;
   reservationSeq?: number;
   reviewCompleted: boolean;
+
+  mentosAt?: string; // "YYYY-MM-DD"
+  mentosTime?: string; // "HH:mm"
 }
 
 export type ReportType =

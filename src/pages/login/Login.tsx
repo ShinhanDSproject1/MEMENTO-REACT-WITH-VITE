@@ -1,11 +1,15 @@
-// src/pages/login/Login.tsx
 import character from "@assets/images/character/character-full-dance.svg";
 import logo from "@assets/images/logo/memento-logo.svg";
-import { useAuth } from "@entities/auth"; // ✅ AuthProvider에서 제공하는 훅
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "@entities/auth";
+import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 type Role = "mentor" | "menti";
+
+const REDIRECT_KEY = "postLoginRedirect";
+const buildPath = (
+  loc?: Partial<Location> & { pathname?: string; search?: string; hash?: string },
+) => (loc?.pathname ? `${loc.pathname}${loc.search ?? ""}${loc.hash ?? ""}` : "/");
 
 export default function Login() {
   const [role, setRole] = useState<Role>("mentor");
@@ -16,6 +20,21 @@ export default function Login() {
 
   const navigate = useNavigate();
   const { login } = useAuth(); // ✅ 전역 auth 액션 사용
+  const location = useLocation() as { state?: { from?: Location } };
+
+  // ✅ (추가) 로그인 페이지 진입 시, 보호 라우트가 넘겨준 from을 세션에 백업(소셜 로그인 대비)
+  useEffect(() => {
+    const from = location.state?.from;
+    if (from) {
+      sessionStorage.setItem(REDIRECT_KEY, buildPath(from));
+    }
+  }, [location.state]);
+
+  // ✅ (추가) 최종 리다이렉트 목적지 계산: state.from → 세션 백업 → "/"
+  const redirectTarget = useMemo(() => {
+    const from = location.state?.from;
+    return buildPath(from) || sessionStorage.getItem(REDIRECT_KEY) || "/";
+  }, [location.state]);
 
   // * 입력값, 로딩중 아닐때
   const canSubmit = !!(id.trim() && pw.trim()) && !loading;
@@ -39,7 +58,8 @@ export default function Login() {
       });
 
       // 로그인 성공 → 홈으로 이동 (필요시 리다이렉트 대상 바꿔도 OK)
-      navigate("/", { replace: true });
+      sessionStorage.removeItem(REDIRECT_KEY);
+      navigate(redirectTarget, { replace: true });
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } }; message?: string };
       const msg =

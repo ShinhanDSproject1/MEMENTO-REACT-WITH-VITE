@@ -12,19 +12,20 @@ export async function updateMentoProfileDetail(
 ): Promise<ApiEnvelope<null>> {
   const fd = new FormData();
 
-  // requestDto는 JSON 문자열로 담아야 함
-  fd.append(
-    "requestDto",
-    new Blob([JSON.stringify(payload.requestDto)], { type: "application/json" }),
-  );
+  const dto = {
+    ...payload.requestDto,
+    mentoPostcode: payload.requestDto.mentoPostcode ?? "",
+    mentoRoadAddress: payload.requestDto.mentoRoadAddress ?? "",
+    mentoBname: payload.requestDto.mentoBname ?? "",
+    mentoDetail: payload.requestDto.mentoDetail ?? "",
+  };
 
-  // 이미지 파일이 있으면 첨부
+  fd.append("requestDto", new Blob([JSON.stringify(dto)], { type: "application/json" }));
+
   if (payload.imageFile) {
-    fd.append("imageFile", payload.imageFile);
+    fd.append("imageFile", payload.imageFile, payload.imageFile.name);
   }
 
-  const { data } = await http.patch<ApiEnvelope<null>>("/mento/mento-profiles", fd, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const { data } = await http.patch<ApiEnvelope<null>>("/mento/mento-profiles", fd);
   return data;
 }
