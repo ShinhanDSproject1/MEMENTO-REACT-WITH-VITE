@@ -32,7 +32,7 @@ export default function CommonHeader({ onClickHome }: CommonHeaderProps) {
   const goHome = () => (onClickHome ? onClickHome() : navigate("/"));
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between bg-white px-4 py-3">
+    <header className="sticky top-0 z-50 flex items-center justify-between bg-white px-4 py-3 sm:px-6 lg:px-8">
       {/* 왼쪽 뒤로가기 아이콘 */}
       <button type="button" onClick={goBack} aria-label="back">
         <img
@@ -41,7 +41,6 @@ export default function CommonHeader({ onClickHome }: CommonHeaderProps) {
           className="mx-0 h-6 w-auto cursor-pointer hover:brightness-60"
         />
       </button>
-
       {/* 오른쪽 아이콘들 */}
       <div className="flex items-center gap-4">
         <button type="button" onClick={goLogin} aria-label="login">
@@ -59,7 +58,6 @@ export default function CommonHeader({ onClickHome }: CommonHeaderProps) {
           />
         </button>
       </div>
-
       {/* ✅ 로그아웃 완료 모달 */}
       {isLogoutOpen && (
         <div

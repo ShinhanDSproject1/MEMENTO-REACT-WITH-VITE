@@ -1,4 +1,3 @@
-// src/pages/Review.tsx
 import PageContainer from "@/widgets/profile/PageContainer";
 import ReviewCard from "@/widgets/profile/ReviewCard";
 import { getMentoReviews, type MentorReview } from "@entities/review";
@@ -21,7 +20,6 @@ export default function Review() {
   const [error, setError] = useState("");
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  // 최신 상태 추적용 ref
   const loadingRef = useRef(false);
   const hasMoreRef = useRef(true);
   const cursorRef = useRef<number | undefined>(undefined);
@@ -45,10 +43,9 @@ export default function Review() {
     content: r.reviewContent,
   });
 
-  // 무한 스크롤에서만 사용하는 fetchMore
   const fetchMore = useCallback(async () => {
     if (loadingRef.current || !hasMoreRef.current) return;
-    if (error) return; // 🚨 에러 상태에서는 재요청 막기
+    if (error) return;
 
     try {
       setLoading(true);
@@ -71,7 +68,6 @@ export default function Review() {
       setHasMore(res.hasNext);
       setCursor(res.nextCursor ?? undefined);
     } catch (err: any) {
-      // ✅ 서버 응답 메시지 반영
       const msg = err?.response?.data?.message || err?.message || "리뷰를 불러오지 못했습니다.";
       setError(msg);
       setHasMore(false);
@@ -80,7 +76,6 @@ export default function Review() {
     }
   }, [error]); // error 의존 추가
 
-  // 초기 로드 (한번만 실행)
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -94,7 +89,6 @@ export default function Review() {
         setCursor(res.nextCursor ?? undefined);
       } catch (err: any) {
         if (!cancelled) {
-          // ✅ 서버 응답 메시지 반영
           const msg = err?.response?.data?.message || err?.message || "리뷰를 불러오지 못했습니다.";
           setError(msg);
           setHasMore(false);
