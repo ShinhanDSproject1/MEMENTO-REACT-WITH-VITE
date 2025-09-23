@@ -80,7 +80,7 @@ export default defineConfig({
         },
       },
       "/py": {
-        target: "http://192.168.0.180:8000",
+        target: "http://192.168.0.180:8001",
         changeOrigin: true,
         secure: false,
         rewrite: (p) => p.replace(/^\/py/, ""),
