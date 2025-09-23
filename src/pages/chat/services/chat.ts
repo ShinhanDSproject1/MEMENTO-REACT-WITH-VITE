@@ -208,7 +208,8 @@ export async function sendMessage(roomId: string, text: string): Promise<ChatMes
   const token = getToken();
   if (!token) throw new Error("로그인이 필요합니다.");
 
-  const res = await fetch(`${BASE}/chat/rooms/${roomId}/messages`, {
+  // chattingRoomSeq를 사용하는 엔드포인트로 변경
+  const res = await fetch(`${BASE}/chatting-rooms/${roomId}/messages`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
