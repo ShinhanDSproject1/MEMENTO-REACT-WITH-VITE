@@ -1,91 +1,12 @@
-// ✅ any 제거 버전
-
-// ─────────────────────────────────────────────────────────────
-// Kakao Maps 최소 타입 정의 (우리가 쓰는 것만)
-// ─────────────────────────────────────────────────────────────
-type KakaoLatLng = {
-  getLat(): number;
-  getLng(): number;
-};
-
-type KakaoSize = unknown;
-type KakaoPoint = unknown;
-
-type KakaoLatLngBounds = {
-  extend(latlng: KakaoLatLng): void;
-  getCenter(): KakaoLatLng;
-};
-
-type KakaoInfoWindow = {
-  setContent(content: string | HTMLElement): void;
-  open(map: KakaoMap, marker?: KakaoMarker): void;
-  close(): void;
-};
-
-type KakaoMarkerImage = unknown;
-
-type KakaoMarker = {
-  setMap(map: KakaoMap | null): void;
-};
-
-type KakaoMap = {
-  setCenter(latlng: KakaoLatLng): void;
-  setLevel(level: number): void;
-  getCenter(): KakaoLatLng;
-  setBounds(bounds: KakaoLatLngBounds): void;
-  relayout(): void;
-};
-
-type KakaoGeocoder = {
-  addressSearch(
-    query: string,
-    cb: (result: Array<Record<string, string>>, status: string) => void,
-  ): void;
-};
-
-type KakaoMapsNamespace = {
-  LatLng: new (lat: number, lng: number) => KakaoLatLng;
-  Size: new (w: number, h: number) => KakaoSize;
-  Point: new (x: number, y: number) => KakaoPoint;
-  LatLngBounds: new () => KakaoLatLngBounds;
-  MarkerImage: new (
-    src: string,
-    size: KakaoSize,
-    opts?: { offset?: KakaoPoint },
-  ) => KakaoMarkerImage;
-  Marker: new (opts: {
-    map: KakaoMap;
-    position: KakaoLatLng;
-    title?: string;
-    image?: KakaoMarkerImage;
-  }) => KakaoMarker;
-  Map: new (el: HTMLElement, opts: { center: KakaoLatLng; level: number }) => KakaoMap;
-  InfoWindow: new (opts?: { removable?: boolean }) => KakaoInfoWindow;
-  services: {
-    Geocoder: new () => KakaoGeocoder;
-    Status: { OK: string };
-  };
-  event: {
-    addListener(target: unknown, type: string, handler: (...args: unknown[]) => void): void;
-  };
-  load(cb: () => void): void;
-};
-
-type KakaoGlobal = {
-  maps: KakaoMapsNamespace;
-};
-
 declare global {
   interface Window {
-    kakao: KakaoGlobal;
+    kakao: any;
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// 도메인 타입
-// ─────────────────────────────────────────────────────────────
-export type MentosItem = { mentosTitle: string; price?: number | string };
+import axios, { AxiosError } from "axios";
 
+export type MentosItem = { mentosTitle: string; price?: number | string };
 export type MentorItem = {
   mentoName?: string;
   mentoProfileContent?: string;
@@ -96,21 +17,27 @@ export type MentorItem = {
   mentosList?: MentosItem[];
 };
 
-// ─────────────────────────────────────────────────────────────
-// 상수/유틸
-// ─────────────────────────────────────────────────────────────
-const API_HOST = "https://memento.shinhanacademy.co.kr";
-const MAPS_KEY_ENDPOINT = `/api/config/maps-key`;
+const API_HOST = import.meta.env.DEV ? "/api" : "https://memento.shinhanacademy.co.kr";
+
 const NEARBY_ENDPOINT = (lat: number, lon: number, distanceKm: number) =>
-  `${API_HOST}/map/mentos?latitude=${lat}&longitude=${lon}&distance=${distanceKm}`;
+  `${API_HOST}/map/mentos?latitude=${lon}&longitude=${lat}&distance=${distanceKm}`;
+
 const BASE_IMAGE_PATH = "/uploads/";
 const FALLBACK_IMAGE = "/static/images/default-60.png";
-
 const BLUE_DOT = "/images/location.svg";
 const RED_PIN = "/images/location2.svg";
 
-/** SDK 중복 로딩 방지 */
+const apiClient = axios.create({
+  timeout: 10000,
+  withCredentials: true,
+  headers: {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  },
+});
+
 let kakaoLoaderPromise: Promise<void> | null = null;
+
 async function ensureKakaoSdkLoaded(): Promise<void> {
   if (typeof window !== "undefined" && window.kakao?.maps) return;
   if (kakaoLoaderPromise) {
@@ -119,24 +46,37 @@ async function ensureKakaoSdkLoaded(): Promise<void> {
   }
 
   kakaoLoaderPromise = (async () => {
-    const res = await fetch(MAPS_KEY_ENDPOINT);
-    if (!res.ok) throw new Error("Failed to fetch Kakao Maps key");
-    const { apiKey } = (await res.json()) as { apiKey: string };
+    try {
+      const apiKey = import.meta.env.VITE_KAKAO_JS_KEY;
 
-    await new Promise<void>((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}&libraries=services&autoload=false`;
-      script.async = true;
-      script.onload = () => {
-        try {
-          window.kakao.maps.load(() => resolve());
-        } catch (e) {
-          reject(e);
-        }
-      };
-      script.onerror = () => reject(new Error("Failed to load Kakao SDK"));
-      document.head.appendChild(script);
-    });
+      if (!apiKey) {
+        throw new Error(
+          "Kakao Maps API key is not configured. Please check VITE_KAKAO_JS_KEY in .env.local",
+        );
+      }
+
+      await new Promise<void>((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}&libraries=services&autoload=false`;
+        script.async = true;
+        script.onload = () => {
+          try {
+            window.kakao.maps.load(() => {
+              resolve();
+            });
+          } catch (e) {
+            reject(e);
+          }
+        };
+        script.onerror = (e) => {
+          reject(new Error("Failed to load Kakao SDK"));
+        };
+        document.head.appendChild(script);
+      });
+    } catch (error) {
+      console.error("Error in ensureKakaoSdkLoaded:", error);
+      throw error;
+    }
   })();
 
   await kakaoLoaderPromise;
@@ -151,7 +91,7 @@ function buildInfoHtml(mentor: MentorItem) {
   const mentosList = Array.isArray(mentor.mentosList) ? mentor.mentosList : [];
   const priceChip = (price: number | string) => {
     const n = Number(price ?? 0);
-    const txt = Number.isFinite(n) ? n.toLocaleString() : String(price ?? "");
+    const txt = isFinite(n) ? n.toLocaleString() : String(price ?? "");
     return `${txt}<span style="white-space:nowrap">원</span>`;
   };
 
@@ -199,16 +139,15 @@ function buildInfoHtml(mentor: MentorItem) {
     font-size:14px; line-height:1.55; word-break:keep-all;
     background:#fff; overflow:hidden;
     border: none; box-shadow: 0 6px 18px rgba(16,24,40,.08); ">
-    <button id="memento-iw-close" style=" position:absolute; top:13px; right:8px;
+      <button id="memento-iw-close" style=" position:absolute; top:13px; right:8px;
       border:none; background:transparent; color:#111; font-size:18px; font-weight:bold; line-height:1; cursor:pointer;">&times;</button>
     <div style="height:6px;background:#0B63F6;"></div>
     <div style="display:flex;align-items:center;gap:12px;padding:14px 16px 8px 16px;">
       <div style="position:relative;">
         <img src="${profileImgSrc}"
-             style="width:54px;height:54px;border-radius:50%;object-fit:cover;
-                border:2px solid #0B63F6;background:#fff;" onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}'" />
+              style="width:54px;height:54px;border-radius:50%;object-fit:cover;
+                 border:2px solid #0B63F6;background:#fff;" onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}'" />
       </div>
-
       <div style="min-width:0;flex:1;">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <h3 class="font-WooridaumB"
@@ -225,6 +164,7 @@ function buildInfoHtml(mentor: MentorItem) {
     </div>
     <div style="height:1px;background:#EEF2F7;margin:10px 16px;"></div>
     <div style="display:flex;align-items:center;gap:8px;padding:0 16px;">
+      <span style="font-size:16px;"></span>
       <h4 class="font-WooridaumB"
           style="margin:6px 0 8px 0;font-size:14px;color:#374151;">
         진행 중인 멘토링
@@ -237,36 +177,42 @@ function buildInfoHtml(mentor: MentorItem) {
 `;
 }
 
-// ─────────────────────────────────────────────────────────────
-// KakaoMapController
-// ─────────────────────────────────────────────────────────────
 export class KakaoMapController {
   private mapEl: HTMLDivElement;
-  private map: KakaoMap | null = null;
-  private infoWindow: KakaoInfoWindow | null = null;
-  private myMarker: KakaoMarker | null = null;
-  private mentorMarkers: KakaoMarker[] = [];
+  private map: any | null = null;
+  private infoWindow: any | null = null;
+  private myMarker: any | null = null;
+  private mentorMarkers: any[] = [];
 
   constructor(mapEl: HTMLDivElement) {
     this.mapEl = mapEl;
   }
 
-  /** SDK 로드 & 기본 지도 초기화 */
   async init(centerLat = 37.5665, centerLng = 126.978, level = 7) {
-    await ensureKakaoSdkLoaded();
-    const kakao = window.kakao;
+    try {
+      await ensureKakaoSdkLoaded();
 
-    const center = new kakao.maps.LatLng(centerLat, centerLng);
-    this.map = new kakao.maps.Map(this.mapEl, { center, level });
-    this.infoWindow = new kakao.maps.InfoWindow({ removable: false });
+      if (!window.kakao?.maps) {
+        throw new Error("Kakao Maps is not available");
+      }
+
+      const kakao = window.kakao;
+      const center = new kakao.maps.LatLng(centerLat, centerLng);
+      this.map = new kakao.maps.Map(this.mapEl, {
+        center,
+        level,
+        draggable: true,
+        scrollwheel: true,
+        disableDoubleClick: false,
+      });
+
+      this.infoWindow = new kakao.maps.InfoWindow({ removable: false });
+    } catch (error) {
+      console.error("Failed to initialize Kakao Map:", error);
+      throw error;
+    }
   }
 
-  relayout() {
-    if (!this.map) return;
-    this.map.relayout();
-  }
-
-  /** 페이지 언마운트 등 정리 */
   destroy() {
     this.clearMentors();
     if (this.myMarker) {
@@ -276,15 +222,11 @@ export class KakaoMapController {
     this.infoWindow = null;
     this.map = null;
   }
-
-  /** 현재 지도 중심 lat/lng 반환 */
   getCenter(): { lat: number; lng: number } | null {
     if (!this.map) return null;
     const c = this.map.getCenter();
     return { lat: c.getLat(), lng: c.getLng() };
   }
-
-  /** 지도 이동(센터/레벨 선택) */
   moveTo(lat: number, lng: number, level?: number) {
     if (!this.map) return;
     const kakao = window.kakao;
@@ -293,7 +235,6 @@ export class KakaoMapController {
     if (typeof level === "number") this.map.setLevel(level);
   }
 
-  /** 내 위치 표시 + 센터 이동 */
   setMyLocation(lat: number, lng: number, opts?: { preserveView?: boolean }) {
     if (!this.map) return;
     const kakao = window.kakao;
@@ -306,7 +247,7 @@ export class KakaoMapController {
       offset: new kakao.maps.Point(16, 32),
     });
 
-    this.myMarker = new window.kakao.maps.Marker({
+    this.myMarker = new kakao.maps.Marker({
       map: this.map,
       position: pos,
       title: "내 위치",
@@ -319,13 +260,11 @@ export class KakaoMapController {
     }
   }
 
-  /** 멘토 마커 모두 제거 */
   clearMentors() {
     this.mentorMarkers.forEach((m) => m.setMap(null));
     this.mentorMarkers = [];
   }
 
-  /** 주변 멘토 조회 + 마커 표시 (카운트 반환) */
   async showMentors(
     lat: number,
     lng: number,
@@ -333,11 +272,17 @@ export class KakaoMapController {
     keepCurrentView = true,
   ): Promise<number> {
     if (!this.map) throw new Error("Map is not initialized");
-    const res = await fetch(NEARBY_ENDPOINT(lat, lng, distanceKm));
-    const data: {
-      code: number;
-      result?: MentorItem[];
-    } = await res.json();
+
+    let data: any;
+
+    try {
+      const url = NEARBY_ENDPOINT(lat, lng, distanceKm);
+      const response = await apiClient.get(url);
+      data = response.data;
+    } catch (error) {
+      this.clearMentors();
+      throw error;
+    }
 
     if (!(data && data.code === 1000 && Array.isArray(data.result))) {
       this.clearMentors();
@@ -347,18 +292,24 @@ export class KakaoMapController {
     const kakao = window.kakao;
     this.clearMentors();
     const bounds = new kakao.maps.LatLngBounds();
+
     const img = new kakao.maps.MarkerImage(RED_PIN, new kakao.maps.Size(32, 32), {
       offset: new kakao.maps.Point(10, 32),
     });
 
-    data.result.forEach((mentor) => {
-      const latNum = toNumber(mentor.latitude);
-      const lngNum = toNumber(mentor.longitude);
-      if (latNum === null || lngNum === null) return;
+    let markerCount = 0;
+
+    (data.result as MentorItem[]).forEach((mentor) => {
+      const latNum = toNumber(mentor.longitude);
+      const lngNum = toNumber(mentor.latitude);
+
+      if (latNum === null || lngNum === null) {
+        return;
+      }
 
       const pos = new kakao.maps.LatLng(latNum, lngNum);
       const marker = new kakao.maps.Marker({
-        map: this.map!,
+        map: this.map,
         position: pos,
         title: mentor.mentoName ?? "멘토",
         image: img,
@@ -366,42 +317,44 @@ export class KakaoMapController {
 
       kakao.maps.event.addListener(marker, "click", () => {
         this.infoWindow?.setContent(buildInfoHtml(mentor));
-        this.infoWindow?.open(this.map!, marker);
-
-        // 인포윈도우 외곽선/그림자 제거 + 닫기 버튼 동작
+        this.infoWindow?.open(this.map, marker);
         setTimeout(() => {
           const btn = document.getElementById("memento-iw-close");
-          btn?.addEventListener("click", () => this.infoWindow?.close(), { once: true });
-          const iwRoot = btn?.closest("div") as HTMLElement | null;
-          let cur = iwRoot;
+          if (btn) {
+            btn.addEventListener("click", () => this.infoWindow?.close(), { once: true });
+          }
+
+          const iwRoot = btn?.closest("div");
+          let cur = iwRoot as HTMLElement | null;
           for (let i = 0; i < 6 && cur; i++) {
-            const st = (cur as HTMLElement).style?.cssText || "";
+            const st = cur.style?.cssText || "";
             if (st.includes("border") || st.includes("box-shadow") || st.includes("boxShadow")) {
-              (cur as HTMLElement).style.border = "none";
-              (cur as HTMLElement).style.boxShadow = "none";
+              cur.style.border = "none";
+              cur.style.boxShadow = "none";
             }
-            cur = cur.parentElement;
+            cur = cur.parentElement as HTMLElement | null;
           }
         }, 0);
       });
 
       this.mentorMarkers.push(marker);
       bounds.extend(pos);
+      markerCount++;
     });
 
-    if (!keepCurrentView) {
+    if (!keepCurrentView && markerCount > 0) {
       try {
-        if (this.mentorMarkers.length > 1) {
+        if (markerCount > 1) {
           this.map.setBounds(bounds);
-        } else if (this.mentorMarkers.length === 1) {
+        } else if (markerCount === 1) {
           this.map.setCenter(bounds.getCenter());
           this.map.setLevel(5);
         }
       } catch (e) {
-        console.warn("bounds 적용 중 에러:", e);
+        console.warn("Error adjusting map bounds:", e);
       }
     }
 
-    return this.mentorMarkers.length;
+    return markerCount;
   }
 }

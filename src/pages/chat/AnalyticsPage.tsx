@@ -1,6 +1,8 @@
 import dogFront from "@assets/images/character/character-dog-serch.png";
 import { BarChart, LineChart, PieChart, Search } from "lucide-react";
 import { useEffect, useState } from "react";
+// import dogFront from "../../assets/images/dog-front.png";
+
 
 export default function AnalyticsPage() {
   const messages = [
