@@ -59,6 +59,15 @@ export default defineConfig({
     host: true,
     port: 3000,
     proxy: {
+      // ✅ 1) 더 구체적인 규칙을 먼저: /api/ai/** → 192.168.0.180:8001
+      "/api/ai": {
+        target: "http://192.168.0.180:8001",
+        changeOrigin: true,
+        secure: false,
+        // /api/ 를 제거해서 /api/ai/chatbot/1 → /ai/chatbot/1 로 전달
+        rewrite: (p) => p.replace(/^\/api/, ""),
+      },
+
       "/api": {
         target: "https://memento.shinhanacademy.co.kr",
         changeOrigin: true,
