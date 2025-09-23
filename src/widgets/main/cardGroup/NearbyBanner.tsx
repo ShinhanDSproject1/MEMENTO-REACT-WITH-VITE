@@ -21,7 +21,7 @@ export default function NearbyBanner({ userType = "guest", onClick }: NearbyBann
       <div className="flex items-center justify-between px-4 py-3">
         {/* 텍스트 */}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-slate-900">내 주변 멘토 빠르게 보기</p>
+          <p className="truncate text-sm font-semibold text-slate-900">내 주변 멘토 지도로 보기</p>
           <p className="truncate text-xs text-slate-500">가까운 거리의 멘토를 만나보세요!</p>
         </div>
 

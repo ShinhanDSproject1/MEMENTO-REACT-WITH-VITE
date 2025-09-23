@@ -5,6 +5,7 @@ declare global {
 }
 
 import axios, { AxiosError } from "axios";
+import { getAccessToken } from "@/shared/auth/token";
 
 export type MentosItem = {
   mentosSeq?: number | string;
@@ -22,6 +23,7 @@ export type MentorItem = {
 };
 
 const API_HOST = import.meta.env.DEV ? "/api" : "https://memento.shinhanacademy.co.kr";
+const SAME_ORIGIN = API_HOST.startsWith("/");
 
 const NEARBY_ENDPOINT = (lat: number, lon: number, distanceKm: number) =>
   `${API_HOST}/map/mentos?latitude=${lon}&longitude=${lat}&distance=${distanceKm}`;
@@ -33,11 +35,20 @@ const RED_PIN = "/images/location2.svg";
 
 const apiClient = axios.create({
   timeout: 10000,
-  withCredentials: true,
+  withCredentials: SAME_ORIGIN,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
   },
+});
+
+apiClient.interceptors.request.use((cfg) => {
+  const token = getAccessToken?.();
+  if (token) {
+    cfg.headers = cfg.headers || {};
+    (cfg.headers as any).Authorization = `Bearer ${token}`;
+  }
+  return cfg;
 });
 
 let kakaoLoaderPromise: Promise<void> | null = null;
@@ -345,6 +356,17 @@ export class KakaoMapController {
       const response = await apiClient.get(url);
       data = response.data;
     } catch (error) {
+      // ✅ 여기서 콘솔 찍기
+      const err = error as AxiosError;
+      console.error("[nearby api error]", {
+        url: err.config?.url,
+        method: err.config?.method,
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        message: err.message,
+        data: err.response?.data,
+      });
+
       this.clearMentors();
       throw error;
     }
