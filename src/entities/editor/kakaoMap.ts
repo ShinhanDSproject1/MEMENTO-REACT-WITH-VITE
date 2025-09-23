@@ -5,13 +5,14 @@ declare global {
 }
 
 import axios, { AxiosError } from "axios";
-import { getAccessToken } from "@/shared/auth/token";
+import { getAccessToken, setAccessToken } from "@/shared/auth/token";
 
 export type MentosItem = {
   mentosSeq?: number | string;
   mentosTitle: string;
   price?: number | string;
 };
+
 export type MentorItem = {
   mentoName?: string;
   mentoProfileContent?: string;
@@ -31,6 +32,11 @@ console.log("[DEBUG] Environment check:", {
   SAME_ORIGIN,
   userAgent: navigator.userAgent,
   currentUrl: window.location.href,
+  cookies: document.cookie,
+  localStorage: {
+    keys: Object.keys(localStorage),
+    length: localStorage.length,
+  },
 });
 
 const NEARBY_ENDPOINT = (lat: number, lon: number, distanceKm: number) =>
@@ -41,6 +47,73 @@ const FALLBACK_IMAGE = "/static/images/default-60.png";
 const BLUE_DOT = "/images/location.svg";
 const RED_PIN = "/images/location2.svg";
 
+// 토큰 유효성 검사 함수
+function isTokenValid(token: string): boolean {
+  try {
+    if (!token) return false;
+
+    const parts = token.split(".");
+    if (parts.length !== 3) return false;
+
+    const payload = JSON.parse(atob(parts[1]));
+    const now = Math.floor(Date.now() / 1000);
+    const isValid = payload.exp > now;
+
+    console.log("[DEBUG] Token validation:", {
+      exp: payload.exp,
+      now: now,
+      isValid,
+      timeLeft: payload.exp - now,
+      expiresIn: `${Math.floor((payload.exp - now) / 60)}분`,
+    });
+
+    return isValid;
+  } catch (error) {
+    console.error("[DEBUG] Token validation error:", error);
+    return false;
+  }
+}
+
+// 토큰 갱신 함수
+async function refreshToken(): Promise<string | null> {
+  try {
+    console.log("[DEBUG] 토큰 갱신 시도 중...");
+
+    const refreshResponse = await axios.post(
+      `${API_HOST}/auth/reissue`,
+      {},
+      {
+        timeout: 10000,
+        withCredentials: SAME_ORIGIN,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    console.log("[DEBUG] 토큰 갱신 성공:", {
+      status: refreshResponse.status,
+      dataType: typeof refreshResponse.data,
+      hasNewToken: !!refreshResponse.data?.accessToken,
+    });
+
+    if (refreshResponse.data?.accessToken) {
+      return refreshResponse.data.accessToken;
+    }
+
+    return null;
+  } catch (error) {
+    console.error("[DEBUG] 토큰 갱신 실패:", {
+      status: (error as AxiosError).response?.status,
+      statusText: (error as AxiosError).response?.statusText,
+      data: (error as AxiosError).response?.data,
+      message: (error as AxiosError).message,
+    });
+    return null;
+  }
+}
+
 const apiClient = axios.create({
   timeout: 10000,
   withCredentials: SAME_ORIGIN,
@@ -50,44 +123,97 @@ const apiClient = axios.create({
   },
 });
 
-apiClient.interceptors.request.use((cfg) => {
-  console.log("[DEBUG] API Request interceptor:", {
-    url: cfg.url,
-    method: cfg.method,
-    headers: cfg.headers,
-    withCredentials: cfg.withCredentials,
-  });
+// 요청 인터셉터
+apiClient.interceptors.request.use(
+  async (cfg) => {
+    console.log("[DEBUG] API Request interceptor:", {
+      url: cfg.url,
+      method: cfg.method,
+      headers: cfg.headers,
+      withCredentials: cfg.withCredentials,
+    });
 
-  const token = getAccessToken?.();
-  console.log("[DEBUG] Auth token check:", {
-    hasGetAccessTokenFunc: typeof getAccessToken === "function",
-    hasToken: !!token,
-    tokenLength: token?.length || 0,
-  });
+    let token = getAccessToken?.();
+    console.log("[DEBUG] Initial token check:", {
+      hasGetAccessTokenFunc: typeof getAccessToken === "function",
+      hasToken: !!token,
+      tokenLength: token?.length || 0,
+    });
 
-  if (token) {
-    cfg.headers = cfg.headers || {};
-    (cfg.headers as any).Authorization = `Bearer ${token}`;
-    console.log("[DEBUG] Authorization header added");
-  }
-  return cfg;
-});
+    // 토큰이 있으면 유효성 검사
+    if (token) {
+      const isValid = isTokenValid(token);
 
+      if (!isValid) {
+        console.log("[DEBUG] 토큰이 만료됨, 갱신 시도");
+        const newToken = await refreshToken();
+
+        if (newToken) {
+          token = newToken;
+          setAccessToken(newToken); // 새 토큰을 저장
+          console.log("[DEBUG] 새 토큰으로 교체 및 저장 완료");
+        } else {
+          console.warn("[DEBUG] 토큰 갱신 실패, 인증 없이 요청");
+          token = null;
+        }
+      }
+    }
+
+    if (token) {
+      cfg.headers = cfg.headers || {};
+      (cfg.headers as any).Authorization = `Bearer ${token}`;
+      console.log("[DEBUG] Authorization header added");
+    } else {
+      console.log("[DEBUG] 토큰 없이 요청");
+    }
+
+    return cfg;
+  },
+  (error) => {
+    console.error("[DEBUG] Request interceptor error:", error);
+    return Promise.reject(error);
+  },
+);
+
+// 응답 인터셉터
 apiClient.interceptors.response.use(
   (response) => {
+    // HTML 응답 체크 (인증 실패로 로그인 페이지 리다이렉트)
+    const isHtmlResponse =
+      typeof response.data === "string" && response.data.includes("<!doctype html>");
+    const contentType = response.headers["content-type"] || "";
+
     console.log("[DEBUG] API Response success:", {
       url: response.config.url,
       status: response.status,
       dataType: typeof response.data,
-      dataKeys: response.data ? Object.keys(response.data) : [],
+      isHtmlResponse,
+      contentType,
+      dataKeys:
+        response.data && typeof response.data === "object" ? Object.keys(response.data) : [],
       dataCode: response.data?.code,
       resultLength: Array.isArray(response.data?.result)
         ? response.data.result.length
         : "not array",
     });
+
+    // HTML 응답이면 인증 에러로 처리
+    if (isHtmlResponse || contentType.includes("text/html")) {
+      console.error("[DEBUG] 인증 실패: API가 HTML 페이지를 반환했습니다.");
+      const authError = new Error("Authentication failed - received HTML instead of JSON");
+      authError.name = "AuthenticationError";
+      (authError as any).isAuthError = true;
+      throw authError;
+    }
+
     return response;
   },
-  (error) => {
+  async (error: AxiosError) => {
+    const isAuthError =
+      error.response?.status === 401 ||
+      error.response?.status === 403 ||
+      (error as any).isAuthError;
+
     console.error("[DEBUG] API Response error:", {
       url: error.config?.url,
       method: error.config?.method,
@@ -95,9 +221,27 @@ apiClient.interceptors.response.use(
       statusText: error.response?.statusText,
       message: error.message,
       responseData: error.response?.data,
-      isNetworkError: error.code === "NETWORK_ERROR",
-      isTimeout: error.code === "ECONNABORTED",
+      isNetworkError: !error.response,
+      code: error.code,
+      isAuthError,
     });
+
+    // 401/403 에러나 인증 관련 에러인 경우 토큰 갱신 시도
+    if (isAuthError && error.config && !(error.config as any)._retry) {
+      (error.config as any)._retry = true;
+      console.log("[DEBUG] 인증 에러로 인한 재시도");
+
+      const newToken = await refreshToken();
+      if (newToken && error.config.headers) {
+        setAccessToken(newToken); // 새 토큰 저장
+        error.config.headers.Authorization = `Bearer ${newToken}`;
+        console.log("[DEBUG] 새 토큰으로 재요청");
+        return apiClient(error.config);
+      } else {
+        console.error("[DEBUG] 토큰 갱신 실패, 로그인 필요");
+      }
+    }
+
     return Promise.reject(error);
   },
 );
@@ -309,15 +453,11 @@ function buildInfoHtml(mentor: MentorItem) {
       padding:0 16px 14px 16px;
       margin:0;
       font-size:12px;
-
-
       max-height:150px;
       overflow-y:auto;
       overscroll-behavior:contain;
       -webkit-overflow-scrolling:touch;  
       scroll-snap-type:y mandatory;     
-
-
       -webkit-mask-image: linear-gradient(to bottom,
         transparent 0, rgba(0,0,0,.95) 10px,
         #000 calc(100% - 10px), transparent 100%);
@@ -327,8 +467,6 @@ function buildInfoHtml(mentor: MentorItem) {
     ">
       ${itemsHtml}
     </ul>
-
-
   </div>
 `;
 
@@ -512,6 +650,20 @@ export class KakaoMapController {
       console.log("[DEBUG] API 응답 받음:", data);
     } catch (error) {
       const err = error as AxiosError;
+
+      // 인증 실패 체크
+      if ((err as any).isAuthError || err.name === "AuthenticationError") {
+        console.error("[DEBUG] 인증 실패로 인한 API 호출 실패");
+        console.error("[DEBUG] 토큰 상태 재확인:", {
+          hasGetAccessTokenFunc: typeof getAccessToken === "function",
+          currentToken: getAccessToken?.()?.substring(0, 20) + "...",
+          tokenLength: getAccessToken?.()?.length || 0,
+        });
+
+        // 사용자에게 알림 (선택적)
+        // alert("로그인이 만료되었습니다. 새로고침 후 다시 시도해 주세요.");
+      }
+
       console.error("[DEBUG] API 요청 실패:", {
         url: err.config?.url,
         method: err.config?.method,
@@ -521,6 +673,7 @@ export class KakaoMapController {
         data: err.response?.data,
         isNetworkError: !err.response,
         code: err.code,
+        authError: (err as any).isAuthError,
       });
 
       this.clearMentors();
