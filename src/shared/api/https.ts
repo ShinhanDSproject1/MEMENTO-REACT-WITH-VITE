@@ -8,12 +8,12 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 
-// type Internal = AxiosRequestConfig & { _retry?: boolean; _skipAuth?: boolean };
-
 const DEBUG_HTTP = true;
 
-// const BASE_URL = "https://memento.shinhanacademy.co.kr/api";
-const BASE_URL = "/api";
+// 환경변수 기반으로 baseURL 결정 (dev: "/api" 프록시, prod: 절대 URL)
+const RAW_BASE = (import.meta as any).env?.VITE_API_BASE_URL;
+export const BASE_URL = typeof RAW_BASE === "string" && RAW_BASE.length > 0 ? RAW_BASE : "/api";
+
 const LOGIN_PATH = "/auth/login";
 const REFRESH_PATH = "/auth/reissue";
 

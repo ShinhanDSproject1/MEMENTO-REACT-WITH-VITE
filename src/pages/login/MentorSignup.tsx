@@ -1,54 +1,60 @@
 // src/pages/MentorSignup.tsx
 import logo from "@assets/images/logo/memento-logo.svg";
 import { ko } from "date-fns/locale";
-import React, {
-  forwardRef,
-  useMemo,
-  useState,
-  type ChangeEvent,
-  type FormEvent,
-  type ForwardedRef,
-} from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Link, useNavigate } from "react-router-dom";
 
-// ✅ DatePicker 등에 넘길 수 있는 숨김 input (지금은 사용 안 하지만 보관)
-const HiddenInput = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
-  (props, ref: ForwardedRef<HTMLInputElement>) => (
-    <input ref={ref} {...props} className="sr-only" readOnly aria-hidden="true" tabIndex={-1} />
-  ),
-);
+import { loadMentorOnboardingDraft } from "@/shared/lib/mentorProfileStorage";
 
 type Birth = { y: string; m: string; d: string };
+
+const KOR_TO_ISO_DAY: Record<string, string> = {
+  일: "SUN",
+  월: "MON",
+  화: "TUE",
+  수: "WED",
+  목: "THU",
+  금: "FRI",
+  토: "SAT",
+};
+
+const toHHMM = (h: number) => String(h).padStart(2, "0") + ":00";
+
+async function dataUrlToFile(dataUrl: string, filename = "profile.png"): Promise<File> {
+  const res = await fetch(dataUrl);
+  const blob = await res.blob();
+  const match = /^data:(.*?);base64,/.exec(dataUrl);
+  const type = match?.[1] || blob.type || "image/png";
+  return new File([blob], filename, { type });
+}
 
 export default function MentorSignup() {
   const navigate = useNavigate();
 
-  // 폼 상태
-  const [id, setId] = useState<string>("");
-  const [pw, setPw] = useState<string>("");
-  const [pw2, setPw2] = useState<string>("");
-  const [name, setName] = useState<string>("");
-  const [phone, setPhone] = useState<string>("");
+  // ===== 가입 폼 상태 =====
+  const [id, setId] = useState("");
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [birth, setBirth] = useState<Birth>({ y: "", m: "", d: "" });
 
-  const [certOwn, setCertOwn] = useState<boolean>(false); // true: 보유, false: 미보유
+  // 달력 popover 열림
+  const [isCalOpen, setIsCalOpen] = useState(false);
+  const popoverRef = useRef<HTMLDivElement | null>(null);
+
+  const [certOwn, setCertOwn] = useState(false);
   const [certFile, setCertFile] = useState<File | null>(null);
+  const [certName, setCertName] = useState("");
 
-  const [agree, setAgree] = useState<boolean>(false);
-  const [submitting, setSubmitting] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string>("");
-  const [certName, setCertName] = useState<string>("");
+  const [agree, setAgree] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  // DatePicker 열림 상태
-  const [isCalOpen, setIsCalOpen] = useState<boolean>(false);
-
-  // 전화번호/비번 검증
   const pwOk = pw.length >= 6 && pw === pw2;
   const phoneOk = /^010-\d{4}-\d{4}$/.test(phone);
-
-  // 생년월일 검증(실제 날짜 유효성)
   const birthOk = useMemo(() => {
     if (!/^\d{4}$/.test(birth.y)) return false;
     if (!/^\d{1,2}$/.test(birth.m) || !/^\d{1,2}$/.test(birth.d)) return false;
@@ -60,69 +66,117 @@ export default function MentorSignup() {
   }, [birth]);
 
   const canSubmit = useMemo(() => {
-    return (
-      id.trim() !== "" &&
-      pwOk &&
-      name.trim() !== "" &&
-      phoneOk &&
-      birthOk &&
-      (certOwn === false || (certOwn === true && !!certFile)) &&
-      agree
-    );
-  }, [id, pwOk, name, phoneOk, birthOk, certOwn, certFile, agree]);
+    const certOk = !certOwn || (certOwn && !!certFile && certName.trim() !== "");
+    return id.trim() !== "" && pwOk && name.trim() !== "" && phoneOk && birthOk && certOk && agree;
+  }, [id, pwOk, name, phoneOk, birthOk, certOwn, certFile, certName, agree]);
 
-  // ✅ 실제 가입 API
+  // 온보딩 임시값
+  const draft = loadMentorOnboardingDraft();
+
+  // ESC / 바깥 클릭으로 닫기
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setIsCalOpen(false);
+    const onClickOutside = (e: MouseEvent) => {
+      if (!popoverRef.current) return;
+      if (!popoverRef.current.contains(e.target as Node)) setIsCalOpen(false);
+    };
+    if (isCalOpen) {
+      document.addEventListener("keydown", onKey);
+      document.addEventListener("mousedown", onClickOutside);
+    }
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onClickOutside);
+    };
+  }, [isCalOpen]);
+
+  // ===== 전송 함수 (서버 스펙 맞춤) =====
   const submitSignup = async () => {
     const BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
-    // 파일 외에는 기본 회원 정보만 담음
-    const requestDto = {
-      memberId: id.trim(),
-      memberPwd: pw,
-      memberName: name.trim(),
-      memberPhoneNumber: phone,
-      memberBirthDate: `${birth.y}-${birth.m.padStart(2, "0")}-${birth.d.padStart(2, "0")}`,
-    };
+    const daysFromDraft: string[] = Array.isArray(draft?.days) ? draft!.days : [];
+    const availableDays =
+      daysFromDraft.length > 0
+        ? daysFromDraft
+            .map((d: string) => (KOR_TO_ISO_DAY[d] ? KOR_TO_ISO_DAY[d] : d.toUpperCase()))
+            .join(",")
+        : "";
+
+    const startTime = Number.isFinite(draft?.start) ? toHHMM(Number(draft!.start)) : "10:00";
+    const endTime = Number.isFinite(draft?.end) ? toHHMM(Number(draft!.end)) : "20:00";
+
+    const mentoPostcode = draft?.zonecode ?? "";
+    const mentoRoadAddress = draft?.address ?? "";
+    const mentoBname = draft?.bname ?? "";
+    const mentoDetail = draft?.detail ?? "";
+    const mentoProfileContent = draft?.profileContent ?? "";
+
+    let mentoImageFile: File | null = null;
+    if (draft?.profileImageDataUrl && draft.profileImageDataUrl.startsWith("data:")) {
+      try {
+        mentoImageFile = await dataUrlToFile(draft.profileImageDataUrl, "mento-profile.png");
+      } catch {
+        mentoImageFile = null;
+      }
+    }
 
     const form = new FormData();
-    form.append("requestDto", new Blob([JSON.stringify(requestDto)], { type: "application/json" }));
+    form.append("memberId", id.trim());
+    form.append("memberPwd", pw);
+    form.append("memberName", name.trim());
+    form.append("memberPhoneNumber", phone);
+    form.append(
+      "memberBirthDate",
+      `${birth.y}-${birth.m.padStart(2, "0")}-${birth.d.padStart(2, "0")}`,
+    );
 
-    // 자격증 보유일 때만 파일 첨부
     if (certOwn && certFile) {
-      form.append("imageFile", certFile);
+      form.append("certificationImgUrl", certFile.name);
+      form.append("certificationName", certName.trim());
+    } else {
+      form.append("certificationImgUrl", "");
+      form.append("certificationName", "");
     }
+
+    form.append("mentoProfileContent", mentoProfileContent);
+    form.append("startTime", startTime);
+    form.append("endTime", endTime);
+    form.append("availableDays", availableDays);
+    form.append("mentoPostcode", mentoPostcode);
+    form.append("mentoRoadAddress", mentoRoadAddress);
+    form.append("mentoBname", mentoBname);
+    form.append("mentoDetail", mentoDetail);
+    if (mentoImageFile) form.append("mentoImage", mentoImageFile);
 
     const res = await fetch(`${BASE}/auth/signup/mento`, {
       method: "POST",
       body: form,
       credentials: "include",
-      headers: {
-        "Idem-Key": "testIdempotencyKey",
-      },
+      headers: { "Idem-Key": "mento-signup-" + Date.now() },
     });
 
-    let payload: any = null;
-    try {
-      payload = await res.json();
-    } catch {
-      /* 바디가 없을 수도 있음 */
-    }
-    if (!res.ok) {
-      const err: any = new Error(payload?.message || `가입 실패 (${res.status})`);
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok || payload?.code !== 1000) {
+      const msg = payload?.message || `가입 실패 (${res.status})`;
+      const err: any = new Error(msg);
       err.status = res.status;
       throw err;
     }
     return payload;
   };
 
+  // 제출
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!canSubmit || submitting) return;
     setErrorMsg("");
     setSubmitting(true);
-
     try {
       await submitSignup();
+
+      // ✅ 가입 성공 → 세션스토리지 제거
+      sessionStorage.removeItem("mentorProfile.v1");
+
       navigate("/signup-complete");
     } catch (err: any) {
       const status = err?.response?.status ?? err?.status;
@@ -134,7 +188,6 @@ export default function MentorSignup() {
     }
   };
 
-  // DatePicker 선택 값
   const selectedDate: Date | null =
     birth.y && birth.m && birth.d
       ? new Date(Number(birth.y), Number(birth.m) - 1, Number(birth.d))
@@ -171,7 +224,7 @@ export default function MentorSignup() {
         <label className="block">
           <input
             type="password"
-            placeholder="PW 입력"
+            placeholder="PW 입력(6자 이상)"
             value={pw}
             onChange={(e) => setPw(e.target.value)}
             className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
@@ -229,45 +282,50 @@ export default function MentorSignup() {
           )}
         </label>
 
-        {/* 생년월일 (인라인 DatePicker) */}
+        {/* 생년월일 — 버튼 아래 popover */}
         <div>
           <div className="mb-2 text-sm font-semibold text-slate-600">생년월일</div>
 
-          <div className="relative">
-            <div className="grid grid-cols-4 gap-2">
-              <input
-                placeholder="년도"
-                readOnly
-                value={birth.y}
-                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
-              />
-              <input
-                placeholder="월"
-                readOnly
-                value={birth.m}
-                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
-              />
-              <input
-                placeholder="일"
-                readOnly
-                value={birth.d}
-                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
-              />
+          <div className="grid grid-cols-4 gap-2">
+            <input
+              placeholder="년도"
+              readOnly
+              value={birth.y}
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
+            />
+            <input
+              placeholder="월"
+              readOnly
+              value={birth.m}
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
+            />
+            <input
+              placeholder="일"
+              readOnly
+              value={birth.d}
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
+            />
+
+            {/* 트리거 + popover 래퍼 (relative) */}
+            <div className="relative">
               <button
                 type="button"
                 onClick={() => setIsCalOpen((v) => !v)}
-                className="flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#1161FF] shadow-sm hover:bg-slate-50"
-                aria-label="생년월일 선택">
+                className="flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#1161FF] shadow-sm hover:bg-slate-50">
                 📅 선택
               </button>
-            </div>
 
-            {isCalOpen && (
-              <>
-                <div className="fixed inset-0 z-[9998]" onClick={() => setIsCalOpen(false)} />
-                <div className="absolute right-0 z-[9999] mt-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+              {/* Popover (absolute, 버튼 아래로) */}
+              {isCalOpen && (
+                <div
+                  ref={popoverRef}
+                  className="absolute right-0 z-50 mt-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
                   <DatePicker
-                    selected={selectedDate}
+                    selected={
+                      birth.y && birth.m && birth.d
+                        ? new Date(Number(birth.y), Number(birth.m) - 1, Number(birth.d))
+                        : null
+                    }
                     onChange={(date: Date | null) => {
                       if (!date) return;
                       setBirth({
@@ -288,8 +346,8 @@ export default function MentorSignup() {
                     }
                   />
                 </div>
-              </>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
@@ -302,7 +360,7 @@ export default function MentorSignup() {
               onClick={() => setCertOwn(true)}
               className={[
                 "flex-1 rounded-full px-6 py-3 text-sm font-bold",
-                certOwn === true
+                certOwn
                   ? "bg-[#1161FF] text-white shadow-[0_6px_18px_rgba(17,97,255,0.25)]"
                   : "bg-slate-200 text-slate-700",
               ].join(" ")}>
@@ -313,7 +371,7 @@ export default function MentorSignup() {
               onClick={() => setCertOwn(false)}
               className={[
                 "flex-1 rounded-full px-6 py-3 text-sm font-bold",
-                certOwn === false
+                !certOwn
                   ? "bg-[#1161FF] text-white shadow-[0_6px_18px_rgba(17,97,255,0.25)]"
                   : "bg-slate-200 text-slate-700",
               ].join(" ")}>
@@ -322,17 +380,17 @@ export default function MentorSignup() {
           </div>
         </div>
 
-        {/* 자격증 업로드 (보유 시) */}
-        {certOwn === true && (
-          <div className="mt-4">
-            <div className="mb-2 text-sm text-slate-400">
-              자격증을 AI가 검사 후 인증마크를 달아드립니다
+        {/* 자격증 입력(보유 시) */}
+        {certOwn && (
+          <div className="mt-4 space-y-2">
+            <div className="text-xs text-slate-500">
+              * 새 API: 파일 자체는 업로드하지 않고 파일명과 자격증명만 전송합니다.
             </div>
             <div className="flex items-center gap-2">
               <input
                 type="text"
                 readOnly
-                value={certFile?.name || "자격증 업로드"}
+                value={certFile?.name || "자격증 파일 선택"}
                 className="flex-1 cursor-default rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-400"
               />
               <label className="inline-block cursor-pointer rounded-2xl bg-[#1161FF] px-4 py-3 text-sm font-bold text-white hover:bg-[#0C2D62]">
@@ -347,6 +405,13 @@ export default function MentorSignup() {
                 />
               </label>
             </div>
+            <input
+              type="text"
+              placeholder="자격증 이름 (예: 금융자격증)"
+              value={certName}
+              onChange={(e) => setCertName(e.target.value)}
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
+            />
           </div>
         )}
 
@@ -358,17 +423,10 @@ export default function MentorSignup() {
             onChange={(e: ChangeEvent<HTMLInputElement>) => setAgree(e.target.checked)}
             className="h-5 w-5 rounded border-slate-300 text-[#1161FF] focus:ring-[#1161FF]"
           />
-          <span className="text-sm">
-            <Link to="/tos" className="font-bold text-slate-600 underline underline-offset-2">
-              이용약관
-            </Link>{" "}
-            및{" "}
-            <Link to="/privacy" className="font-bold text-slate-600 underline underline-offset-2">
-              개인정보처리방침
-            </Link>
-            에 동의합니다
-          </span>
+          <span className="text-sm">이용약관 및 개인정보처리방침에 동의합니다</span>
         </label>
+
+        {errorMsg && <p className="text-sm text-red-500">{errorMsg}</p>}
 
         {/* 버튼들 */}
         <div className="mt-4 grid grid-cols-2 gap-3">

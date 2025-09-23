@@ -1,5 +1,5 @@
-import { Client, type IMessage } from "@stomp/stompjs";
 import { getAccessToken as _getAccessToken } from "@/shared/auth/token";
+import { Client, type IMessage } from "@stomp/stompjs";
 
 function resolveWsUrl() {
   const abs = import.meta.env.VITE_WS_ABSOLUTE as string | undefined;

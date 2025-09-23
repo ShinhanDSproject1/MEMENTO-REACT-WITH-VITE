@@ -1,6 +1,7 @@
 // src/app/routes/index.tsx
 import React, { Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
+import RootLayout from "./layouts/RootLayout";
 import RequireAuth from "./quards/RequireAuth";
 
 // [ Layout ]
@@ -51,6 +52,7 @@ const MentoIntroduce2 = React.lazy(() => import("@/pages/book/MentoIntroduce2"))
 // ✅ 새로 추가된 페이지
 const PaySuccess = React.lazy(() => import("@/pages/book/PaySuccess"));
 const MentorMapNearbyPage = React.lazy(() => import("@/pages/mentos/MentorMapNearbyPage"));
+const CertificationFailPage = React.lazy(() => import("@/pages/mentos/CertificationFailPage"));
 
 const withSuspense = (el: React.ReactNode) => (
   <Suspense fallback={<div className="p-6 text-sm text-gray-500">로딩 중…</div>}>{el}</Suspense>
@@ -58,67 +60,79 @@ const withSuspense = (el: React.ReactNode) => (
 
 export const router = createBrowserRouter([
   {
-    element: withSuspense(<HomeLayout />),
-    children: [{ index: true, element: withSuspense(<Home />) }],
-    errorElement: withSuspense(<Error404 />),
-  },
-
-  { path: "/400", element: withSuspense(<Error400 />) },
-  { path: "/500", element: withSuspense(<Error500 />) },
-
-  {
-    element: withSuspense(<AppLayout />),
+    element: withSuspense(<RootLayout />), // ✅ 최상단 래퍼
     children: [
-      // ----- (1) 공개 라우트 -----
-      { path: "/login", element: withSuspense(<Login />) },
-      { path: "/signup", element: withSuspense(<SignupSelect />) },
-      { path: "/signup/mentor", element: withSuspense(<MentorSignup />) },
-      { path: "/signup/mentee", element: withSuspense(<MenteeSignup />) },
-      { path: "/signup-complete", element: withSuspense(<SignupComplete />) },
-      { path: "/mento/introduce", element: withSuspense(<MentoIntroduce />) },
-      { path: "/mento/introduce2", element: withSuspense(<MentoIntroduce2 />) },
-
-      { path: "/menti/:category", element: withSuspense(<MentosList />) },
-      { path: "/menti/mentos-detail/:id", element: withSuspense(<MentosDetail />) },
-      { path: "/video", element: withSuspense(<HomeVideo />) },
-      { path: "/ready", element: withSuspense(<Ready />) },
-
-      // ----- (2) 보호 라우트 그룹 (RequireAuth) -----
       {
-        element: withSuspense(<RequireAuth />),
+        element: withSuspense(<HomeLayout />),
+        children: [{ index: true, element: withSuspense(<Home />) }],
+        errorElement: withSuspense(<Error404 />),
+      },
+
+      { path: "/400", element: withSuspense(<Error400 />) },
+      { path: "/500", element: withSuspense(<Error500 />) },
+
+      {
+        element: withSuspense(<AppLayout />),
         children: [
-          // 멘티
-          { path: "/menti/mymentos", element: withSuspense(<MyMentosList role="menti" />) },
-          { path: "/menti/myprofile", element: withSuspense(<MyProfile />) },
+          // ----- (1) 공개 라우트 -----
+          { path: "/login", element: withSuspense(<Login />) },
+          { path: "/signup", element: withSuspense(<SignupSelect />) },
+          { path: "/signup/mentor", element: withSuspense(<MentorSignup />) },
+          { path: "/signup/mentee", element: withSuspense(<MenteeSignup />) },
+          { path: "/signup-complete", element: withSuspense(<SignupComplete />) },
+          { path: "/mento/introduce", element: withSuspense(<MentoIntroduce />) },
+          { path: "/mento/introduce2", element: withSuspense(<MentoIntroduce2 />) },
 
-          // 멘토
-          { path: "/mento/my-list", element: withSuspense(<MyMentosList role="mento" />) },
-          { path: "/mento", element: withSuspense(<MentorProfile />) },
-          { path: "/mento/nearby", element: withSuspense(<MentorMapNearbyPage />) },
-          { path: "/create-mentos", element: withSuspense(<CreateMentos />) },
-          { path: "/edit/:id", element: withSuspense(<EditMentos />) },
-          { path: "/mento/certification", element: withSuspense(<CertificationRegister />) },
-          { path: "/mento/certification/:result", element: withSuspense(<CertificationPage />) },
+          { path: "/menti/:category", element: withSuspense(<MentosList />) },
+          { path: "/menti/mentos-detail/:id", element: withSuspense(<MentosDetail />) },
+          { path: "/video", element: withSuspense(<HomeVideo />) },
+          { path: "/ready", element: withSuspense(<Ready />) },
 
-          // 채팅/통계
-          { path: "/chat", element: withSuspense(<ChatListPage />) },
-          { path: "/chat/:roomId", element: withSuspense(<ChatRoomPage />) },
-          { path: "/analytics", element: withSuspense(<AnalyticsPage />) },
+          // ----- (2) 보호 라우트 그룹 (RequireAuth) -----
+          {
+            element: withSuspense(<RequireAuth />),
+            children: [
+              // 멘티
+              { path: "/menti/mymentos", element: withSuspense(<MyMentosList role="menti" />) },
+              { path: "/menti/myprofile", element: withSuspense(<MyProfile />) },
 
-          // 예약/결제
-          { path: "/booking", element: withSuspense(<BookingPage />) },
-          { path: "/booking/confirm", element: withSuspense(<BookingConfirm />) },
-          { path: "/payments/success", element: withSuspense(<PaySuccess />) },
-          { path: "/booking/success", element: withSuspense(<PaySuccess />) },
-          { path: "/reviews", element: withSuspense(<Reviews />) },
+              // 멘토
+              { path: "/mento/my-list", element: withSuspense(<MyMentosList role="mento" />) },
+              { path: "/mento", element: withSuspense(<MentorProfile />) },
+              { path: "/mento/nearby", element: withSuspense(<MentorMapNearbyPage />) },
+              { path: "/create-mentos", element: withSuspense(<CreateMentos />) },
+              { path: "/edit/:id", element: withSuspense(<EditMentos />) },
+              { path: "/mento/certification", element: withSuspense(<CertificationRegister />) },
+              {
+                path: "/mento/certification/:result",
+                element: withSuspense(<CertificationPage />),
+              },
+              {
+                path: "/mento/certification/fail",
+                element: withSuspense(<CertificationFailPage />),
+              },
+
+              // 채팅/통계
+              { path: "/chat", element: withSuspense(<ChatListPage />) },
+              { path: "/chat/:roomId", element: withSuspense(<ChatRoomPage />) },
+              { path: "/analytics", element: withSuspense(<AnalyticsPage />) },
+
+              // 예약/결제
+              { path: "/booking", element: withSuspense(<BookingPage />) },
+              { path: "/booking/confirm", element: withSuspense(<BookingConfirm />) },
+              { path: "/payments/success", element: withSuspense(<PaySuccess />) },
+              { path: "/booking/success", element: withSuspense(<PaySuccess />) },
+              { path: "/reviews", element: withSuspense(<Reviews />) },
+            ],
+          },
+
+          // 관리자(보호 필요시 이쪽으로 옮기세요)
+          { path: "/admin/report", element: withSuspense(<MemberReport />) },
+          { path: "/admin/declaration", element: withSuspense(<ReportList />) },
         ],
       },
 
-      // 관리자(보호 필요시 이쪽으로 옮기세요)
-      { path: "/admin/report", element: withSuspense(<MemberReport />) },
-      { path: "/admin/declaration", element: withSuspense(<ReportList />) },
+      { path: "*", element: withSuspense(<Error404 />) },
     ],
   },
-
-  { path: "*", element: withSuspense(<Error404 />) },
 ]);
