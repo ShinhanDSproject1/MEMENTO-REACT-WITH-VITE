@@ -1,6 +1,6 @@
 import { BarChart, LineChart, PieChart, Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import dogFront from "../../assets/images/dog-front.png";
+// import dogFront from "../../assets/images/dog-front.png";
 
 export default function AnalyticsPage() {
   const messages = [
