@@ -13,7 +13,7 @@ function AdminButtonGroup() {
       <MainButton className={style} onClick={() => navigate("/admin/declaration")}>
         관리자 신고확인
       </MainButton>
-      <MainButton className={style} onClick={() => navigate("/admin/revenue")}>
+      <MainButton className={style} onClick={() => navigate("/ready")}>
         수익관리
       </MainButton>
     </div>

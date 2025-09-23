@@ -2,6 +2,7 @@
 import Button from "@/widgets/common/Button";
 import { FileInput, Label } from "flowbite-react";
 import React, { useCallback, useEffect, useState } from "react";
+
 import { useNavigate } from "react-router-dom";
 
 const ACCEPT_MIME = ["image/png", "image/jpeg", "image/jpg", "application/pdf"];

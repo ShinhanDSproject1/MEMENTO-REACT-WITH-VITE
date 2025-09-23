@@ -114,7 +114,7 @@ export default function ReportList() {
                   신고자
                 </th>
                 <th className="h-10 border-r border-white/35 bg-[#0b76ff] px-3 text-center">
-                  신고 대상
+                  신고 멘토링
                 </th>
                 <th className="h-10 border-r border-white/35 bg-[#0b76ff] px-3 text-center">
                   분류
