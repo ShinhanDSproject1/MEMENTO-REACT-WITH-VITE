@@ -9,12 +9,12 @@ export async function registerCertification(
   // requestDto JSON → Blob으로 감싸서 append
   form.append(
     "requestDto",
-    new Blob([JSON.stringify({ name: req.name })], { type: "application/json" }),
+    new Blob([JSON.stringify({ name: req.certificationName })], { type: "application/json" }),
   );
 
   // 이미지 파일이 있으면 첨부
-  if (req.imageFile) {
-    form.append("imageFile", req.imageFile, req.name);
+  if (req.certificationImgUrl) {
+    form.append("imageFile", req.certificationImgUrl, req.certificationName);
   }
 
   const { data } = await http.post<RegisterCertificationResponse>(

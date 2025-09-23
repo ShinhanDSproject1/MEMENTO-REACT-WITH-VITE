@@ -9,7 +9,11 @@ import {
   setAccessToken as saveAccessToken,
   saveUserSnapshot,
 } from "@shared/auth";
+import { motion } from "framer-motion"; // ⬅️ 로딩바 애니메이션용
 import React, { useEffect, useMemo, useState } from "react";
+
+// (선택) 브랜드 로고를 로딩에도 재사용하고 싶다면 경로 맞춰주세요.
+import mementoLogo from "@shared/assets/images/logo/memento-logo.svg";
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -20,8 +24,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     (async () => {
       try {
-        // 1) 로컬 스냅샷을 먼저 세팅 (새로고침 깜빡임 방지)
-        const snap = loadUserSnapshot(); // 예: { accessToken?: string, ... }
+        const snap = loadUserSnapshot();
         if (snap) {
           setUser(snap);
           if (snap.accessToken) {
@@ -29,9 +32,6 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             setAccessToken(snap.accessToken);
           }
         }
-
-        // 2) 조용한 리프레시 시도(쿠키/조건 충족 시)
-        //    실패해도 스냅샷은 그대로 두어 "로그아웃처럼 보이는 현상" 방지
         const at = await refreshSilently().catch(() => null);
         if (at) {
           saveAccessToken(at);
@@ -98,6 +98,36 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     [user, accessToken],
   );
 
-  if (!bootstrapped) return <div>인증 확인 중…</div>;
+  if (!bootstrapped) return <AuthBootLoading />; // ⬅️ 로딩 오버레이 표시
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+/** 인증 부트스트랩 로딩 오버레이 */
+function AuthBootLoading() {
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex h-dvh w-dvw flex-col items-center justify-center bg-white"
+      role="dialog"
+      aria-modal="true">
+      {/* 로고 */}
+      <img src={mementoLogo} alt="memento logo" className="mb-6 h-auto w-[140px] opacity-90" />
+
+      {/* 인디케이터 바 (무한 진행) */}
+      <div className="w-[240px]">
+        <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-black/10">
+          <motion.div
+            className="absolute inset-y-0 left-0 h-full w-1/3 rounded-full bg-[#3B82F6]"
+            animate={{ x: ["-120%", "300%"] }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </div>
+        <p className="mt-3 text-center text-xs text-[#6B7280]">인증 확인 중…</p>
+      </div>
+
+      {/* 접근성: 스크린리더용 상태 */}
+      <span className="sr-only" role="status">
+        인증 정보를 확인하는 중입니다.
+      </span>
+    </div>
+  );
 }
