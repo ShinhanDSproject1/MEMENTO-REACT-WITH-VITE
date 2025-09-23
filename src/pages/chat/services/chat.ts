@@ -11,15 +11,15 @@ export interface Room {
 type ApiEnvelope<T> = { code: number; status: number; message: string; result: T };
 
 type ChatRoomDTO = {
-  chattingRoomSeq: number; // chatRoomId -> chattingRoomSeq로 변경
-  opponentName: string; // mentiName -> opponentName으로 변경
+  chattingRoomSeq: number;
+  opponentName: string;
   lastMessage: string | null;
   lastMessageAt: string | null;
   hasUnreadMessage: boolean;
 };
 
 type MentosGroupDTO = {
-  mentosSeq: number; // mentosId -> mentosSeq로 변경
+  mentosSeq: number;
   mentosTitle: string;
   chatRooms: ChatRoomDTO[];
 };
@@ -78,13 +78,13 @@ function normalizeToSpec(raw: any): MentosGroupDTO[] {
   const groups = raw.result as any[];
 
   return groups.map((g, gi) => {
-    assertNumber(g?.mentosSeq, "mentosSeq"); // mentosId -> mentosSeq로 변경
+    assertNumber(g?.mentosSeq, "mentosSeq");
     const mentosTitle = String(g?.mentosTitle ?? "");
     assertArray(g?.chatRooms, "chatRooms");
 
     const chatRooms: ChatRoomDTO[] = (g.chatRooms as any[]).map((r, ri) => {
-      assertNumber(r?.chattingRoomSeq, "chattingRoomSeq"); // chatRoomId -> chattingRoomSeq로 변경
-      const opponentName = String(r?.opponentName ?? ""); // mentiName -> opponentName으로 변경
+      assertNumber(r?.chattingRoomSeq, "chattingRoomSeq");
+      const opponentName = String(r?.opponentName ?? "");
       if (!opponentName) throw new Error(`opponentName 누락 (index: ${gi}/${ri})`);
 
       const lastMessage = r?.lastMessage ?? null;
@@ -92,8 +92,8 @@ function normalizeToSpec(raw: any): MentosGroupDTO[] {
       const hasUnreadMessage = Boolean(r?.hasUnreadMessage);
 
       return {
-        chattingRoomSeq: r.chattingRoomSeq, // chatRoomId -> chattingRoomSeq로 변경
-        opponentName, // mentiName -> opponentName으로 변경
+        chattingRoomSeq: r.chattingRoomSeq,
+        opponentName,
         lastMessage,
         lastMessageAt,
         hasUnreadMessage,
@@ -101,7 +101,7 @@ function normalizeToSpec(raw: any): MentosGroupDTO[] {
     });
 
     return {
-      mentosSeq: g.mentosSeq, // mentosId -> mentosSeq로 변경
+      mentosSeq: g.mentosSeq,
       mentosTitle,
       chatRooms,
     };

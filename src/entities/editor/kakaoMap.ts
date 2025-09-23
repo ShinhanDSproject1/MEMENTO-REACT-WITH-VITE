@@ -6,7 +6,11 @@ declare global {
 
 import axios, { AxiosError } from "axios";
 
-export type MentosItem = { mentosTitle: string; price?: number | string };
+export type MentosItem = {
+  mentosSeq?: number | string;
+  mentosTitle: string;
+  price?: number | string;
+};
 export type MentorItem = {
   mentoName?: string;
   mentoProfileContent?: string;
@@ -82,6 +86,30 @@ async function ensureKakaoSdkLoaded(): Promise<void> {
   await kakaoLoaderPromise;
 }
 
+function ensureIwStylesInjected() {
+  if (document.getElementById("memento-iw-style")) return;
+
+  const css = `
+  .memento-iw-root {
+    opacity: 0;
+    transform: translateY(6px) scale(.98);
+    transition: opacity .2s ease, transform .25s ease;
+  }
+  .memento-iw-root.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  .memento-iw-root.hide {
+    opacity: 0;
+    transform: translateY(6px) scale(.98);
+  }
+  `;
+  const style = document.createElement("style");
+  style.id = "memento-iw-style";
+  style.textContent = css;
+  document.head.appendChild(style);
+}
+
 function toNumber(n: unknown): number | null {
   const v = Number(n);
   return Number.isNaN(v) ? null : v;
@@ -113,10 +141,14 @@ function buildInfoHtml(mentor: MentorItem) {
       ? mentosList
           .map(
             (m) => `
-              <li style="
+            <li
+              class="memento-iw-item"
+              data-mentos-id="${m.mentosSeq ?? ""}" 
+              style="
                 display:flex;align-items:center;justify-content:space-between;gap:12px;
                 padding:10px 14px;margin:8px 0 0 0;
                 background:#F4F6FA;border:1px solid #E6EAF2;border-radius:12px;
+                scroll-snap-align:start;     
               ">
                 <span style="
                   flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;
@@ -134,7 +166,7 @@ function buildInfoHtml(mentor: MentorItem) {
           ">등록된 멘토링이 없습니다.</li>`;
 
   return `
-  <div class="font-WooridaumR" style="
+  <div class="font-WooridaumR memento-iw-root" style="
     width: 250px; max-width: 80vw;
     font-size:14px; line-height:1.55; word-break:keep-all;
     background:#fff; overflow:hidden;
@@ -151,28 +183,50 @@ function buildInfoHtml(mentor: MentorItem) {
       <div style="min-width:0;flex:1;">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <h3 class="font-WooridaumB"
-              style="margin:0;font-size:18px;color:#111;
+              style="margin:0;font-size:15px;color:#111;
                      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
             ${mentor.mentoName ?? ""}
           </h3>
           <span class="font-WooridaumL" style="display:inline-block;padding:4px 8px;border-radius:999px; background:#0B63F6;color:#fff;font-size:12px;">
             ${distanceText} km </span>
         </div>
-        <p class="font-WooridaumR" style="margin:4px 0 0 0;color:#6B7280;font-size:13px; overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+        <p class="font-WooridaumR" style="margin:4px 0 0 0;color:#6B7280;font-size:12px; overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
           ${mentor.mentoProfileContent ?? ""} </p>
       </div>
     </div>
     <div style="height:1px;background:#EEF2F7;margin:10px 16px;"></div>
     <div style="display:flex;align-items:center;gap:8px;padding:0 16px;">
-      <span style="font-size:16px;"></span>
+      <span style="font-size:12px;"></span>
       <h4 class="font-WooridaumB"
           style="margin:6px 0 8px 0;font-size:14px;color:#374151;">
         진행 중인 멘토링
       </h4>
     </div>
-    <ul class="font-WooridaumR" style="list-style:none;padding:0 16px 14px 16px;margin:0;">
+    <ul class="font-WooridaumR" style="
+      list-style:none;
+      padding:0 16px 14px 16px;
+      margin:0;
+      font-size:12px;
+
+
+      max-height:150px;
+      overflow-y:auto;
+      overscroll-behavior:contain;
+      -webkit-overflow-scrolling:touch;  
+      scroll-snap-type:y mandatory;     
+
+
+      -webkit-mask-image: linear-gradient(to bottom,
+        transparent 0, rgba(0,0,0,.95) 10px,
+        #000 calc(100% - 10px), transparent 100%);
+              mask-image: linear-gradient(to bottom,
+        transparent 0, rgba(0,0,0,.95) 10px,
+        #000 calc(100% - 10px), transparent 100%);
+    ">
       ${itemsHtml}
     </ul>
+
+
   </div>
 `;
 }
@@ -319,11 +373,44 @@ export class KakaoMapController {
         this.infoWindow?.setContent(buildInfoHtml(mentor));
         this.infoWindow?.open(this.map, marker);
         setTimeout(() => {
+          ensureIwStylesInjected();
+          const root = document.querySelector(".memento-iw-root") as HTMLElement | null;
+          if (root) requestAnimationFrame(() => root.classList.add("show"));
+
+          // ✅ li 클릭 시 상세 페이지 이동
+          root?.querySelectorAll<HTMLLIElement>(".memento-iw-item").forEach((el) => {
+            el.addEventListener("click", () => {
+              const id = el.dataset.mentosId;
+              if (id) {
+                window.location.href = `/menti/mentos-detail/${id}`;
+              }
+            });
+          });
+
+          // 닫기 버튼 처리
           const btn = document.getElementById("memento-iw-close");
           if (btn) {
-            btn.addEventListener("click", () => this.infoWindow?.close(), { once: true });
+            btn.addEventListener(
+              "click",
+              (e) => {
+                e.preventDefault();
+                if (root) {
+                  root.classList.remove("show");
+                  root.classList.add("hide");
+                  root.addEventListener(
+                    "transitionend",
+                    () => {
+                      this.infoWindow?.close();
+                    },
+                    { once: true },
+                  );
+                } else {
+                  this.infoWindow?.close();
+                }
+              },
+              { once: true },
+            );
           }
-
           const iwRoot = btn?.closest("div");
           let cur = iwRoot as HTMLElement | null;
           for (let i = 0; i < 6 && cur; i++) {
