@@ -6,15 +6,37 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
-import mkcert from "vite-plugin-mkcert";
 import tsconfigPaths from "vite-tsconfig-paths";
 
+const isProd = process.env.NODE_ENV === "production";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const r = (p: string) => path.resolve(__dirname, p);
 
+// dev에서만 동적 import (Node 18+ 가정)
+const mkcert = !isProd ? (await import("vite-plugin-mkcert")).default : undefined;
+
+// dev https cert 안전 로딩
+function devHttps() {
+  if (isProd) return undefined;
+  try {
+    const key = fs.readFileSync("localhost-key.pem");
+    const cert = fs.readFileSync("localhost.pem");
+    return { key, cert };
+  } catch {
+    // 인증서가 없으면 http로 구동
+    return undefined;
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss(), flowbiteReact(), tsconfigPaths(), mkcert()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    flowbiteReact(),
+    tsconfigPaths(),
+    ...(isProd ? [] : [mkcert!()]),
+  ],
   resolve: {
     alias: {
       "@": r("src"),
@@ -31,58 +53,42 @@ export default defineConfig({
       "@api": r("src/shared/api"),
     },
   },
-  define: {
-    global: "window",
-  },
+  define: { global: "window" },
   server: {
-    // mkcert가 만든 로컬 인증서를 사용해 https로 띄움
-    https: {
-      key: fs.readFileSync("localhost-key.pem"),
-      cert: fs.readFileSync("localhost.pem"),
-    },
+    https: devHttps(),
     host: true,
     port: 3000,
-    open: "/memento-finance",
     proxy: {
       "/api": {
         target: "https://memento.shinhanacademy.co.kr",
         changeOrigin: true,
-        secure: true,
-        // 서버가 도메인을 지정해 내려보내도 로컬에 저장되도록 치환
+        secure: true, // 셀프사인이면 false
         cookieDomainRewrite: "localhost",
-        // Set-Cookie에 Secure / SameSite=None을 강제로 붙여 브라우저가 버리지 않게 함
         configure: (proxy) => {
           proxy.on("proxyRes", (proxyRes) => {
             const setCookie = proxyRes.headers["set-cookie"];
             if (!setCookie) return;
-
             const list = Array.isArray(setCookie) ? setCookie : [setCookie];
             proxyRes.headers["set-cookie"] = list.map((c) => {
-              let v = c;
-
-              // 기존 SameSite 제거(중복 방지) 후 우리가 다시 지정
-              v = v.replace(/;\s*SameSite=[^;]*/i, "");
-              // Secure 없으면 추가
+              let v = c.replace(/;\s*SameSite=[^;]*/i, ""); // SameSite 제거 후
               if (!/;\s*Secure/i.test(v)) v += "; Secure";
-              // SameSite 없으면 None으로
               if (!/;\s*SameSite=/i.test(v)) v += "; SameSite=None";
-              // Path 없으면 기본값
               if (!/;\s*Path=/i.test(v)) v += "; Path=/";
-
               return v;
             });
           });
         },
       },
-      "/map": {
-        target: "https://memento.shinhanacademy.co.kr",
+      "/py": {
+        target: "http://192.168.0.180:8000",
         changeOrigin: true,
-        secure: true,
+        secure: false,
+        rewrite: (p) => p.replace(/^\/py/, ""),
       },
       "/ws-stomp": {
         target: "https://memento.shinhanacademy.co.kr",
         changeOrigin: true,
-        secure: true,
+        secure: true, // 셀프사인이면 false
         ws: true,
       },
     },
