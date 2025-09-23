@@ -242,6 +242,17 @@ export class KakaoMapController {
     this.mapEl = mapEl;
   }
 
+  relayout(preserveCenter: boolean = true) {
+    if (!this.map) return;
+    const center = preserveCenter ? this.map.getCenter() : null;
+    try {
+      this.map.relayout();
+      if (center) this.map.setCenter(center);
+    } catch (e) {
+      console.warn("[Map] relayout() 실패:", e);
+    }
+  }
+
   async init(centerLat = 37.5665, centerLng = 126.978, level = 7) {
     try {
       await ensureKakaoSdkLoaded();
