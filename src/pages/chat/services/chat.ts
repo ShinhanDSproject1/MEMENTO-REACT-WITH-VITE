@@ -235,3 +235,20 @@ export async function sendMessage(roomId: string, text: string): Promise<ChatMes
     ts: new Date(m.sentAt.replace(" ", "T")).getTime(),
   };
 }
+
+/** --- 읽음 처리 --- */
+export async function markRoomRead(roomId: number | string): Promise<void> {
+  const token = getToken();
+  if (!token) throw new Error("로그인이 필요합니다.");
+
+  const res = await fetch(`${BASE}/chat/rooms/${roomId}/read`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const msg = await res.text().catch(() => "");
+    throw new Error(`읽음 처리 실패: ${res.status} ${msg}`);
+  }
+}
