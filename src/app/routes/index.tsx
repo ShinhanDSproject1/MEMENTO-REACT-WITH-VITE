@@ -53,6 +53,7 @@ const MentoIntroduce2 = React.lazy(() => import("@/pages/book/MentoIntroduce2"))
 const PaySuccess = React.lazy(() => import("@/pages/book/PaySuccess"));
 const MentorMapNearbyPage = React.lazy(() => import("@/pages/mentos/MentorMapNearbyPage"));
 const CertificationFailPage = React.lazy(() => import("@/pages/mentos/CertificationFailPage"));
+const ChatBot = React.lazy(() => import("@/pages/chat/ChatBot"));
 
 const withSuspense = (el: React.ReactNode) => (
   <Suspense fallback={<div className="p-6 text-sm text-gray-500">로딩 중…</div>}>{el}</Suspense>
@@ -123,6 +124,9 @@ export const router = createBrowserRouter([
               { path: "/payments/success", element: withSuspense(<PaySuccess />) },
               { path: "/booking/success", element: withSuspense(<PaySuccess />) },
               { path: "/reviews", element: withSuspense(<Reviews />) },
+
+              //AI
+              { path: "/ai/chatBot", element: withSuspense(<ChatBot />) },
             ],
           },
 
