@@ -26,19 +26,6 @@ export type MentorItem = {
 const API_HOST = import.meta.env.DEV ? "/api" : "https://memento.shinhanacademy.co.kr";
 const SAME_ORIGIN = API_HOST.startsWith("/");
 
-console.log("[DEBUG] Environment check:", {
-  isDev: import.meta.env.DEV,
-  API_HOST,
-  SAME_ORIGIN,
-  userAgent: navigator.userAgent,
-  currentUrl: window.location.href,
-  cookies: document.cookie,
-  localStorage: {
-    keys: Object.keys(localStorage),
-    length: localStorage.length,
-  },
-});
-
 const NEARBY_ENDPOINT = (lat: number, lon: number, distanceKm: number) =>
   `${API_HOST}/map/mentos?latitude=${lon}&longitude=${lat}&distance=${distanceKm}`;
 
@@ -59,14 +46,6 @@ function isTokenValid(token: string): boolean {
     const now = Math.floor(Date.now() / 1000);
     const isValid = payload.exp > now;
 
-    console.log("[DEBUG] Token validation:", {
-      exp: payload.exp,
-      now: now,
-      isValid,
-      timeLeft: payload.exp - now,
-      expiresIn: `${Math.floor((payload.exp - now) / 60)}분`,
-    });
-
     return isValid;
   } catch (error) {
     console.error("[DEBUG] Token validation error:", error);
@@ -77,8 +56,6 @@ function isTokenValid(token: string): boolean {
 // 토큰 갱신 함수
 async function refreshToken(): Promise<string | null> {
   try {
-    console.log("[DEBUG] 토큰 갱신 시도 중...");
-
     const refreshResponse = await axios.post(
       `${API_HOST}/auth/reissue`,
       {},
@@ -91,12 +68,6 @@ async function refreshToken(): Promise<string | null> {
         },
       },
     );
-
-    console.log("[DEBUG] 토큰 갱신 성공:", {
-      status: refreshResponse.status,
-      dataType: typeof refreshResponse.data,
-      hasNewToken: !!refreshResponse.data?.accessToken,
-    });
 
     if (refreshResponse.data?.accessToken) {
       return refreshResponse.data.accessToken;
@@ -126,34 +97,17 @@ const apiClient = axios.create({
 // 요청 인터셉터
 apiClient.interceptors.request.use(
   async (cfg) => {
-    console.log("[DEBUG] API Request interceptor:", {
-      url: cfg.url,
-      method: cfg.method,
-      headers: cfg.headers,
-      withCredentials: cfg.withCredentials,
-    });
-
     let token = getAccessToken?.();
-    console.log("[DEBUG] Initial token check:", {
-      hasGetAccessTokenFunc: typeof getAccessToken === "function",
-      hasToken: !!token,
-      tokenLength: token?.length || 0,
-    });
-
-    // 토큰이 있으면 유효성 검사
     if (token) {
       const isValid = isTokenValid(token);
 
       if (!isValid) {
-        console.log("[DEBUG] 토큰이 만료됨, 갱신 시도");
         const newToken = await refreshToken();
 
         if (newToken) {
           token = newToken;
-          setAccessToken(newToken); // 새 토큰을 저장
-          console.log("[DEBUG] 새 토큰으로 교체 및 저장 완료");
+          setAccessToken(newToken);
         } else {
-          console.warn("[DEBUG] 토큰 갱신 실패, 인증 없이 요청");
           token = null;
         }
       }
@@ -162,7 +116,6 @@ apiClient.interceptors.request.use(
     if (token) {
       cfg.headers = cfg.headers || {};
       (cfg.headers as any).Authorization = `Bearer ${token}`;
-      console.log("[DEBUG] Authorization header added");
     } else {
       console.log("[DEBUG] 토큰 없이 요청");
     }
@@ -170,36 +123,16 @@ apiClient.interceptors.request.use(
     return cfg;
   },
   (error) => {
-    console.error("[DEBUG] Request interceptor error:", error);
     return Promise.reject(error);
   },
 );
 
-// 응답 인터셉터
 apiClient.interceptors.response.use(
   (response) => {
-    // HTML 응답 체크 (인증 실패로 로그인 페이지 리다이렉트)
     const isHtmlResponse =
       typeof response.data === "string" && response.data.includes("<!doctype html>");
     const contentType = response.headers["content-type"] || "";
-
-    console.log("[DEBUG] API Response success:", {
-      url: response.config.url,
-      status: response.status,
-      dataType: typeof response.data,
-      isHtmlResponse,
-      contentType,
-      dataKeys:
-        response.data && typeof response.data === "object" ? Object.keys(response.data) : [],
-      dataCode: response.data?.code,
-      resultLength: Array.isArray(response.data?.result)
-        ? response.data.result.length
-        : "not array",
-    });
-
-    // HTML 응답이면 인증 에러로 처리
     if (isHtmlResponse || contentType.includes("text/html")) {
-      console.error("[DEBUG] 인증 실패: API가 HTML 페이지를 반환했습니다.");
       const authError = new Error("Authentication failed - received HTML instead of JSON");
       authError.name = "AuthenticationError";
       (authError as any).isAuthError = true;
@@ -214,28 +147,13 @@ apiClient.interceptors.response.use(
       error.response?.status === 403 ||
       (error as any).isAuthError;
 
-    console.error("[DEBUG] API Response error:", {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      message: error.message,
-      responseData: error.response?.data,
-      isNetworkError: !error.response,
-      code: error.code,
-      isAuthError,
-    });
-
-    // 401/403 에러나 인증 관련 에러인 경우 토큰 갱신 시도
     if (isAuthError && error.config && !(error.config as any)._retry) {
       (error.config as any)._retry = true;
-      console.log("[DEBUG] 인증 에러로 인한 재시도");
 
       const newToken = await refreshToken();
       if (newToken && error.config.headers) {
-        setAccessToken(newToken); // 새 토큰 저장
+        setAccessToken(newToken);
         error.config.headers.Authorization = `Bearer ${newToken}`;
-        console.log("[DEBUG] 새 토큰으로 재요청");
         return apiClient(error.config);
       } else {
         console.error("[DEBUG] 토큰 갱신 실패, 로그인 필요");
@@ -249,15 +167,11 @@ apiClient.interceptors.response.use(
 let kakaoLoaderPromise: Promise<void> | null = null;
 
 async function ensureKakaoSdkLoaded(): Promise<void> {
-  console.log("[DEBUG] ensureKakaoSdkLoaded 시작");
-
   if (typeof window !== "undefined" && window.kakao?.maps) {
-    console.log("[DEBUG] Kakao SDK 이미 로드됨");
     return;
   }
 
   if (kakaoLoaderPromise) {
-    console.log("[DEBUG] Kakao SDK 로딩 중... 대기");
     await kakaoLoaderPromise;
     return;
   }
@@ -265,11 +179,6 @@ async function ensureKakaoSdkLoaded(): Promise<void> {
   kakaoLoaderPromise = (async () => {
     try {
       const apiKey = import.meta.env.VITE_KAKAO_JS_KEY;
-      console.log("[DEBUG] Kakao API Key 체크:", {
-        hasKey: !!apiKey,
-        keyLength: apiKey?.length || 0,
-        keyPrefix: apiKey ? apiKey.substring(0, 8) + "..." : "none",
-      });
 
       if (!apiKey) {
         throw new Error(
@@ -283,10 +192,7 @@ async function ensureKakaoSdkLoaded(): Promise<void> {
         script.src = scriptSrc;
         script.async = true;
 
-        console.log("[DEBUG] Kakao SDK 스크립트 로딩 시작:", scriptSrc);
-
         script.onload = () => {
-          console.log("[DEBUG] Kakao SDK 스크립트 로드 완료");
           try {
             console.log("[DEBUG] window.kakao 체크:", {
               hasKakao: !!window.kakao,
@@ -295,11 +201,9 @@ async function ensureKakaoSdkLoaded(): Promise<void> {
             });
 
             window.kakao.maps.load(() => {
-              console.log("[DEBUG] Kakao Maps 로드 완료");
               resolve();
             });
           } catch (e) {
-            console.error("[DEBUG] Kakao Maps 로드 중 오류:", e);
             reject(e);
           }
         };
@@ -316,13 +220,10 @@ async function ensureKakaoSdkLoaded(): Promise<void> {
   })();
 
   await kakaoLoaderPromise;
-  console.log("[DEBUG] Kakao SDK 로드 완료");
 }
 
 function ensureIwStylesInjected() {
-  console.log("[DEBUG] ensureIwStylesInjected 호출");
   if (document.getElementById("memento-iw-style")) {
-    console.log("[DEBUG] InfoWindow 스타일 이미 주입됨");
     return;
   }
 
@@ -345,22 +246,16 @@ function ensureIwStylesInjected() {
   style.id = "memento-iw-style";
   style.textContent = css;
   document.head.appendChild(style);
-  console.log("[DEBUG] InfoWindow 스타일 주입 완료");
 }
 
 function toNumber(n: unknown): number | null {
   const v = Number(n);
   const result = Number.isNaN(v) ? null : v;
-  console.log("[DEBUG] toNumber 변환:", { input: n, output: result });
   return result;
 }
 
 function buildInfoHtml(mentor: MentorItem) {
-  console.log("[DEBUG] buildInfoHtml 호출:", mentor);
-
   const mentosList = Array.isArray(mentor.mentosList) ? mentor.mentosList : [];
-  console.log("[DEBUG] 멘토링 리스트:", mentosList);
-
   const priceChip = (price: number | string) => {
     const n = Number(price ?? 0);
     const txt = isFinite(n) ? n.toLocaleString() : String(price ?? "");
@@ -372,8 +267,6 @@ function buildInfoHtml(mentor: MentorItem) {
       ? (mentor.mentoProfileImage as string)
       : BASE_IMAGE_PATH + mentor.mentoProfileImage
     : FALLBACK_IMAGE;
-
-  console.log("[DEBUG] 프로필 이미지 경로:", profileImgSrc);
 
   const distanceText =
     typeof mentor.distance === "number"
@@ -469,8 +362,6 @@ function buildInfoHtml(mentor: MentorItem) {
     </ul>
   </div>
 `;
-
-  console.log("[DEBUG] InfoWindow HTML 생성 완료, 길이:", html.length);
   return html;
 }
 
@@ -483,41 +374,28 @@ export class KakaoMapController {
 
   constructor(mapEl: HTMLDivElement) {
     this.mapEl = mapEl;
-    console.log("[DEBUG] KakaoMapController 생성자:", {
-      hasMapEl: !!mapEl,
-      mapElId: mapEl?.id,
-      mapElClass: mapEl?.className,
-    });
   }
 
   relayout(preserveCenter: boolean = true) {
-    console.log("[DEBUG] relayout 호출:", { preserveCenter, hasMap: !!this.map });
     if (!this.map) return;
     const center = preserveCenter ? this.map.getCenter() : null;
     try {
       this.map.relayout();
       if (center) this.map.setCenter(center);
-      console.log("[DEBUG] relayout 성공");
     } catch (e) {
       console.warn("[DEBUG] relayout() 실패:", e);
     }
   }
 
   async init(centerLat = 37.5665, centerLng = 126.978, level = 7) {
-    console.log("[DEBUG] Map init 시작:", { centerLat, centerLng, level });
-
     try {
       await ensureKakaoSdkLoaded();
 
       if (!window.kakao?.maps) {
-        console.error("[DEBUG] Kakao Maps이 사용 불가능");
         throw new Error("Kakao Maps is not available");
       }
-
-      console.log("[DEBUG] Kakao Maps 사용 가능, 지도 생성 중...");
       const kakao = window.kakao;
       const center = new kakao.maps.LatLng(centerLat, centerLng);
-
       console.log("[DEBUG] 지도 센터 좌표 생성:", {
         lat: center.getLat(),
         lng: center.getLng(),
@@ -531,12 +409,7 @@ export class KakaoMapController {
         disableDoubleClick: false,
       });
 
-      console.log("[DEBUG] 지도 생성 완료");
-
       this.infoWindow = new kakao.maps.InfoWindow({ removable: false });
-
-      console.log("[DEBUG] InfoWindow 생성 완료");
-      console.log("[DEBUG] Map init 성공");
     } catch (error) {
       console.error("[DEBUG] Failed to initialize Kakao Map:", error);
       throw error;
@@ -544,47 +417,36 @@ export class KakaoMapController {
   }
 
   destroy() {
-    console.log("[DEBUG] destroy 호출");
     this.clearMentors();
     if (this.myMarker) {
       this.myMarker.setMap(null);
       this.myMarker = null;
-      console.log("[DEBUG] 내 위치 마커 제거");
     }
     this.infoWindow = null;
     this.map = null;
-    console.log("[DEBUG] destroy 완료");
   }
 
   getCenter(): { lat: number; lng: number } | null {
     if (!this.map) {
-      console.log("[DEBUG] getCenter: map이 없음");
       return null;
     }
     const c = this.map.getCenter();
     const result = { lat: c.getLat(), lng: c.getLng() };
-    console.log("[DEBUG] getCenter:", result);
     return result;
   }
 
   moveTo(lat: number, lng: number, level?: number) {
-    console.log("[DEBUG] moveTo 호출:", { lat, lng, level });
     if (!this.map) {
-      console.log("[DEBUG] moveTo: map이 없음");
       return;
     }
     const kakao = window.kakao;
     const pos = new kakao.maps.LatLng(lat, lng);
     this.map.setCenter(pos);
     if (typeof level === "number") this.map.setLevel(level);
-    console.log("[DEBUG] moveTo 완료");
   }
 
   setMyLocation(lat: number, lng: number, opts?: { preserveView?: boolean }) {
-    console.log("[DEBUG] setMyLocation 호출:", { lat, lng, opts });
-
     if (!this.map) {
-      console.log("[DEBUG] setMyLocation: map이 없음");
       return;
     }
 
@@ -594,14 +456,11 @@ export class KakaoMapController {
 
     if (this.myMarker) {
       this.myMarker.setMap(null);
-      console.log("[DEBUG] 기존 내 위치 마커 제거");
     }
 
     const img = new kakao.maps.MarkerImage(BLUE_DOT, new kakao.maps.Size(32, 32), {
       offset: new kakao.maps.Point(16, 32),
     });
-
-    console.log("[DEBUG] 내 위치 마커 이미지 생성:", BLUE_DOT);
 
     this.myMarker = new kakao.maps.Marker({
       map: this.map,
@@ -610,20 +469,15 @@ export class KakaoMapController {
       image: img,
     });
 
-    console.log("[DEBUG] 내 위치 마커 생성 완료");
-
     if (!preserveView) {
       this.map.setCenter(pos);
       this.map.setLevel(5);
-      console.log("[DEBUG] 지도 중심점 이동");
     }
   }
 
   clearMentors() {
-    console.log("[DEBUG] clearMentors 호출, 기존 마커 수:", this.mentorMarkers.length);
     this.mentorMarkers.forEach((m) => m.setMap(null));
     this.mentorMarkers = [];
-    console.log("[DEBUG] 멘토 마커 모두 제거 완료");
   }
 
   async showMentors(
@@ -632,10 +486,7 @@ export class KakaoMapController {
     distanceKm = 10,
     keepCurrentView = true,
   ): Promise<number> {
-    console.log("[DEBUG] showMentors 호출:", { lat, lng, distanceKm, keepCurrentView });
-
     if (!this.map) {
-      console.error("[DEBUG] showMentors: map이 초기화되지 않음");
       throw new Error("Map is not initialized");
     }
 
@@ -643,65 +494,33 @@ export class KakaoMapController {
 
     try {
       const url = NEARBY_ENDPOINT(lat, lng, distanceKm);
-      console.log("[DEBUG] API 요청 URL:", url);
 
       const response = await apiClient.get(url);
       data = response.data;
-      console.log("[DEBUG] API 응답 받음:", data);
     } catch (error) {
       const err = error as AxiosError;
 
       // 인증 실패 체크
       if ((err as any).isAuthError || err.name === "AuthenticationError") {
-        console.error("[DEBUG] 인증 실패로 인한 API 호출 실패");
         console.error("[DEBUG] 토큰 상태 재확인:", {
           hasGetAccessTokenFunc: typeof getAccessToken === "function",
           currentToken: getAccessToken?.()?.substring(0, 20) + "...",
           tokenLength: getAccessToken?.()?.length || 0,
         });
-
-        // 사용자에게 알림 (선택적)
-        // alert("로그인이 만료되었습니다. 새로고침 후 다시 시도해 주세요.");
       }
-
-      console.error("[DEBUG] API 요청 실패:", {
-        url: err.config?.url,
-        method: err.config?.method,
-        status: err.response?.status,
-        statusText: err.response?.statusText,
-        message: err.message,
-        data: err.response?.data,
-        isNetworkError: !err.response,
-        code: err.code,
-        authError: (err as any).isAuthError,
-      });
 
       this.clearMentors();
       throw error;
     }
 
-    console.log("[DEBUG] API 응답 분석:", {
-      hasData: !!data,
-      dataType: typeof data,
-      code: data?.code,
-      hasResult: !!data?.result,
-      resultType: typeof data?.result,
-      isResultArray: Array.isArray(data?.result),
-      resultLength: Array.isArray(data?.result) ? data.result.length : "not array",
-    });
-
     if (!(data && data.code === 1000 && Array.isArray(data.result))) {
-      console.warn("[DEBUG] 예상치 못한 API 응답 형식:", data);
       this.clearMentors();
       return 0;
     }
 
     if (data.result.length === 0) {
-      console.info("[DEBUG] 주변 멘토 없음:", { lat, lng, distanceKm });
       return 0;
     }
-
-    console.log("[DEBUG] 멘토 데이터:", data.result);
 
     const kakao = window.kakao;
     this.clearMentors();
@@ -710,38 +529,20 @@ export class KakaoMapController {
     const img = new kakao.maps.MarkerImage(RED_PIN, new kakao.maps.Size(32, 32), {
       offset: new kakao.maps.Point(10, 32),
     });
-
-    console.log("[DEBUG] 멘토 마커 이미지 생성:", RED_PIN);
-
     let markerCount = 0;
 
     (data.result as MentorItem[]).forEach((mentor, index) => {
-      console.log(`[DEBUG] 멘토 ${index + 1} 처리 중:`, mentor);
-
       let latNum = toNumber(mentor.longitude);
       let lngNum = toNumber(mentor.latitude);
-
-      console.log(`[DEBUG] 멘토 ${index + 1} 좌표 변환:`, {
-        originalLat: mentor.latitude,
-        originalLng: mentor.longitude,
-        convertedLat: latNum,
-        convertedLng: lngNum,
-      });
-
       if (latNum !== null && lngNum !== null && (Math.abs(latNum) > 90 || Math.abs(lngNum) > 180)) {
-        console.log(`[DEBUG] 멘토 ${index + 1} 좌표 순서 바꿈 (lat/lng swap)`);
         const t = latNum;
         latNum = lngNum;
         lngNum = t;
       }
 
       if (latNum === null || lngNum === null) {
-        console.warn(`[DEBUG] 멘토 ${index + 1} 좌표 변환 실패, 스킵:`, { latNum, lngNum });
         return;
       }
-
-      console.log(`[DEBUG] 멘토 ${index + 1} 최종 좌표:`, { lat: latNum, lng: lngNum });
-
       const pos = new kakao.maps.LatLng(latNum, lngNum);
       const marker = new kakao.maps.Marker({
         map: this.map,
@@ -750,28 +551,21 @@ export class KakaoMapController {
         image: img,
       });
 
-      console.log(`[DEBUG] 멘토 ${index + 1} 마커 생성 완료:`, marker);
-
       kakao.maps.event.addListener(marker, "click", () => {
-        console.log(`[DEBUG] 멘토 ${index + 1} 마커 클릭됨`);
-
         try {
           const infoHtml = buildInfoHtml(mentor);
           this.infoWindow?.setContent(infoHtml);
           this.infoWindow?.open(this.map, marker);
-          console.log(`[DEBUG] InfoWindow 열기 완료`);
 
           setTimeout(() => {
             ensureIwStylesInjected();
             const root = document.querySelector(".memento-iw-root") as HTMLElement | null;
-            console.log(`[DEBUG] InfoWindow root 요소:`, root);
 
             if (root) requestAnimationFrame(() => root.classList.add("show"));
 
             root?.querySelectorAll<HTMLLIElement>(".memento-iw-item").forEach((el) => {
               el.addEventListener("click", () => {
                 const id = el.dataset.mentosId;
-                console.log(`[DEBUG] 멘토링 아이템 클릭:`, id);
                 if (id) {
                   window.location.href = `/menti/mentos-detail/${id}`;
                 }
@@ -780,12 +574,10 @@ export class KakaoMapController {
 
             // 닫기 버튼 처리
             const btn = document.getElementById("memento-iw-close");
-            console.log(`[DEBUG] 닫기 버튼:`, btn);
             if (btn) {
               btn.addEventListener(
                 "click",
                 (e) => {
-                  console.log(`[DEBUG] InfoWindow 닫기 버튼 클릭`);
                   e.preventDefault();
                   if (root) {
                     root.classList.remove("show");
@@ -824,23 +616,12 @@ export class KakaoMapController {
       this.mentorMarkers.push(marker);
       bounds.extend(pos);
       markerCount++;
-
-      console.log(`[DEBUG] 멘토 ${index + 1} 마커 추가 완료, 총 마커 수: ${markerCount}`);
     });
-
-    console.log("[DEBUG] 모든 멘토 마커 처리 완료:", {
-      totalMentors: data.result.length,
-      createdMarkers: markerCount,
-      keepCurrentView,
-    });
-
     if (!keepCurrentView && markerCount > 0) {
       try {
         if (markerCount > 1) {
-          console.log("[DEBUG] 여러 마커로 지도 범위 조정");
           this.map.setBounds(bounds);
         } else if (markerCount === 1) {
-          console.log("[DEBUG] 단일 마커로 지도 중심 이동");
           this.map.setCenter(bounds.getCenter());
           this.map.setLevel(5);
         }
@@ -849,7 +630,6 @@ export class KakaoMapController {
       }
     }
 
-    console.log(`[DEBUG] showMentors 완료, 반환 마커 수: ${markerCount}`);
     return markerCount;
   }
 }
