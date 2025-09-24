@@ -1,10 +1,10 @@
-import { ensureConnected, subscribeRoom, sendChatMessage } from "@/pages/chat/services/chatSocket";
+import { ensureConnected, sendChatMessage, subscribeRoom } from "@/pages/chat/services/chatSocket";
+import { markAsRead } from "@/pages/chat/services/chat";
+import { http } from "@/shared/api/https";
 import defaultimage from "@assets/images/character/character-gom.svg";
 import { Send } from "lucide-react";
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-
-import { http } from "@/shared/api/https";
 
 // --- 인터페이스 정의 ---
 export interface RoomInfo {
@@ -26,9 +26,10 @@ export interface ChatMessage {
 type LocationState = { room?: RoomInfo } | null;
 
 // --- useMe 커스텀 훅 ---
+// 사용자 정보 로딩 완료 상태를 명확히 하기 위해 isLoaded로 상태 이름 변경
 function useMe() {
   const [memberSeq, setMemberSeq] = useState<number | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -43,7 +44,7 @@ function useMe() {
         console.error("내 정보를 가져오는데 실패했습니다:", error);
         if (alive) setMemberSeq(null);
       } finally {
-        if (alive) setLoaded(true);
+        if (alive) setIsLoaded(true);
       }
     })();
     return () => {
@@ -51,7 +52,7 @@ function useMe() {
     };
   }, []);
 
-  return { memberSeq, loaded };
+  return { memberSeq, isLoaded };
 }
 
 // --- ChatRoomPage 컴포넌트 ---
@@ -59,11 +60,8 @@ export default function ChatRoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
   const { state } = useLocation() as { state: LocationState };
 
-  const { memberSeq, loaded } = useMe();
-  const mySeqRef = useRef<number | null>(null);
-  useEffect(() => {
-    mySeqRef.current = memberSeq ?? null;
-  }, [memberSeq]);
+  // 훅에서 isLoaded 상태를 받아와 실행 시점을 제어합니다.
+  const { memberSeq, isLoaded } = useMe();
 
   const [room, setRoom] = useState<RoomInfo | null>(state?.room ?? null);
   const [msgs, setMsgs] = useState<ChatMessage[]>([]);
@@ -72,16 +70,25 @@ export default function ChatRoomPage() {
   const formRef = useRef<HTMLFormElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // 과거 메시지 로드, 채팅방 정보 설정, 소켓 구독을 하나의 useEffect에서 처리
+  // [핵심 수정] 과거 메시지 로드, 채팅방 정보 설정, 소켓 구독 로직
   useEffect(() => {
-    // roomId가 없거나, 아직 내 정보(mySeqRef)를 불러오지 못했다면 아무것도 하지 않음
-    if (!roomId || !mySeqRef.current) return;
+    // 사용자 정보 로딩이 끝나고, memberSeq가 유효할 때만 모든 로직을 실행합니다.
+    if (!roomId || !isLoaded || !memberSeq) {
+      if (isLoaded && !memberSeq) {
+        console.error("사용자 인증 정보가 없어 채팅방을 시작할 수 없습니다.");
+      }
+      return;
+    }
 
     let subscription: { unsubscribe: () => void } | null = null;
 
     const setupChatRoom = async () => {
       try {
-        // 1. 채팅방 상세 정보(제목, 참여자, 과거 메시지)를 한 번에 가져옴
+        // 이제 memberSeq가 항상 유효하므로 직접 사용합니다.
+        const myCurrentSeq = memberSeq;
+
+        // 1. API 호출들을 먼저 수행합니다.
+        await markAsRead(roomId);
         const res = await http.get(`/chat/rooms/${roomId}/messages`);
         const details = res?.data?.result;
 
@@ -90,59 +97,59 @@ export default function ChatRoomPage() {
           return;
         }
 
-        // 2. 채팅방 정보 설정 (멘토스 제목, 상대방 이름)
-        const other = details.participants.find((p: any) => p.memberSeq !== mySeqRef.current);
+        const other = details.participants.find((p: any) => p.memberSeq !== myCurrentSeq);
         setRoom({
           id: String(details.chattingRoomSeq),
           name: details.mentosTitle,
           group: other?.memberName || "상대방",
         });
 
-        // 3. 과거 메시지 상태 설정
         const oldMessages = details.messages.map(
           (msg: any): ChatMessage => ({
             id: `${msg.chattingRoomSeq}-${msg.sentAt}-${msg.senderSeq}`,
             roomId,
-            role: msg.senderSeq === mySeqRef.current ? "me" : "bot",
+            role: msg.senderSeq === myCurrentSeq ? "me" : "bot",
             text: msg.message,
-            ts: new Date(msg.sentAt).getTime(),
-            profileImageUrl:
-              msg.senderSeq !== mySeqRef.current ? msg.senderProfileImage : undefined,
+            ts: new Date(msg.sentAt.replace(" ", "T")).getTime(),
+            profileImageUrl: msg.senderSeq !== myCurrentSeq ? msg.senderProfileImage : undefined,
           }),
         );
         setMsgs(oldMessages);
 
-        // 4. STOMP 연결 및 구독
+        // 2. 모든 HTTP 작업이 끝난 후, 마지막에 WebSocket 연결을 시도합니다.
         await ensureConnected();
+
+        // 3. 연결 성공 후 방을 구독합니다.
         subscription = subscribeRoom(roomId, (body: any) => {
+          if (body.senderSeq === myCurrentSeq) return;
+
           setMsgs((prev) => [
             ...prev,
             {
               id: `${body.chattingRoomSeq}-${body.sentAt}-${body.senderSeq}-${Math.random()}`,
               roomId,
-              role: body.senderSeq === mySeqRef.current ? "me" : "bot",
+              role: "bot",
               text: body.message,
-              ts: new Date(body.sentAt).getTime(),
-              profileImageUrl:
-                body.senderSeq !== mySeqRef.current ? body.senderProfileImage : undefined,
+              ts: new Date(body.sentAt.replace(" ", "T")).getTime(),
+              profileImageUrl: body.senderProfileImage,
             },
           ]);
         });
       } catch (error) {
+        // ensureConnected에서 발생한 에러도 여기서 잡힙니다.
         console.error("채팅방 설정 중 에러:", error);
       }
     };
 
     setupChatRoom();
 
-    // 5. Cleanup 함수: 컴포넌트가 사라질 때 이전 구독을 확실하게 해제
     return () => {
       if (subscription) {
         subscription.unsubscribe();
-        console.log(`Unsubscribed from room ${roomId}`);
       }
     };
-  }, [roomId, loaded]); // roomId가 바뀌거나, 내 정보 로딩이 완료될 때 재실행
+    // useEffect가 isLoaded와 memberSeq 값의 변경에 반응하도록 설정
+  }, [roomId, isLoaded, memberSeq]);
 
   // 스크롤 맨 아래로 이동
   useEffect(() => {
@@ -152,27 +159,30 @@ export default function ChatRoomPage() {
   }, [msgs.length]);
 
   // 메시지 전송 함수
-  const onSend = async (e: FormEvent<HTMLFormElement>) => {
+  const onSend = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const text = input.trim();
-    if (!text || !roomId) return;
-
-    if (!loaded) {
-      alert("로그인 정보를 불러오는 중입니다. 잠시만요.");
-      return;
-    }
-
-    if (!mySeqRef.current) {
-      alert("사용자 정보를 확인하지 못했습니다. 잠시 후 다시 시도해주세요.");
-      return;
-    }
+    // memberSeq를 직접 사용 (useRef 불필요)
+    if (!text || !roomId || !memberSeq) return;
 
     setInput("");
 
-    await sendChatMessage({
+    const optimisticMessage: ChatMessage = {
+      id: `temp-${Date.now()}`,
       roomId,
-      senderMemberSeq: mySeqRef.current,
-      content: text,
+      role: "me",
+      text,
+      ts: Date.now(),
+    };
+    setMsgs((prev) => [...prev, optimisticMessage]);
+
+    sendChatMessage({
+      roomId,
+      message: text,
+    }).catch((err) => {
+      console.error("메시지 전송 실패:", err);
+      // 실패 시 낙관적 UI 업데이트를 되돌리는 로직을 추가할 수 있습니다.
+      // 예: setMsgs(prev => prev.filter(m => m.id !== optimisticMessage.id));
     });
   };
 
@@ -193,7 +203,7 @@ export default function ChatRoomPage() {
     }
   };
 
-  // JSX 렌더링
+  // JSX 렌더링 ---
   return (
     <div className="flex h-dvh w-full flex-col overscroll-none rounded-[18px] bg-white">
       <div className="sticky top-0 z-10 flex h-12 shrink-0 items-center border-b border-[#f1f3f6] bg-white px-4 pt-[env(safe-area-inset-top)]">
@@ -204,13 +214,13 @@ export default function ChatRoomPage() {
 
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 space-y-4 overflow-hidden overscroll-none bg-[#E6EDFF]/[0.22] px-4 py-5">
+        className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-[#E6EDFF]/[0.22] px-4 py-5">
         {msgs.map((m) => (
           <div
             key={m.id}
-            className={`flex ${m.role === "me" ? "justify-end" : "items-start gap-2"}`}>
+            className={`flex w-full items-end gap-2 ${m.role === "me" ? "justify-end" : "justify-start"}`}>
             {m.role !== "me" && (
-              <div className="grid h-8 w-8 place-items-center rounded-full bg-[#565C63]">
+              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#565C63]">
                 <img
                   src={m.profileImageUrl || defaultimage}
                   alt="profile"
@@ -218,7 +228,8 @@ export default function ChatRoomPage() {
                 />
               </div>
             )}
-            <div className="max-w-[78%] rounded-[18px] bg-[#93B1FF] px-4 py-2 text-white">
+            <div
+              className={`max-w-[78%] rounded-[18px] px-4 py-2 break-words whitespace-pre-wrap text-white ${m.role === "me" ? "bg-[#2563eb]" : "bg-[#93B1FF]"}`}>
               {m.text}
             </div>
           </div>

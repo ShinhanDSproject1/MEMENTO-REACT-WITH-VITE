@@ -66,6 +66,13 @@ export default defineConfig({
         },
       },
 
+      "/ws/chat": {
+        target: "wss://memento.shinhanacademy.co.kr",
+        ws: true,
+        changeOrigin: true,
+        secure: true,
+      },
+
       "/py": {
         target: "http://192.168.0.180:8000",
         changeOrigin: true,

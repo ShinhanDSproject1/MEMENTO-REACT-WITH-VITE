@@ -207,3 +207,9 @@ export async function sendMessage(roomId: string, text: string): Promise<ChatMes
     ts: m.sentAt ? new Date(m.sentAt.replace(" ", "T")).getTime() : 0,
   };
 }
+
+/* --------------------------- 메시지 읽음 처리 --------------------------- */
+export async function markAsRead(roomId: string): Promise<void> {
+  // 응답을 기다릴 뿐 특별히 데이터를 사용하지는 않음
+  await http.patch(`/chat/rooms/${roomId}/read`);
+}

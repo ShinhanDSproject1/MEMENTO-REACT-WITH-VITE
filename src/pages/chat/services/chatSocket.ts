@@ -1,24 +1,25 @@
-import { Client, type IMessage } from "@stomp/stompjs";
+import { Client } from "@stomp/stompjs";
 import { getAccessToken as _getAccessToken } from "@/shared/auth/token";
 
-function resolveWsUrl() {
-  // 1. 개발 환경(DEV)일 경우 (npm run dev)
-  // Vite 프록시를 사용하지 않고, 배포된 백엔드 서버의 주소로 직접 연결
-  if (import.meta.env.DEV) {
-    return "wss://memento.shinhanacademy.co.kr/ws/chat";
+export function resolveWsUrl() {
+  const VITE_WS_URL = import.meta.env.VITE_WS_BASE_URL;
+
+  // VITE_WS_URL이 없는 경우에 대한 방어 코드 추가
+  if (!VITE_WS_URL) {
+    console.error("❌ VITE_WS_BASE_URL 환경 변수가 정의되지 않았습니다!");
+    return ""; // 빈 문자열을 반환하여 에러 방지
   }
 
-  // 2. 배포 환경(PROD)일 경우 (npm run build)
-  // VITE_WS_ABSOLUTE 환경 변수가 있으면 그 값을 우선적으로 사용.
-  const abs = import.meta.env.VITE_WS_ABSOLUTE as string | undefined;
-  if (import.meta.env.PROD && abs) {
-    return abs;
+  // 1. VITE_WS_URL 자체가 완전한 URL인 경우 (예: wss://...)
+  if (VITE_WS_URL.startsWith("ws")) {
+    return VITE_WS_URL;
   }
 
-  // 3. 배포 환경에서 위 환경 변수가 없으면, 현재 웹사이트 주소를 기준으로 상대 경로 생성
-  // (예: 프론트엔드가 https://memento.com에 배포되면, wss://memento.com/ws/chat으로 자동 설정)
-  const scheme = location.protocol === "https:" ? "wss" : "ws";
-  return `${scheme}://${location.host}/ws/chat`;
+  // 2. 상대 경로인 경우 (개발 환경)
+  const isSecure = location.protocol === "https:";
+  const protocol = isSecure ? "wss" : "ws";
+  const host = location.host; // "localhost:3000"
+  return `${protocol}://${host}${VITE_WS_URL}`;
 }
 
 export const WS_URL = resolveWsUrl();
@@ -27,7 +28,7 @@ export const WS_URL = resolveWsUrl();
 export const TOPIC_BASE = import.meta.env.VITE_STOMP_TOPIC_BASE ?? "/topic/chat/room";
 export const SEND_DEST = import.meta.env.VITE_STOMP_SEND_DEST ?? "/app/chat/send";
 
-/** 토큰(있으면 헤더로 추가 — 쿠키 인증이면 없어도 무방) */
+/** 토큰 가져오기 */
 function getToken(): string {
   try {
     return (_getAccessToken?.() as string) ?? localStorage.getItem("accessToken") ?? "";
@@ -36,17 +37,29 @@ function getToken(): string {
   }
 }
 
-/** STOMP 클라이언트 (네이티브 WebSocket) */
+/** STOMP 클라이언트 */
 export const stompClient = new Client({
-  brokerURL: WS_URL,
+  brokerURL: WS_URL, // full ws:// or wss://
   reconnectDelay: 3000,
   heartbeatIncoming: 10000,
   heartbeatOutgoing: 10000,
-  debug: () => {},
-  connectHeaders: {
-    Authorization: `Bearer ${getToken()}`,
+  beforeConnect: () => {
+    console.log("STOMP 연결 시도 직전...");
+    const token = getToken();
+    if (token) {
+      // 연결 직전에 최신 토큰을 가져와 헤더에 설정합니다.
+      stompClient.connectHeaders = {
+        Authorization: `Bearer ${token}`,
+      };
+      console.log("최신 토큰으로 헤더 설정 완료.");
+    } else {
+      console.warn("STOMP 연결: 토큰이 없습니다.");
+    }
   },
 });
+
+stompClient.onConnect = () => console.log("✅ STOMP connected");
+stompClient.onStompError = (f) => console.error("❌ STOMP error", f);
 
 /** 연결 보장: 중복 activate 방지 + 에러 핸들링 */
 let connecting = false;
@@ -102,16 +115,11 @@ export function subscribeRoom(roomId: string, onMessage: (msg: any) => void) {
 }
 
 /** 메시지 전송 */
-export async function sendChatMessage(params: {
-  roomId: string;
-  senderMemberSeq: number;
-  content: string;
-}) {
+export async function sendChatMessage(params: { roomId: string; message: string }) {
   await ensureConnected();
   const payload = {
     chattingRoomSeq: Number(params.roomId),
-    senderSeq: params.senderMemberSeq, // senderMemberSeq -> senderSeq
-    message: params.content, // content -> message
+    message: params.message,
   };
   stompClient.publish({
     destination: SEND_DEST,
