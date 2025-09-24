@@ -18,6 +18,7 @@ type MentosCardProps = {
   onDeleteClick?: () => void;
   refundDisabled?: boolean;
   reviewDisabled?: boolean; // ✅ 리뷰 완료 시 true로 들어옴
+  reportDisabled?: boolean;
 };
 
 const statusStyles: Record<MentosStatus, string> = {
@@ -46,6 +47,7 @@ export default function MentosCard({
   imageUrl,
   refundDisabled,
   reviewDisabled,
+  reportDisabled,
 }: MentosCardProps) {
   const statusClassName = statusStyles[status] ?? "";
   const statusText = statusTextMap[status] ?? "";
@@ -72,8 +74,12 @@ export default function MentosCard({
               title={isDisabled ? "이미 리뷰를 작성했습니다" : "리뷰 작성"}>
               {isDisabled ? "리뷰 완료" : "리뷰 작성"}
             </Button>
-
-            <Button className="text-xs" variant="danger" size="sm" onClick={onReportClick}>
+            <Button
+              className="text-xs"
+              variant="danger"
+              size="sm"
+              onClick={onReportClick}
+              disabled={reportDisabled}>
               신고하기
             </Button>
           </>

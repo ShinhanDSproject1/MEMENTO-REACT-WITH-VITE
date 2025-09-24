@@ -86,6 +86,24 @@ function markReviewedInCache(
   });
 }
 
+/** 신고 완료를 캐시에 즉시 반영 */
+function markReportedInCache(queryClient: ReturnType<typeof useQueryClient>, mentosSeq?: number) {
+  if (!mentosSeq) return;
+  queryClient.setQueryData<any>(MY_MENTOS_QK, (old) => {
+    if (!old) return old;
+    return {
+      ...old,
+      pages: old.pages?.map((pg: any) => {
+        if (!pg?.result?.content) return pg;
+        const newContent = pg.result.content.map((it: any) =>
+          it?.mentosSeq === mentosSeq ? { ...it, reportCompleted: true } : it,
+        );
+        return { ...pg, result: { ...pg.result, content: newContent } };
+      }),
+    };
+  });
+}
+
 interface ReviewModalData {
   mentosSeq?: number; // 사용 안 해도 남겨둠(타입 호환)
   initialRating?: number;
@@ -229,7 +247,6 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
         openModal("withdrawFailed", { message: "신고 정보가 올바르지 않습니다." });
         return;
       }
-
       try {
         openModal("loading", { title: "신고 접수 중…", description: "잠시만 기다려주세요 ⏳" });
         await createReport({
@@ -238,6 +255,7 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
           idemKey,
         });
         closeModal();
+        markReportedInCache(queryClient, mentosSeq);
         openModal("reportComplete");
       } catch {
         closeModal();
@@ -445,7 +463,6 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
                 location={locationLabel}
                 status={item.progressStatus === "진행 완료" ? "completed" : "pending"}
                 imageUrl={item.mentosImage}
-                onReportClick={() => onReportClick(item.mentosSeq)}
                 onReviewClick={() => onReviewClick(item.reservationSeq, item.reviewCompleted)}
                 onRefundClick={() =>
                   item.reservationSeq
@@ -454,8 +471,15 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
                         message: "해당 항목에는 예약 내역이 없습니다.",
                       })
                 }
+                onReportClick={() =>
+                  item.reportCompleted
+                    ? openModal("withdrawFailed", { message: "이미 신고한 항목입니다." })
+                    : onReportClick(item.mentosSeq)
+                }
+                // 버튼 비활성화
                 refundDisabled={!item.reservationSeq}
-                reviewDisabled={item.reviewCompleted} // ✅ 리뷰 완료 시 버튼 비활성화
+                reviewDisabled={item.reviewCompleted}
+                reportDisabled={!!item.reportCompleted}
               />
             );
           })}
