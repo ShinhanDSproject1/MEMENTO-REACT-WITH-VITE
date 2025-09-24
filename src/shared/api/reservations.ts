@@ -6,16 +6,19 @@ export type Availability = {
   availableTime: string[];
 };
 
-// 로그인 불필요 → fetch 사용
 export async function fetchAvailability(
   mentosSeq: number,
   selectedDate: string,
 ): Promise<Availability> {
-  const rsp = await fetch(
-    `/api/reservation/availability/${mentosSeq}?selectedDate=${encodeURIComponent(selectedDate)}`,
-    { credentials: "include" },
-  );
-  const data = await rsp.json();
+  const { data } = await http.get(`/reservation/availability/${mentosSeq}`, {
+    params: { selectedDate },
+    headers: {
+      "Content-Type": "application/json",
+      // Authorization 헤더가 http 인스턴스에서 자동 주입되지 않는 경우 직접 추가하세요:
+      // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
+  });
+
   const res = data?.result ?? data;
 
   return {
