@@ -1,28 +1,8 @@
 import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 import { getAccessToken as _getAccessToken } from "@/shared/auth/token";
 
-export function resolveWsUrl() {
-  const VITE_WS_URL = import.meta.env.VITE_WS_BASE_URL;
-
-  // VITE_WS_URL이 없는 경우에 대한 방어 코드 추가
-  if (!VITE_WS_URL) {
-    console.error("❌ VITE_WS_BASE_URL 환경 변수가 정의되지 않았습니다!");
-    return ""; // 빈 문자열을 반환하여 에러 방지
-  }
-
-  // 1. VITE_WS_URL 자체가 완전한 URL인 경우 (예: wss://...)
-  if (VITE_WS_URL.startsWith("ws")) {
-    return VITE_WS_URL;
-  }
-
-  // 2. 상대 경로인 경우 (개발 환경)
-  const isSecure = location.protocol === "https:";
-  const protocol = isSecure ? "wss" : "ws";
-  const host = location.host; // "localhost:3000"
-  return `${protocol}://${host}${VITE_WS_URL}`;
-}
-
-export const WS_URL = resolveWsUrl();
+export const WS_URL = "/ws/chat";
 
 /** 브로커 경로들 (백엔드 설정과 반드시 일치) */
 export const TOPIC_BASE = import.meta.env.VITE_STOMP_TOPIC_BASE ?? "/topic/chat/room";
@@ -39,7 +19,9 @@ function getToken(): string {
 
 /** STOMP 클라이언트 */
 export const stompClient = new Client({
-  brokerURL: WS_URL, // full ws:// or wss://
+  webSocketFactory: () => {
+    return new SockJS(WS_URL);
+  },
   reconnectDelay: 3000,
   heartbeatIncoming: 10000,
   heartbeatOutgoing: 10000,
@@ -47,7 +29,7 @@ export const stompClient = new Client({
     console.log("STOMP 연결 시도 직전...");
     const token = getToken();
     if (token) {
-      // 연결 직전에 최신 토큰을 가져와 헤더에 설정합니다.
+      // 연결 직전에 최신 토큰을 가져와 헤더에 설정
       stompClient.connectHeaders = {
         Authorization: `Bearer ${token}`,
       };
@@ -57,6 +39,14 @@ export const stompClient = new Client({
     }
   },
 });
+
+/** STOMP 연결을 명시적으로 해제하는 함수 */
+export function disconnectSocket() {
+  if (stompClient.connected) {
+    stompClient.deactivate();
+    console.log("🔌 STOMP connection deactivated.");
+  }
+}
 
 stompClient.onConnect = () => console.log("✅ STOMP connected");
 stompClient.onStompError = (f) => console.error("❌ STOMP error", f);

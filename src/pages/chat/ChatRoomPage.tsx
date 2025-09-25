@@ -37,6 +37,7 @@ function useMe() {
       try {
         const res = await http.get(`/mypage/profile`);
         const userSeqFromResult = res?.data?.result?.memberSeq;
+        console.log("✅ [useMe] API 응답 받음, memberSeq:", userSeqFromResult);
         if (alive) {
           setMemberSeq(typeof userSeqFromResult === "number" ? userSeqFromResult : null);
         }
@@ -60,8 +61,11 @@ export default function ChatRoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
   const { state } = useLocation() as { state: LocationState };
 
-  // 훅에서 isLoaded 상태를 받아와 실행 시점을 제어합니다.
+  // 훅에서 isLoaded 상태를 받아와 실행 시점을 제어
   const { memberSeq, isLoaded } = useMe();
+
+  // memberSeq를 저장할 ref를 생성
+  const memberSeqRef = useRef(memberSeq);
 
   const [room, setRoom] = useState<RoomInfo | null>(state?.room ?? null);
   const [msgs, setMsgs] = useState<ChatMessage[]>([]);
@@ -70,9 +74,14 @@ export default function ChatRoomPage() {
   const formRef = useRef<HTMLFormElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // [핵심 수정] 과거 메시지 로드, 채팅방 정보 설정, 소켓 구독 로직
+  // memberSeq 상태가 변경될 때마다 ref의 값을 업데이트
   useEffect(() => {
-    // 사용자 정보 로딩이 끝나고, memberSeq가 유효할 때만 모든 로직을 실행합니다.
+    memberSeqRef.current = memberSeq;
+  }, [memberSeq]);
+
+  // 과거 메시지 로드, 채팅방 정보 설정, 소켓 구독 로직
+  useEffect(() => {
+    // 사용자 정보 로딩이 끝나고, memberSeq가 유효할 때만 모든 로직을 실행
     if (!roomId || !isLoaded || !memberSeq) {
       if (isLoaded && !memberSeq) {
         console.error("사용자 인증 정보가 없어 채팅방을 시작할 수 없습니다.");
@@ -80,14 +89,16 @@ export default function ChatRoomPage() {
       return;
     }
 
+    console.log(`🚀 [useEffect] 실행됨, 현재 memberSeq: ${memberSeq}`);
+
     let subscription: { unsubscribe: () => void } | null = null;
 
     const setupChatRoom = async () => {
       try {
-        // 이제 memberSeq가 항상 유효하므로 직접 사용합니다.
+        // 이제 memberSeq가 항상 유효하므로 직접 사용
         const myCurrentSeq = memberSeq;
 
-        // 1. API 호출들을 먼저 수행합니다.
+        // 1. API 호출들을 먼저 수행
         await markAsRead(roomId);
         const res = await http.get(`/chat/rooms/${roomId}/messages`);
         const details = res?.data?.result;
@@ -116,27 +127,25 @@ export default function ChatRoomPage() {
         );
         setMsgs(oldMessages);
 
-        // 2. 모든 HTTP 작업이 끝난 후, 마지막에 WebSocket 연결을 시도합니다.
+        // 2. 모든 HTTP 작업이 끝난 후, 마지막에 WebSocket 연결을 시도
         await ensureConnected();
 
-        // 3. 연결 성공 후 방을 구독합니다.
+        // 3. 연결 성공 후 방을 구독
         subscription = subscribeRoom(roomId, (body: any) => {
-          if (body.senderSeq === myCurrentSeq) return;
-
-          setMsgs((prev) => [
-            ...prev,
-            {
-              id: `${body.chattingRoomSeq}-${body.sentAt}-${body.senderSeq}-${Math.random()}`,
-              roomId,
-              role: "bot",
-              text: body.message,
-              ts: new Date(body.sentAt.replace(" ", "T")).getTime(),
-              profileImageUrl: body.senderProfileImage,
-            },
-          ]);
+          // 3. 콜백 함수 안에서는 항상 최신 값을 보장하는 ref를 사용
+          const currentMemberSeq = memberSeqRef.current;
+          const newMessage: ChatMessage = {
+            id: `${body.chattingRoomSeq}-${body.sentAt}-${body.senderSeq}-${Math.random()}`,
+            roomId,
+            role: body.senderSeq === currentMemberSeq ? "me" : "bot",
+            text: body.message,
+            ts: new Date(body.sentAt.replace(" ", "T")).getTime(),
+            profileImageUrl:
+              body.senderSeq !== currentMemberSeq ? body.senderProfileImage : undefined,
+          };
+          setMsgs((prev) => [...prev, newMessage]);
         });
       } catch (error) {
-        // ensureConnected에서 발생한 에러도 여기서 잡힙니다.
         console.error("채팅방 설정 중 에러:", error);
       }
     };
@@ -167,22 +176,11 @@ export default function ChatRoomPage() {
 
     setInput("");
 
-    const optimisticMessage: ChatMessage = {
-      id: `temp-${Date.now()}`,
-      roomId,
-      role: "me",
-      text,
-      ts: Date.now(),
-    };
-    setMsgs((prev) => [...prev, optimisticMessage]);
-
     sendChatMessage({
       roomId,
       message: text,
     }).catch((err) => {
       console.error("메시지 전송 실패:", err);
-      // 실패 시 낙관적 UI 업데이트를 되돌리는 로직을 추가할 수 있습니다.
-      // 예: setMsgs(prev => prev.filter(m => m.id !== optimisticMessage.id));
     });
   };
 
