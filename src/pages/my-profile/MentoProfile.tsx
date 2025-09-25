@@ -365,7 +365,7 @@ export default function MentorProfile() {
           <h2 className={headingCls}>보유 자격증</h2>
           <section className="mb-8">
             <div className="rounded-xl border border-[#E5E7ED] bg-white px-5 py-4 text-sm leading-6 text-[#606264]">
-              {user.certs.length > 0 ? user.certs.join("    ") : "등록된 자격증이 없습니다."}
+              {user.certs.length > 0 ? user.certs.join("  /  ") : "등록된 자격증이 없습니다."}
             </div>
 
             <div className="mt-4 flex items-start justify-between">

@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 /* 분류 옵션 */
 const CATEGORY_OPTIONS = [
   { label: "소비 패턴", value: "1" },
-  { label: "생활 노하우", value: "2" },
+  { label: "생활\n노하우", value: "2" }, // Changed
   { label: "저축 방식", value: "3" },
   { label: "자산 증식", value: "4" },
 ];
@@ -139,7 +139,8 @@ export default function MentosForm({
                 key={opt.value}
                 type="button"
                 onClick={() => setForm((prev) => ({ ...prev, category: opt.value }))}
-                className={`flex-1 rounded-lg py-2 text-sm font-semibold transition-colors ${
+                className={`flex-1 rounded-lg py-2 text-sm font-semibold whitespace-pre-line transition-colors ${
+                  // Changed
                   form.category === opt.value
                     ? "bg-[#1161FF] text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"

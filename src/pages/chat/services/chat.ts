@@ -1,5 +1,8 @@
+import { http } from "@/shared/api/https";
 import { getAccessToken as _getAccessToken } from "@/shared/auth/token";
+import { jwtDecode } from "jwt-decode";
 
+/* ----------------------------- 유틸/타입 정의 ----------------------------- */
 export interface Room {
   id: string;
   name: string;
@@ -8,11 +11,20 @@ export interface Room {
   unread?: boolean;
   lastAt?: number;
 }
+
 type ApiEnvelope<T> = { code: number; status: number; message: string; result: T };
 
-type ChatRoomDTO = {
+type MentorChatRoomDTO = {
   chatRoomId: number;
   mentiName: string;
+  lastMessage: string | null;
+  lastMessageAt: string | null;
+  hasUnreadMessage: boolean;
+};
+
+type MenteeChatRoomDTO = {
+  chatRoomId: number;
+  mentorName: string;
   lastMessage: string | null;
   lastMessageAt: string | null;
   hasUnreadMessage: boolean;
@@ -43,16 +55,7 @@ export type ChatMessage = {
   ts: number;
 };
 
-const BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
-
-function getToken(): string {
-  try {
-    return (_getAccessToken?.() as string) ?? localStorage.getItem("accessToken") ?? "";
-  } catch {
-    return "";
-  }
-}
-
+/* ------------------------------ 유틸 함수 ------------------------------ */
 function toEpoch(s?: string | null): number {
   if (!s) return 0;
   const v = s.includes(" ") ? s.replace(" ", "T") : s;
@@ -69,22 +72,22 @@ function assertNumber(v: unknown, label: string): asserts v is number {
     throw new Error(`${label}가 숫자가 아닙니다.`);
   }
 }
-/** --- 목록 응답 보정 --- */
+
+/** --- 멘토용 응답 보정 --- */
 function normalizeToSpec(raw: any): MentosGroupDTO[] {
-  if (!raw || typeof raw !== "object" || !Array.isArray(raw.result)) {
-    throw new Error("menti-list 응답이 명세(result 배열)가 아닙니다.");
+  const arr = raw?.result ?? raw;
+  if (!Array.isArray(arr)) {
+    throw new Error("menti-list 응답이 배열이 아닙니다.");
   }
 
-  const groups = raw.result as any[];
-
-  return groups.map((g, gi) => {
+  return arr.map((g, gi) => {
     assertNumber(g?.mentosId, "mentosId");
     const mentosTitle = String(g?.mentosTitle ?? "");
     assertArray(g?.chatRooms, "chatRooms");
 
     const chatRooms: ChatRoomDTO[] = (g.chatRooms as any[]).map((r, ri) => {
-      assertNumber(r?.chatRoomId, "chatRoomId");
-      const mentiName = String(r?.mentiName ?? "");
+      assertNumber(r?.chatRoomId ?? r?.chattingRoomSeq, "chatRoomId");
+      const mentiName = String(r?.mentiName ?? r?.mentoName ?? "");
       if (!mentiName) throw new Error(`mentiName 누락 (index: ${gi}/${ri})`);
 
       const lastMessage = r?.lastMessage ?? null;
@@ -92,7 +95,7 @@ function normalizeToSpec(raw: any): MentosGroupDTO[] {
       const hasUnreadMessage = Boolean(r?.hasUnreadMessage);
 
       return {
-        chatRoomId: r.chatRoomId,
+        chatRoomId: r.chatRoomId ?? r.chattingRoomSeq,
         mentiName,
         lastMessage,
         lastMessageAt,
@@ -108,35 +111,63 @@ function normalizeToSpec(raw: any): MentosGroupDTO[] {
   });
 }
 
-export async function getRooms(): Promise<Room[]> {
-  const token = getToken();
-  if (!token) throw new Error("로그인 정보가 없습니다. 먼저 로그인해 주세요.");
+/* --------------------------- 로그인 계정 Role --------------------------- */
+export function isMentiUser(): boolean {
+  try {
+    const token = _getAccessToken();
+    if (!token) return false;
+    const payload: any = jwtDecode(token);
 
-  const res = await fetch(`${BASE}/mento/menti-list`, {
-    method: "GET",
-    headers: { Authorization: `Bearer ${token}` },
-    credentials: "include",
-  });
+    // 💡 수정된 부분: "type" 키를 가장 먼저 확인하도록 추가
+    const userType = payload?.type ?? payload?.userType ?? payload?.role ?? payload?.userRole;
 
-  if (!res.ok) {
-    const msg = await res.text().catch(() => "");
-    if (res.status === 401) throw new Error("인증이 만료되었습니다. 다시 로그인해 주세요. (401)");
-    throw new Error(`채팅방 목록 조회 실패: ${res.status} ${msg}`);
+    return typeof userType === "string" && userType.toUpperCase() === "MENTI";
+  } catch {
+    return false;
+  }
+}
+
+/* --------------------------- 채팅방 목록 조회 --------------------------- */
+export async function getRooms(role: "mento" | "menti" = "mento"): Promise<Room[]> {
+  // 계정에 따라 URL을 바꾼다
+  const url = role === "mento" ? `/mento/menti-list` : `/chat/rooms/menti`;
+  const res = await http.get(url);
+  const json = res.data;
+
+  // 멘토용 응답: ApiEnvelope<MentosGroupDTO[]>
+  if (role === "mento") {
+    const groups = normalizeToSpec(json);
+    const rooms: Room[] = [];
+    for (const g of groups) {
+      const sorted = [...g.chatRooms].sort(
+        (a, b) => toEpoch(b.lastMessageAt) - toEpoch(a.lastMessageAt),
+      );
+
+      for (const r of sorted) {
+        rooms.push({
+          id: String(r.chatRoomId),
+          name: r.mentiName,
+          group: g.mentosTitle,
+          preview: (r.lastMessage ?? "").trim() || "메시지가 없습니다.",
+          unread: r.hasUnreadMessage,
+          lastAt: toEpoch(r.lastMessageAt),
+        });
+      }
+    }
+    return rooms;
   }
 
-  const json: ApiEnvelope<MentosGroupDTO[]> = await res.json();
-  const groups = normalizeToSpec(json);
-
+  // 멘티용 응답: /chat/rooms/menti 구조에 맞춰 변환
+  const mentiGroups = (json.result ?? json) as any[];
   const rooms: Room[] = [];
-  for (const g of groups) {
-    const sorted = [...g.chatRooms].sort(
-      (a, b) => toEpoch(b.lastMessageAt) - toEpoch(a.lastMessageAt),
-    );
 
-    for (const r of sorted) {
+  for (const g of mentiGroups) {
+    if (!g.chatRooms) continue;
+    for (const r of g.chatRooms) {
       rooms.push({
         id: String(r.chatRoomId),
-        name: r.mentiName,
+        // 💡 멘티 입장에서는 멘토 이름을 보여줘야 함
+        name: r.mentorName ?? "멘토",
         group: g.mentosTitle,
         preview: (r.lastMessage ?? "").trim() || "메시지가 없습니다.",
         unread: r.hasUnreadMessage,
@@ -144,66 +175,41 @@ export async function getRooms(): Promise<Room[]> {
       });
     }
   }
-
   return rooms;
 }
 
-/** --- 특정 방 메시지 조회 --- */
+/* --------------------------- 특정 방 메시지 조회 --------------------------- */
 export async function getMessages(roomId: string): Promise<ChatMessage[]> {
-  const token = getToken();
-  if (!token) throw new Error("로그인이 필요합니다.");
-
-  const res = await fetch(`${BASE}/chat/rooms/${roomId}/messages`, {
-    method: "GET",
-    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-    credentials: "include",
-  });
-
-  if (!res.ok) {
-    const msg = await res.text().catch(() => "");
-    throw new Error(`메시지 조회 실패: ${res.status} ${msg}`);
-  }
-
-  const json: ApiEnvelope<{ messages: MessageDTO[] }> = await res.json();
-  const msgs = json.result.messages ?? [];
+  const res = await http.get(`/chat/rooms/${roomId}/messages`);
+  const json: ApiEnvelope<{ messages: MessageDTO[] }> = res.data;
+  const msgs = json.result?.messages ?? json.messages ?? [];
 
   return msgs.map((m) => ({
     id: `${m.chattingRoomSeq}-${m.sentAt}-${m.senderSeq}`,
     roomId,
     role: "bot",
     text: m.message,
-    ts: new Date(m.sentAt.replace(" ", "T")).getTime(),
+    ts: m.sentAt ? new Date(m.sentAt.replace(" ", "T")).getTime() : 0,
   }));
 }
 
-/** --- 메시지 전송 --- */
+/* --------------------------- 메시지 전송 --------------------------- */
 export async function sendMessage(roomId: string, text: string): Promise<ChatMessage> {
-  const token = getToken();
-  if (!token) throw new Error("로그인이 필요합니다.");
-
-  const res = await fetch(`${BASE}/chat/rooms/${roomId}/messages`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify({ message: text }),
-  });
-
-  if (!res.ok) {
-    const msg = await res.text().catch(() => "");
-    throw new Error(`메시지 전송 실패: ${res.status} ${msg}`);
-  }
-
-  const json: ApiEnvelope<MessageDTO> = await res.json();
-  const m = json.result;
+  const res = await http.post(`/chat/rooms/${roomId}/messages`, { message: text });
+  const json: ApiEnvelope<MessageDTO> = res.data;
+  const m = json.result ?? json;
 
   return {
     id: `${m.chattingRoomSeq}-${m.sentAt}-${m.senderSeq}`,
     roomId,
     role: "me",
     text: m.message,
-    ts: new Date(m.sentAt.replace(" ", "T")).getTime(),
+    ts: m.sentAt ? new Date(m.sentAt.replace(" ", "T")).getTime() : 0,
   };
+}
+
+/* --------------------------- 메시지 읽음 처리 --------------------------- */
+export async function markAsRead(roomId: string): Promise<void> {
+  // 응답을 기다릴 뿐 특별히 데이터를 사용하지는 않음
+  await http.patch(`/chat/rooms/${roomId}/read`);
 }

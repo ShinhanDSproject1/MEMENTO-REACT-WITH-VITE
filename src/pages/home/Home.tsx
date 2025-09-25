@@ -1,6 +1,13 @@
 // src/pages/home/Home.tsx
 import { useAuth } from "@/entities/auth";
-import { CharacterAni, HelpCard, LoginBox, MainFooter, RecommendBox } from "@widgets/main";
+import {
+  CharacterAni,
+  HelpCard,
+  LoginBox,
+  MainFooter,
+  RecommendBox,
+  NearbyBanner,
+} from "@widgets/main";
 import Index from "@widgets/main/buttonGroup/index";
 import { useLocation } from "react-router-dom";
 
@@ -35,6 +42,7 @@ export default function Home() {
   return (
     <div className="mx-auto w-full max-w-100 rounded-xl bg-white">
       <CharacterAni />
+      <NearbyBanner userType={effectiveUserType} />
       <LoginBox
         userType={effectiveUserType}
         userName={effectiveUserName ?? ""}

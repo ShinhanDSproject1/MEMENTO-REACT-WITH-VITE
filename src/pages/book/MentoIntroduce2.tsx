@@ -272,23 +272,7 @@ export default function MentoIntroduce() {
           <p className="font-WooridaumB mb-3 ml-1 text-[18px] font-bold text-[#0F172A]">
             멘토링 장소
           </p>
-          <LocationField
-            defaultValue={{
-              zonecode: location.zonecode,
-              address: location.address,
-              detail: location.detail,
-              bname: location.bname,
-              location: "",
-            }}
-            onChange={(v) =>
-              setLocation({
-                zonecode: v.zonecode,
-                address: v.address,
-                detail: v.detail,
-                bname: v.bname,
-              } as LocationFieldValue)
-            }
-          />
+          <LocationField value={location} onChange={(v) => setLocation(v)} />
         </section>
 
         {/* 저장 */}

@@ -2,6 +2,7 @@
 import Button from "@/widgets/common/Button";
 import { FileInput, Label } from "flowbite-react";
 import React, { useCallback, useEffect, useState } from "react";
+
 import { useNavigate } from "react-router-dom";
 
 const ACCEPT_MIME = ["image/png", "image/jpeg", "image/jpg", "application/pdf"];
@@ -173,8 +174,8 @@ export default function CertificationRegister() {
 
       {/* 제목 */}
       <div className="flex w-full">
-        <p className="font-WooridaumB text-black">
-          보유중인 <span className="font-WooridaumB text-[#005EF9]">자격증</span>을 <br />
+        <p className="font-WooridaumB text-[21px] text-black">
+          보유중인 <span className="font-WooridaumB text-50px text-[#005EF9]">자격증</span>을 <br />
           업로드해주세요!
         </p>
       </div>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import Button from "@/widgets/common/Button";
 import SnapCarousel from "@/widgets/common/SnapCarousel";
 import ReviewMentosDetailCard from "@/widgets/mentos/ReviewMentosDetailCard";
@@ -10,6 +10,7 @@ import DOMPurify from "dompurify";
 import { KakaoMapController } from "@entities/editor";
 import type { MentosDetailResult, ReviewItem } from "@shared/api/mentos";
 import { getMentosDetail, getMentosReviewsPage } from "@shared/api/mentos";
+import { useAuth } from "@entities/auth";
 
 /* ---------- Kakao 타입 최소 정의 ---------- */
 type KakaoStatus = "OK" | "ZERO_RESULT" | "ERROR";
@@ -70,6 +71,16 @@ function toHtml(input?: string): { __html: string } {
   return { __html: sanitized };
 }
 
+type UserType = "mentee" | "mentor" | "admin" | "guest";
+
+function normalizeRole(memberType?: string | null): UserType | undefined {
+  const t = (memberType ?? "").toUpperCase().trim();
+  if (t === "MENTEE" || t === "MENTI") return "mentee";
+  if (t === "MENTOR" || t === "MENTO") return "mentor";
+  if (t === "ADMIN") return "admin";
+  return undefined;
+}
+
 type MentoLike = {
   mentoName?: string;
   mentoImg?: string;
@@ -83,11 +94,15 @@ function pickFirstMento(mento: unknown): MentoLike | undefined {
 }
 
 export default function MentosDetail() {
+  const { user } = useAuth();
+  const normalized = normalizeRole((user as any)?.memberType ?? (user as any)?.role);
+  const isMentor = (normalized ?? "guest") === "mentor";
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<MentosDetailResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const location = useLocation();
 
   // --- 리뷰 무한 스크롤 상태 ---
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
@@ -309,6 +324,12 @@ export default function MentosDetail() {
   /* 예약 이동 */
   const handleGoBooking = () => {
     if (!id || !data) return;
+    if (isMentor) return;
+
+    if (!user) {
+      navigate("/login", { state: { from: location } });
+      return;
+    }
     navigate("/booking", {
       state: {
         mentosSeq: Number(id),
@@ -328,25 +349,27 @@ export default function MentosDetail() {
   const reviewCountText = Number(data.reviewTotalCnt ?? 0).toLocaleString();
 
   return (
-    <div className="flex w-full flex-col gap-2 bg-white">
+    <div className="flex w-full flex-col gap-5 bg-white">
       {/* 상단 이미지 */}
       <section className="flex h-[20%] w-full items-center justify-center">
         <img className="w-full" src={data.mentosImage} alt="mentos image" />
       </section>
 
       {/* 타이틀, 위치, 시간, 별점 */}
-      <section className="flex w-full flex-col gap-2 px-4">
-        <p className="font-WooridaumB text-[0.85rem] font-bold">{data.mentosTitle}</p>
+      <section className="flex w-full flex-col gap-3 px-4">
+        <p className="font-WooridaumB text-[1.2rem] font-bold">{data.mentosTitle}</p>
 
         <div className="flex flex-row items-center gap-1.5 text-sm">
           <img src={locationIcon} alt="location" />
-          <span className="font-WooridaumB text-[0.6rem] leading-3">{data.mentosLocation}</span>
+          <span className="font-WooridaumR text-[0.8rem] leading-3 text-[#a0a09c]">
+            {data.mentosLocation}
+          </span>
         </div>
 
         <div className="flex h-full items-center justify-between">
           <div className="flex w-auto flex-row items-center gap-1.5 text-sm">
             <img src={clockIcon} alt="clock" />
-            <span className="font-WooridaumB text-[0.6rem] leading-3">총 1시간</span>
+            <span className="font-WooridaumR text-[0.8rem] leading-3 text-[#a0a09c]">총 1시간</span>
           </div>
 
           <div className="flex h-full items-center">
@@ -356,12 +379,12 @@ export default function MentosDetail() {
                 src={starIcon}
                 alt="star"
               />
-              <span className="font-WooridaumB text-[0.6rem] leading-3 font-bold text-gray-900">
+              <span className="font-WooridaumB text-[0.9rem] leading-3 font-bold text-gray-900">
                 {ratingAvg.toFixed(2)}
               </span>
             </div>
             <span className="mx-1.5 h-1 w-1 rounded-full bg-gray-500" />
-            <span className="font-WooridaumB text-[0.6rem] leading-3 font-medium text-gray-900 underline">
+            <span className="font-WooridaumB text-[0.8rem] leading-3 font-medium text-gray-900 underline">
               {reviewCountText}건 리뷰
             </span>
           </div>
@@ -426,24 +449,28 @@ export default function MentosDetail() {
 
           <div className="flex justify-center">
             <div className="h-40 w-40 overflow-hidden rounded-full shadow-md ring-4 ring-white">
-              <img src={mento?.mentoImg} alt="멘토 프로필" className="h-full w-full object-cover" />
+              <img
+                src={mento?.mentoImg}
+                alt="멘토 프로필"
+                className="border- h-full w-full rounded-full object-cover"
+              />
             </div>
           </div>
 
           <div className="mt-3 flex justify-center">
-            <span className="rounded-full bg-[#0059FF] px-4 py-1 text-sm font-bold text-white">
+            <span className="text-m rounded-full bg-[#0059FF] px-4 py-1 font-bold text-white">
               {mento?.mentoName ?? "익명 멘토"}
             </span>
           </div>
 
           <div className="-mt-4 rounded-[20px] bg-[#F4F4F4] p-6 shadow-sm">
             <div
-              className="text-center leading-relaxed"
+              className="text-[17px] leading-relaxed font-medium"
               dangerouslySetInnerHTML={toHtml(mento?.mentoDescription)}
             />
           </div>
 
-          <div className="mt-8 flex w-full flex-col items-center justify-center px-2 pb-4 text-center text-[0.8rem]">
+          <div className="mt-15 flex w-full flex-col items-center px-2 pb-4 text-center text-[0.9rem]">
             <div
               className="text-center leading-relaxed"
               dangerouslySetInnerHTML={toHtml(data.mentosDescription)}
@@ -453,15 +480,19 @@ export default function MentosDetail() {
       </section>
 
       {/* 하단 가격 + 버튼 */}
-      <div className="flex w-full flex-row items-center justify-center gap-4 border-t border-t-zinc-100 p-4">
+      <div className="flex w-full items-center gap-4 border-t border-t-zinc-100 p-4">
         <div className="flex-1 text-center">
           <span className="font-WooridaumB font-bold">
             {Number(data.mentosPrice).toLocaleString()}원
           </span>
         </div>
-        <Button variant="primary" size="lg" className="flex-1" onClick={handleGoBooking}>
-          예약하기
-        </Button>
+        {isMentor ? (
+          <div className="flex-1" />
+        ) : (
+          <Button variant="primary" size="lg" className="flex-1" onClick={handleGoBooking}>
+            예약하기
+          </Button>
+        )}
       </div>
     </div>
   );

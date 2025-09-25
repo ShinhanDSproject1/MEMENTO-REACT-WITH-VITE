@@ -79,13 +79,10 @@ const CertificationPage: React.FC = () => {
     setErrorMsg(null);
 
     try {
-      // 서버에 보낼 파일 준비: 서버가 반환한 이미지 URL이 있으면 파일로 변환
-      const imageFile = img ? await fetchImageAsFile(img) : undefined;
-
-      // 💡 분리된 API 호출
+      // 💡 JSON 기반 API 호출
       const res = await registerCertification({
-        name: data.certificationName ?? "",
-        imageFile, // 없으면 undefined로 전달되어 multipart에서 제외됨
+        certificationName: data.certificationName ?? "",
+        certificationImgUrl: data.verifiedCertificationImage ?? "",
       });
 
       if (res.code !== 1000) {

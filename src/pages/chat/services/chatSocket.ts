@@ -1,19 +1,14 @@
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 import { getAccessToken as _getAccessToken } from "@/shared/auth/token";
-import { Client, type IMessage } from "@stomp/stompjs";
 
-function resolveWsUrl() {
-  const abs = import.meta.env.VITE_WS_ABSOLUTE as string | undefined;
-  if (import.meta.env.PROD && abs) return abs;
-  const scheme = location.protocol === "https:" ? "wss" : "ws";
-  return `${scheme}://${location.host}/ws-stomp/websocket`; // 프록시 경유
-}
-export const WS_URL = resolveWsUrl();
+export const WS_URL = "/ws/chat";
 
 /** 브로커 경로들 (백엔드 설정과 반드시 일치) */
-export const TOPIC_BASE = import.meta.env.VITE_STOMP_TOPIC_BASE ?? "/topic/chat/rooms";
+export const TOPIC_BASE = import.meta.env.VITE_STOMP_TOPIC_BASE ?? "/topic/chat/room";
 export const SEND_DEST = import.meta.env.VITE_STOMP_SEND_DEST ?? "/app/chat/send";
 
-/** 토큰(있으면 헤더로 추가 — 쿠키 인증이면 없어도 무방) */
+/** 토큰 가져오기 */
 function getToken(): string {
   try {
     return (_getAccessToken?.() as string) ?? localStorage.getItem("accessToken") ?? "";
@@ -22,17 +17,39 @@ function getToken(): string {
   }
 }
 
-/** STOMP 클라이언트 (네이티브 WebSocket) */
+/** STOMP 클라이언트 */
 export const stompClient = new Client({
-  brokerURL: WS_URL,
+  webSocketFactory: () => {
+    return new SockJS(WS_URL);
+  },
   reconnectDelay: 3000,
   heartbeatIncoming: 10000,
   heartbeatOutgoing: 10000,
-  debug: () => {},
-  connectHeaders: {
-    Authorization: `Bearer ${getToken()}`,
+  beforeConnect: () => {
+    console.log("STOMP 연결 시도 직전...");
+    const token = getToken();
+    if (token) {
+      // 연결 직전에 최신 토큰을 가져와 헤더에 설정
+      stompClient.connectHeaders = {
+        Authorization: `Bearer ${token}`,
+      };
+      console.log("최신 토큰으로 헤더 설정 완료.");
+    } else {
+      console.warn("STOMP 연결: 토큰이 없습니다.");
+    }
   },
 });
+
+/** STOMP 연결을 명시적으로 해제하는 함수 */
+export function disconnectSocket() {
+  if (stompClient.connected) {
+    stompClient.deactivate();
+    console.log("🔌 STOMP connection deactivated.");
+  }
+}
+
+stompClient.onConnect = () => console.log("✅ STOMP connected");
+stompClient.onStompError = (f) => console.error("❌ STOMP error", f);
 
 /** 연결 보장: 중복 activate 방지 + 에러 핸들링 */
 let connecting = false;
@@ -88,16 +105,11 @@ export function subscribeRoom(roomId: string, onMessage: (msg: any) => void) {
 }
 
 /** 메시지 전송 */
-export async function sendChatMessage(params: {
-  roomId: string;
-  senderMemberSeq: number;
-  content: string;
-}) {
+export async function sendChatMessage(params: { roomId: string; message: string }) {
   await ensureConnected();
   const payload = {
     chattingRoomSeq: Number(params.roomId),
-    senderMemberSeq: params.senderMemberSeq,
-    content: params.content,
+    message: params.message,
   };
   stompClient.publish({
     destination: SEND_DEST,
