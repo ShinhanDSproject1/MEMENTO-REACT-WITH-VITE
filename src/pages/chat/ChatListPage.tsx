@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import defaultimage from "@assets/images/character/character-gom.svg";
 import type { Room } from "@/pages/chat/services/chat";
-import { getRooms } from "@/pages/chat/services/chat";
+import { getRooms, isMentiUser } from "@/pages/chat/services/chat";
 
 function groupBy<T extends Record<string, any>, K extends keyof T>(
   arr: T[],
@@ -41,7 +41,9 @@ export default function ChatListPage() {
     let alive = true;
     (async () => {
       try {
-        const list = await getRooms();
+        // JWT payload에서 role 가져오기
+        const role: "mento" | "menti" = isMentiUser() ? "menti" : "mento";
+        const list = await getRooms(role);
         if (!alive) return;
         setRooms(list);
       } catch (e: any) {

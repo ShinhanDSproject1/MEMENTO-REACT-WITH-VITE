@@ -1,18 +1,16 @@
-import { getMessages, getRooms, markRoomRead } from "@/pages/chat/services/chat";
-import { ensureConnected, subscribeRoom, sendChatMessage } from "@/pages/chat/services/chatSocket";
+import { ensureConnected, sendChatMessage, subscribeRoom } from "@/pages/chat/services/chatSocket";
+import { markAsRead } from "@/pages/chat/services/chat";
+import { http } from "@/shared/api/https";
 import defaultimage from "@assets/images/character/character-gom.svg";
 import { Send } from "lucide-react";
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import { getAccessToken } from "@/shared/auth/token";
-import { http } from "@/shared/api/https";
 
-export interface Room {
+// --- 인터페이스 정의 ---
+export interface RoomInfo {
   id: string;
-  name: string;
-  group: string;
-  preview?: string;
-  unread?: boolean;
+  name: string; // mentosTitle
+  group: string; // 상대방 이름
 }
 
 export type MessageRole = "bot" | "me";
@@ -22,124 +20,171 @@ export interface ChatMessage {
   role: MessageRole;
   text: string;
   ts: number;
+  profileImageUrl?: string; // 상대방 프로필 이미지
 }
 
-type LocationState = { room?: Room } | null;
+type LocationState = { room?: RoomInfo } | null;
 
+// --- useMe 커스텀 훅 ---
+// 사용자 정보 로딩 완료 상태를 명확히 하기 위해 isLoaded로 상태 이름 변경
 function useMe() {
   const [memberSeq, setMemberSeq] = useState<number | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    try {
-      const token = getAccessToken?.() as string | undefined;
-      if (token) {
-        const payload = JSON.parse(atob(token.split(".")[1] ?? ""));
-        const seq = Number(payload?.memberSeq ?? payload?.sub ?? NaN);
-        setMemberSeq(Number.isFinite(seq) ? seq : null);
-      } else {
-        setMemberSeq(null);
+    let alive = true;
+    (async () => {
+      try {
+        const res = await http.get(`/mypage/profile`);
+        const userSeqFromResult = res?.data?.result?.memberSeq;
+        console.log("✅ [useMe] API 응답 받음, memberSeq:", userSeqFromResult);
+        if (alive) {
+          setMemberSeq(typeof userSeqFromResult === "number" ? userSeqFromResult : null);
+        }
+      } catch (error) {
+        console.error("내 정보를 가져오는데 실패했습니다:", error);
+        if (alive) setMemberSeq(null);
+      } finally {
+        if (alive) setIsLoaded(true);
       }
-    } catch {
-      setMemberSeq(null);
-    } finally {
-      setLoaded(true);
-    }
+    })();
+    return () => {
+      alive = false;
+    };
   }, []);
 
-  return { memberSeq, loaded };
+  return { memberSeq, isLoaded };
 }
 
+// --- ChatRoomPage 컴포넌트 ---
 export default function ChatRoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
   const { state } = useLocation() as { state: LocationState };
 
-  const { memberSeq, loaded } = useMe();
-  const mySeqRef = useRef<number | null>(null);
-  useEffect(() => {
-    mySeqRef.current = memberSeq ?? null;
-  }, [memberSeq]);
+  // 훅에서 isLoaded 상태를 받아와 실행 시점을 제어
+  const { memberSeq, isLoaded } = useMe();
 
-  const [room, setRoom] = useState<Room | null>(state?.room ?? null);
+  // memberSeq를 저장할 ref를 생성
+  const memberSeqRef = useRef(memberSeq);
+
+  const [room, setRoom] = useState<RoomInfo | null>(state?.room ?? null);
   const [msgs, setMsgs] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState<string>("");
 
   const formRef = useRef<HTMLFormElement | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // 과거 메시지 로드 + 소켓 연결/구독
+  // memberSeq 상태가 변경될 때마다 ref의 값을 업데이트
   useEffect(() => {
-    if (!roomId) return;
+    memberSeqRef.current = memberSeq;
+  }, [memberSeq]);
 
-    let unsub: { unsubscribe: () => void } | null = null;
-    (async () => {
-      // 1) 과거 메시지(REST)
-      const old = await getMessages(roomId);
-      setMsgs(old);
-      // 방 입장 시 읽음 처리
-      markRoomRead(roomId).catch(() => {});
-      // 2) STOMP 연결 및 구독
-      await ensureConnected();
-      unsub = subscribeRoom(roomId, (body: any) => {
-        const text = body?.message ?? body?.content ?? "";
-        const tsStr = body?.sentAt ?? body?.timestamp ?? new Date().toISOString();
-        const sender = body?.senderSeq ?? body?.senderMemberSeq ?? body?.memberSeq;
-        const el = scrollRef.current;
-        const nearBottom = el ? el.scrollHeight - el.scrollTop - el.clientHeight < 32 : false;
-
-        setMsgs((prev) => [
-          ...prev,
-          {
-            id: `${body?.chattingRoomSeq ?? roomId}-${tsStr}-${sender ?? ""}`,
-            roomId,
-            role: sender && mySeqRef.current && sender === mySeqRef.current ? "me" : "bot",
-            text,
-            ts: new Date(String(tsStr).replace(" ", "T")).getTime(),
-          },
-        ]);
-        if (nearBottom) {
-          // ✅ 새 메시지 보이는 상태면 바로 읽음 처리
-          markRoomRead(roomId).catch(() => {});
-        }
-      });
-    })();
-
-    return () => {
-      unsub?.unsubscribe?.();
-    };
-  }, [roomId]);
-
+  // 과거 메시지 로드, 채팅방 정보 설정, 소켓 구독 로직
   useEffect(() => {
-    if (room || !roomId) return;
-    (async () => {
-      const rooms = await getRooms();
-      const found = rooms.find((r) => String(r.id) === String(roomId));
-      if (found) setRoom(found);
-    })();
-  }, [room, roomId]);
-
-  useEffect(() => {
-    if (!scrollRef.current) return;
-    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [msgs.length]);
-
-  const onSend = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const text = input.trim();
-    if (!text || !roomId) return;
-
-    if (!loaded) {
-      alert("로그인 정보를 불러오는 중입니다. 잠시만요.");
+    // 사용자 정보 로딩이 끝나고, memberSeq가 유효할 때만 모든 로직을 실행
+    if (!roomId || !isLoaded || !memberSeq) {
+      if (isLoaded && !memberSeq) {
+        console.error("사용자 인증 정보가 없어 채팅방을 시작할 수 없습니다.");
+      }
       return;
     }
 
-    const now = Date.now();
-    setMsgs((prev) => [...prev, { id: `local-${now}`, roomId, role: "me", text, ts: now }]);
+    console.log(`🚀 [useEffect] 실행됨, 현재 memberSeq: ${memberSeq}`);
+
+    let subscription: { unsubscribe: () => void } | null = null;
+
+    const setupChatRoom = async () => {
+      try {
+        // 이제 memberSeq가 항상 유효하므로 직접 사용
+        const myCurrentSeq = memberSeq;
+
+        // 1. API 호출들을 먼저 수행
+        await markAsRead(roomId);
+        const res = await http.get(`/chat/rooms/${roomId}/messages`);
+        const details = res?.data?.result;
+
+        if (!details) {
+          console.error("채팅방 정보를 불러오지 못했습니다.");
+          return;
+        }
+
+        const other = details.participants.find((p: any) => p.memberSeq !== myCurrentSeq);
+        setRoom({
+          id: String(details.chattingRoomSeq),
+          name: details.mentosTitle,
+          group: other?.memberName || "상대방",
+        });
+
+        const oldMessages = details.messages.map(
+          (msg: any): ChatMessage => ({
+            id: `${msg.chattingRoomSeq}-${msg.sentAt}-${msg.senderSeq}`,
+            roomId,
+            role: msg.senderSeq === myCurrentSeq ? "me" : "bot",
+            text: msg.message,
+            ts: new Date(msg.sentAt.replace(" ", "T")).getTime(),
+            profileImageUrl: msg.senderSeq !== myCurrentSeq ? msg.senderProfileImage : undefined,
+          }),
+        );
+        setMsgs(oldMessages);
+
+        // 2. 모든 HTTP 작업이 끝난 후, 마지막에 WebSocket 연결을 시도
+        await ensureConnected();
+
+        // 3. 연결 성공 후 방을 구독
+        subscription = subscribeRoom(roomId, (body: any) => {
+          // 3. 콜백 함수 안에서는 항상 최신 값을 보장하는 ref를 사용
+          const currentMemberSeq = memberSeqRef.current;
+          const newMessage: ChatMessage = {
+            id: `${body.chattingRoomSeq}-${body.sentAt}-${body.senderSeq}-${Math.random()}`,
+            roomId,
+            role: body.senderSeq === currentMemberSeq ? "me" : "bot",
+            text: body.message,
+            ts: new Date(body.sentAt.replace(" ", "T")).getTime(),
+            profileImageUrl:
+              body.senderSeq !== currentMemberSeq ? body.senderProfileImage : undefined,
+          };
+          setMsgs((prev) => [...prev, newMessage]);
+        });
+      } catch (error) {
+        console.error("채팅방 설정 중 에러:", error);
+      }
+    };
+
+    setupChatRoom();
+
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
+    // useEffect가 isLoaded와 memberSeq 값의 변경에 반응하도록 설정
+  }, [roomId, isLoaded, memberSeq]);
+
+  // 스크롤 맨 아래로 이동
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [msgs.length]);
+
+  // 메시지 전송 함수
+  const onSend = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const text = input.trim();
+    // memberSeq를 직접 사용 (useRef 불필요)
+    if (!text || !roomId || !memberSeq) return;
+
     setInput("");
-    await sendChatMessage({ roomId, senderMemberSeq: memberSeq, content: text });
+
+    sendChatMessage({
+      roomId,
+      message: text,
+    }).catch((err) => {
+      console.error("메시지 전송 실패:", err);
+    });
   };
 
+  // 입력창 핸들러
   const onChangeInput = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     const el = e.target;
@@ -155,34 +200,34 @@ export default function ChatRoomPage() {
       if (input.trim()) formRef.current?.requestSubmit();
     }
   };
-  useEffect(() => {
-    if (!roomId || msgs.length === 0) return;
-    const onFocus = () => markRoomRead(roomId).catch(() => {});
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, [roomId, msgs.length]);
 
+  // JSX 렌더링 ---
   return (
     <div className="flex h-dvh w-full flex-col overscroll-none rounded-[18px] bg-white">
       <div className="sticky top-0 z-10 flex h-12 shrink-0 items-center border-b border-[#f1f3f6] bg-white px-4 pt-[env(safe-area-inset-top)]">
         <div className="text-[18px] font-bold text-[#4B4E51]">
-          {room ? `${room.group} · ${room.name}` : "채팅"}
+          {room ? `${room.name} · ${room.group}` : "채팅"}
         </div>
       </div>
 
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 space-y-4 overflow-hidden overscroll-none bg-[#E6EDFF]/[0.22] px-4 py-5">
+        className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-[#E6EDFF]/[0.22] px-4 py-5">
         {msgs.map((m) => (
           <div
             key={m.id}
-            className={`flex ${m.role === "me" ? "justify-end" : "items-start gap-2"}`}>
+            className={`flex w-full items-end gap-2 ${m.role === "me" ? "justify-end" : "justify-start"}`}>
             {m.role !== "me" && (
-              <div className="grid h-8 w-8 place-items-center rounded-full bg-[#565C63]">
-                <img src={defaultimage} alt="gom" />
+              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#565C63]">
+                <img
+                  src={m.profileImageUrl || defaultimage}
+                  alt="profile"
+                  className="h-full w-full rounded-full object-cover"
+                />
               </div>
             )}
-            <div className="max-w-[78%] rounded-[18px] bg-[#93B1FF] px-4 py-2 text-white">
+            <div
+              className={`max-w-[78%] rounded-[18px] px-4 py-2 break-words whitespace-pre-wrap text-white ${m.role === "me" ? "bg-[#2563eb]" : "bg-[#93B1FF]"}`}>
               {m.text}
             </div>
           </div>
@@ -195,7 +240,6 @@ export default function ChatRoomPage() {
         className="sticky bottom-0 z-10 flex min-h-[60px] shrink-0 items-center gap-3 border-t border-[#e9eef4] bg-white px-4 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_6px_rgba(0,0,0,0.08)]">
         <div className="flex flex-1 items-center rounded-full border border-[#e6eaf0] bg-[#f9fafb] px-4 py-2">
           <textarea
-            ref={textareaRef}
             value={input}
             onChange={onChangeInput}
             onKeyDown={onKeyDownInput}
