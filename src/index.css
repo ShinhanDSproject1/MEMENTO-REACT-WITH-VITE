@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "./app/styles/variables.css";
+@import "./00-app/styles/variables.css";
 
 :root {
 

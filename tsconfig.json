@@ -8,34 +8,34 @@
     "paths": {
       "@/*": ["src/*"],
 
-      "@app/*": ["src/app/*"],
-      "@pages/*": ["src/pages/*"],
+      "@app/*": ["src/00-app/*"],
+      "@pages/*": ["src/01-pages/*"],
 
-      "@widgets": ["src/widgets/index.ts"],
-      "@widgets/*": ["src/widgets/*"],
+      "@features": ["src/02-features/index.ts"],
+      "@features/*": ["src/02-features/*"],
 
-      "@features": ["src/features/index.ts"],
-      "@features/*": ["src/features/*"],
+      "@widgets": ["src/03-widgets/index.ts"],
+      "@widgets/*": ["src/03-widgets/*"],
 
-      "@entities": ["src/entities/index.ts"],
-      "@entities/*": ["src/entities/*"],
+      "@entities": ["src/04-entities/index.ts"],
+      "@entities/*": ["src/04-entities/*"],
 
-      "@shared": ["src/shared/index.ts"],
-      "@shared/*": ["src/shared/*"],
+      "@shared": ["src/05-shared/index.ts"],
+      "@shared/*": ["src/05-shared/*"],
 
-      "@assets/*": ["src/shared/assets/*"],
+      "@assets/*": ["src/05-shared/assets/*"],
 
-      "@hooks": ["src/shared/hooks/index.ts"],
-      "@hooks/*": ["src/shared/hooks/*"],
+      "@hooks": ["src/05-shared/hooks/index.ts"],
+      "@hooks/*": ["src/05-shared/hooks/*"],
 
-      "@lib": ["src/shared/lib/index.ts"],
-      "@lib/*": ["src/shared/lib/*"],
+      "@lib": ["src/05-shared/lib/index.ts"],
+      "@lib/*": ["src/05-shared/lib/*"],
 
-      "@ui": ["src/shared/ui/index.ts"],
-      "@ui/*": ["src/shared/ui/*"],
+      "@ui": ["src/05-shared/ui/index.ts"],
+      "@ui/*": ["src/05-shared/ui/*"],
 
-      "@api": ["src/shared/api/index.ts"],
-      "@api/*": ["src/shared/api/*"]
+      "@api": ["src/05-shared/api/index.ts"],
+      "@api/*": ["src/05-shared/api/*"]
     },
     "types": ["vite/client", "node", "vitest/globals", "react", "react-dom"],
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
