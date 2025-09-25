@@ -113,6 +113,3 @@ export async function sendChatMessage(params: { roomId: string; message: string 
   };
   stompClient.publish({
     destination: SEND_DEST,
-    body: JSON.stringify(payload),
-  });
-}
