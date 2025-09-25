@@ -26,7 +26,7 @@ export default function MentosList() {
   const mainTitle = useMemo(() => (category ? (TITLE_MAP[category] ?? "") : ""), [category]);
   const categoryId = category ? CATEGORY_ID_MAP[category] : undefined;
 
-  // hook은 여기서만 호출해야 함
+  // hook은 여기서만 호출해야 함!
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
   const {

@@ -17,7 +17,7 @@ type MentosCardProps = {
   onUpdateClick?: () => void;
   onDeleteClick?: () => void;
   refundDisabled?: boolean;
-  reviewDisabled?: boolean; // ✅ 리뷰 완료 시 true로 들어옴
+  reviewDisabled?: boolean; // 리뷰 완료 시 true로 들어옴
 };
 
 const statusStyles: Record<MentosStatus, string> = {
