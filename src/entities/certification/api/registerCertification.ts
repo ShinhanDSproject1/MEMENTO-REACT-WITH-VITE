@@ -4,10 +4,12 @@ import type { RegisterCertificationRequest, RegisterCertificationResponse } from
 export async function registerCertification(
   req: RegisterCertificationRequest,
 ): Promise<RegisterCertificationResponse> {
+
   const payload: RegisterCertificationRequest = {
     certificationName: req.certificationName,
     certificationImgUrl: req.certificationImgUrl,
   };
+
 
   const { data } = await http.post<RegisterCertificationResponse>(
     "/mento/mento-certifications",
