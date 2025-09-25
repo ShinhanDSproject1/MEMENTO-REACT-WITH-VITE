@@ -84,7 +84,7 @@ export default function TimeGrid({
             disabled={!enabled}
             onClick={() => enabled && onSelectTime(time)}
             className={[
-              "h-12 rounded-lg border text-sm font-medium transition-colors",
+              "text-l h-12 rounded-lg border font-medium transition-colors",
               chosen
                 ? "border-blue-500 bg-[#005EF9] text-white"
                 : enabled

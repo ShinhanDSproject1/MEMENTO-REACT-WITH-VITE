@@ -18,10 +18,10 @@ export default function ReviewMentosDetailCard({
         <StaticStars value={value} className="w-[80%]" />
       </div>
       <div>
-        <p className="font-WooridaumR text-[0.65rem]">{context}</p>
+        <p className="font-WooridaumR text-[0.8rem]">{context}</p>
       </div>
       <div className="flex justify-end">
-        <span className="font-WooridaumR text-[0.5em]">{name}</span>
+        <span className="font-WooridaumR text-[0.75em]">{name}</span>
       </div>
     </div>
   );
