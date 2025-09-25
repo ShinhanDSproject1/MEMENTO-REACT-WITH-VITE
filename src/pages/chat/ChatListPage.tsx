@@ -54,11 +54,17 @@ export default function ChatListPage() {
     };
   }, []);
 
-  const grouped = useMemo(() => groupBy(rooms ?? [], "group"), [rooms]);
-  const groupEntries = useMemo(
-    () => Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b, "ko", { numeric: true })),
-    [grouped],
-  );
+  const grouped = useMemo(() => {
+    const result = groupBy(rooms ?? [], "group");
+    return result;
+  }, [rooms]);
+
+  const groupEntries = useMemo(() => {
+    const entries = Object.entries(grouped).sort(([a], [b]) =>
+      a.localeCompare(b, "ko", { numeric: true }),
+    );
+    return entries;
+  }, [grouped]);
 
   return (
     <div className="l flex min-h-screen w-full justify-center overflow-x-hidden bg-[#f5f6f8] antialiased">

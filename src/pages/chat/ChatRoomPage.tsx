@@ -1,10 +1,10 @@
-import { getMessages, getRooms } from "@/pages/chat/services/chat";
+import { getMessages, getRooms, markRoomRead } from "@/pages/chat/services/chat";
 import { ensureConnected, subscribeRoom, sendChatMessage } from "@/pages/chat/services/chatSocket";
 import defaultimage from "@assets/images/character/character-gom.svg";
 import { Send } from "lucide-react";
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useLocation, useParams } from "react-router-dom";
-
+import { getAccessToken } from "@/shared/auth/token";
 import { http } from "@/shared/api/https";
 
 export interface Room {
@@ -31,27 +31,20 @@ function useMe() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const res = await http.get(`/chat/rooms/${chattingRoomSeq}/messages`);
-        const r = res?.data ?? {};
-        const seq =
-          r?.result?.memberSeq ??
-          r?.data?.memberSeq ??
-          r?.memberSeq ??
-          r?.result?.member?.memberSeq ??
-          null;
-        if (alive) setMemberSeq(typeof seq === "number" ? seq : null);
-      } catch {
-        if (alive) setMemberSeq(null);
-      } finally {
-        if (alive) setLoaded(true);
+    try {
+      const token = getAccessToken?.() as string | undefined;
+      if (token) {
+        const payload = JSON.parse(atob(token.split(".")[1] ?? ""));
+        const seq = Number(payload?.memberSeq ?? payload?.sub ?? NaN);
+        setMemberSeq(Number.isFinite(seq) ? seq : null);
+      } else {
+        setMemberSeq(null);
       }
-    })();
-    return () => {
-      alive = false;
-    };
+    } catch {
+      setMemberSeq(null);
+    } finally {
+      setLoaded(true);
+    }
   }, []);
 
   return { memberSeq, loaded };
@@ -84,13 +77,16 @@ export default function ChatRoomPage() {
       // 1) 과거 메시지(REST)
       const old = await getMessages(roomId);
       setMsgs(old);
-
+      // 방 입장 시 읽음 처리
+      markRoomRead(roomId).catch(() => {});
       // 2) STOMP 연결 및 구독
       await ensureConnected();
       unsub = subscribeRoom(roomId, (body: any) => {
         const text = body?.message ?? body?.content ?? "";
         const tsStr = body?.sentAt ?? body?.timestamp ?? new Date().toISOString();
         const sender = body?.senderSeq ?? body?.senderMemberSeq ?? body?.memberSeq;
+        const el = scrollRef.current;
+        const nearBottom = el ? el.scrollHeight - el.scrollTop - el.clientHeight < 32 : false;
 
         setMsgs((prev) => [
           ...prev,
@@ -102,6 +98,10 @@ export default function ChatRoomPage() {
             ts: new Date(String(tsStr).replace(" ", "T")).getTime(),
           },
         ]);
+        if (nearBottom) {
+          // ✅ 새 메시지 보이는 상태면 바로 읽음 처리
+          markRoomRead(roomId).catch(() => {});
+        }
       });
     })();
 
@@ -155,6 +155,12 @@ export default function ChatRoomPage() {
       if (input.trim()) formRef.current?.requestSubmit();
     }
   };
+  useEffect(() => {
+    if (!roomId || msgs.length === 0) return;
+    const onFocus = () => markRoomRead(roomId).catch(() => {});
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [roomId, msgs.length]);
 
   return (
     <div className="flex h-dvh w-full flex-col overscroll-none rounded-[18px] bg-white">

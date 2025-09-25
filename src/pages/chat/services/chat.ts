@@ -11,15 +11,15 @@ export interface Room {
 type ApiEnvelope<T> = { code: number; status: number; message: string; result: T };
 
 type ChatRoomDTO = {
-  chatRoomId: number;
-  mentiName: string;
+  chattingRoomSeq: number;
+  opponentName: string;
   lastMessage: string | null;
   lastMessageAt: string | null;
   hasUnreadMessage: boolean;
 };
 
 type MentosGroupDTO = {
-  mentosId: number;
+  mentosSeq: number;
   mentosTitle: string;
   chatRooms: ChatRoomDTO[];
 };
@@ -78,22 +78,22 @@ function normalizeToSpec(raw: any): MentosGroupDTO[] {
   const groups = raw.result as any[];
 
   return groups.map((g, gi) => {
-    assertNumber(g?.mentosId, "mentosId");
+    assertNumber(g?.mentosSeq, "mentosSeq");
     const mentosTitle = String(g?.mentosTitle ?? "");
     assertArray(g?.chatRooms, "chatRooms");
 
     const chatRooms: ChatRoomDTO[] = (g.chatRooms as any[]).map((r, ri) => {
-      assertNumber(r?.chatRoomId, "chatRoomId");
-      const mentiName = String(r?.mentiName ?? "");
-      if (!mentiName) throw new Error(`mentiName 누락 (index: ${gi}/${ri})`);
+      assertNumber(r?.chattingRoomSeq, "chattingRoomSeq");
+      const opponentName = String(r?.opponentName ?? "");
+      if (!opponentName) throw new Error(`opponentName 누락 (index: ${gi}/${ri})`);
 
       const lastMessage = r?.lastMessage ?? null;
       const lastMessageAt = r?.lastMessageAt ?? null;
       const hasUnreadMessage = Boolean(r?.hasUnreadMessage);
 
       return {
-        chatRoomId: r.chatRoomId,
-        mentiName,
+        chattingRoomSeq: r.chattingRoomSeq,
+        opponentName,
         lastMessage,
         lastMessageAt,
         hasUnreadMessage,
@@ -101,7 +101,7 @@ function normalizeToSpec(raw: any): MentosGroupDTO[] {
     });
 
     return {
-      mentosId: g.mentosId,
+      mentosSeq: g.mentosSeq,
       mentosTitle,
       chatRooms,
     };
@@ -125,7 +125,30 @@ export async function getRooms(): Promise<Room[]> {
   }
 
   const json: ApiEnvelope<MentosGroupDTO[]> = await res.json();
+
+  // 🔍 백엔드 원본 응답 확인용 콘솔 로그
+  console.log("📡 백엔드 API 원본 응답:", json);
+  console.log("📋 응답 상세 정보:");
+  console.log("  - code:", json.code);
+  console.log("  - status:", json.status);
+  console.log("  - message:", json.message);
+  console.log("  - result 배열 길이:", json.result?.length);
+  console.log("  - result 내용:", json.result);
+
+  // 🔍 chatRooms 구조 상세 확인
+  if (json.result && json.result.length > 0) {
+    console.log("🔍 첫 번째 그룹의 chatRooms 구조 확인:");
+    console.log("  - chatRooms 배열:", json.result[0].chatRooms);
+    if (json.result[0].chatRooms && json.result[0].chatRooms.length > 0) {
+      console.log("  - 첫 번째 chatRoom 객체:", json.result[0].chatRooms[0]);
+      console.log("  - 첫 번째 chatRoom의 모든 키:", Object.keys(json.result[0].chatRooms[0]));
+    }
+  }
+
   const groups = normalizeToSpec(json);
+
+  // 🔧 정규화된 데이터 확인용 콘솔 로그
+  console.log("🔧 정규화된 groups 데이터:", groups);
 
   const rooms: Room[] = [];
   for (const g of groups) {
@@ -135,8 +158,8 @@ export async function getRooms(): Promise<Room[]> {
 
     for (const r of sorted) {
       rooms.push({
-        id: String(r.chatRoomId),
-        name: r.mentiName,
+        id: String(r.chattingRoomSeq), // chatRoomId -> chattingRoomSeq로 변경
+        name: r.opponentName, // mentiName -> opponentName으로 변경
         group: g.mentosTitle,
         preview: (r.lastMessage ?? "").trim() || "메시지가 없습니다.",
         unread: r.hasUnreadMessage,
@@ -144,6 +167,10 @@ export async function getRooms(): Promise<Room[]> {
       });
     }
   }
+
+  // 🎯 최종 변환된 rooms 데이터 확인용 콘솔 로그
+  console.log("🎯 최종 변환된 rooms 데이터:", rooms);
+  console.log("📊 rooms 개수:", rooms.length);
 
   return rooms;
 }
@@ -181,7 +208,8 @@ export async function sendMessage(roomId: string, text: string): Promise<ChatMes
   const token = getToken();
   if (!token) throw new Error("로그인이 필요합니다.");
 
-  const res = await fetch(`${BASE}/chat/rooms/${roomId}/messages`, {
+  // chattingRoomSeq를 사용하는 엔드포인트로 변경
+  const res = await fetch(`${BASE}/chatting-rooms/${roomId}/messages`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -206,4 +234,21 @@ export async function sendMessage(roomId: string, text: string): Promise<ChatMes
     text: m.message,
     ts: new Date(m.sentAt.replace(" ", "T")).getTime(),
   };
+}
+
+/** --- 읽음 처리 --- */
+export async function markRoomRead(roomId: number | string): Promise<void> {
+  const token = getToken();
+  if (!token) throw new Error("로그인이 필요합니다.");
+
+  const res = await fetch(`${BASE}/chat/rooms/${roomId}/read`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const msg = await res.text().catch(() => "");
+    throw new Error(`읽음 처리 실패: ${res.status} ${msg}`);
+  }
 }
