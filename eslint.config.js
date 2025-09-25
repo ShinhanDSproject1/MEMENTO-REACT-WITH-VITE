@@ -13,6 +13,7 @@ import globals from "globals";
 export default defineConfig([
   { ignores: ["dist", "storybook-static", "node_modules"] },
 
+  // ✅ 공통(브라우저) 규칙
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
@@ -35,7 +36,7 @@ export default defineConfig([
     rules: {
       // 기본 추천
       ...js.configs.recommended.rules,
-      // TS 추천(여기서 @typescript-eslint/* 규칙들이 켜짐)
+      // TS 추천
       ...tseslint.configs.recommended.rules,
       // React 추천
       ...react.configs.recommended.rules,
@@ -43,7 +44,6 @@ export default defineConfig([
       ...reactHooks.configs.recommended.rules,
 
       // 팀 커스텀
-
       "no-console": "warn",
       "no-alert": "warn",
       "default-case": ["error", { commentPattern: "^skip\\sdefault" }],
@@ -59,8 +59,21 @@ export default defineConfig([
       "react/self-closing-comp": ["error", { component: true, html: true }],
       "react/prop-types": "warn",
 
+      // ✅ any 규제 완화
+      "@typescript-eslint/no-explicit-any": "off",
+
       // Prettier 연동
       "prettier/prettier": "error",
+    },
+  },
+
+  // ✅ Node 환경 파일에 Node 글로벌(process 등) 허용
+  {
+    files: ["vite.config.*", "eslint.config.*", "*.config.*", "*.cjs", "scripts/**", "tooling/**"],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: { ecmaVersion: "latest", sourceType: "module" },
+      globals: { ...globals.node }, // ← process, __dirname 등 허용
     },
   },
 

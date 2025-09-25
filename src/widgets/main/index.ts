@@ -5,6 +5,7 @@ export { default as HelpCard } from "./cardGroup/HelpCard";
 export { default as NeedRecommend } from "./cardGroup/NeedRecommend";
 export { default as RecommendBox } from "./cardGroup/RecomendBox";
 export { default as RecommendCard } from "./cardGroup/RecommendCard";
+export { default as NearbyBanner } from "./cardGroup/NearbyBanner";
 
 // 로그인 박스들
 export { default as AdminLoginBox } from "./loginBox/AdminLoginBox";

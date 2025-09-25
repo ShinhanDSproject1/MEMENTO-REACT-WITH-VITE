@@ -1,6 +1,6 @@
 export interface RegisterCertificationRequest {
-  name: string; // 자격증명
-  imageFile?: File; // 첨부 이미지 파일
+  certificationName: string; // 자격증명
+  certificationImgUrl: string; // 이미지 URL
 }
 
 export interface RegisterCertificationResponse {

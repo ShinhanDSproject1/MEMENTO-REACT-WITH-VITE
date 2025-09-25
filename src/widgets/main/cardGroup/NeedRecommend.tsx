@@ -23,7 +23,7 @@ export default function NeedRecommend({
       <div className="mt-6 flex justify-center">
         <button
           type="button"
-          onClick={() => navigate("/chat/1")}
+          onClick={() => navigate("/ai/chatBot")}
           disabled={disabled}
           className={[
             "min-w-[260px] rounded-full px-8 py-3 text-sm font-extrabold transition-all",
@@ -31,8 +31,7 @@ export default function NeedRecommend({
               ? "cursor-not-allowed bg-slate-200 text-slate-500"
               : "bg-slate-200 text-slate-600 hover:bg-slate-300 active:scale-[0.99]",
             "shadow-[0_2px_10px_rgba(0,0,0,0.04)]",
-          ].join(" ")}
-        >
+          ].join(" ")}>
           {label}
         </button>
       </div>

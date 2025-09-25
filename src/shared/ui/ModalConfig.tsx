@@ -14,6 +14,7 @@ import { downloadImage } from "@/utils/downloadUtils";
 import type { ButtonProps } from "@/widgets/common/Button";
 import type { ReportType } from "@entities/mentos/model/types";
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 
 /* =========================
  * 공용 타입
@@ -253,21 +254,30 @@ export const MODAL_CONFIG: ModalConfigRecord = {
   // ---- 폼
   reviewMentos: {
     type: "form",
-    content: (modalData) => {
-      const { onRatingChange, onContentChange, initialRating = 0, initialContent = "" } = modalData;
-
-      return (
-        <div className="flex flex-col px-4">
-          <StarRating initialRating={initialRating} onRatingChange={onRatingChange} />
-          <textarea
-            className="h-24 w-full resize-none rounded-[10px] border-[1px] border-solid border-[#E6E7EA] p-2 outline-none focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
-            placeholder="내용을 입력하세요"
-            defaultValue={initialContent}
-            onChange={(e) => onContentChange?.(e.target.value)}
-          />
-        </div>
-      );
+    content: (m) => {
+      const MAX = 100;
+      const C = () => {
+        const [t, setT] = useState(m.initialContent ?? "");
+        useEffect(() => m.onContentChange?.(t), [t]);
+        return (
+          <div className="flex flex-col px-4">
+            <StarRating initialRating={m.initialRating ?? 0} onRatingChange={m.onRatingChange} />
+            <textarea
+              className="h-24 w-full resize-none rounded-[10px] border border-[#E6E7EA] p-2 outline-none focus:border-[#2F6CFF] focus:shadow-[0_0_0_3px_rgba(47,108,255,0.15)]"
+              placeholder={`내용을 입력하세요`}
+              value={t}
+              onChange={(e) => setT(e.target.value)}
+              maxLength={MAX}
+            />
+            <div className="mt-1 text-right text-xs text-gray-500">
+              {t.length} / {MAX}자
+            </div>
+          </div>
+        );
+      };
+      return <C />;
     },
+
     buttons: [
       { text: "등록", variant: "primary", size: "lg", actionType: "submit" },
       { text: "취소", variant: "cancelWhite", size: "lg", actionType: "cancel" },

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import Button from "@/widgets/common/Button";
 import SnapCarousel from "@/widgets/common/SnapCarousel";
 import ReviewMentosDetailCard from "@/widgets/mentos/ReviewMentosDetailCard";
@@ -10,6 +10,7 @@ import DOMPurify from "dompurify";
 import { KakaoMapController } from "@entities/editor";
 import type { MentosDetailResult, ReviewItem } from "@shared/api/mentos";
 import { getMentosDetail, getMentosReviewsPage } from "@shared/api/mentos";
+import { useAuth } from "@entities/auth";
 
 /* ---------- Kakao 타입 최소 정의 ---------- */
 type KakaoStatus = "OK" | "ZERO_RESULT" | "ERROR";
@@ -70,6 +71,16 @@ function toHtml(input?: string): { __html: string } {
   return { __html: sanitized };
 }
 
+type UserType = "mentee" | "mentor" | "admin" | "guest";
+
+function normalizeRole(memberType?: string | null): UserType | undefined {
+  const t = (memberType ?? "").toUpperCase().trim();
+  if (t === "MENTEE" || t === "MENTI") return "mentee";
+  if (t === "MENTOR" || t === "MENTO") return "mentor";
+  if (t === "ADMIN") return "admin";
+  return undefined;
+}
+
 type MentoLike = {
   mentoName?: string;
   mentoImg?: string;
@@ -83,11 +94,15 @@ function pickFirstMento(mento: unknown): MentoLike | undefined {
 }
 
 export default function MentosDetail() {
+  const { user } = useAuth();
+  const normalized = normalizeRole((user as any)?.memberType ?? (user as any)?.role);
+  const isMentor = (normalized ?? "guest") === "mentor";
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<MentosDetailResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const location = useLocation();
 
   // --- 리뷰 무한 스크롤 상태 ---
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
@@ -309,6 +324,12 @@ export default function MentosDetail() {
   /* 예약 이동 */
   const handleGoBooking = () => {
     if (!id || !data) return;
+    if (isMentor) return;
+
+    if (!user) {
+      navigate("/login", { state: { from: location } });
+      return;
+    }
     navigate("/booking", {
       state: {
         mentosSeq: Number(id),
@@ -453,15 +474,19 @@ export default function MentosDetail() {
       </section>
 
       {/* 하단 가격 + 버튼 */}
-      <div className="flex w-full flex-row items-center justify-center gap-4 border-t border-t-zinc-100 p-4">
+      <div className="flex w-full items-center gap-4 border-t border-t-zinc-100 p-4">
         <div className="flex-1 text-center">
           <span className="font-WooridaumB font-bold">
             {Number(data.mentosPrice).toLocaleString()}원
           </span>
         </div>
-        <Button variant="primary" size="lg" className="flex-1" onClick={handleGoBooking}>
-          예약하기
-        </Button>
+        {isMentor ? (
+          <div className="flex-1" />
+        ) : (
+          <Button variant="primary" size="lg" className="flex-1" onClick={handleGoBooking}>
+            예약하기
+          </Button>
+        )}
       </div>
     </div>
   );
