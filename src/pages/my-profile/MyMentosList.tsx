@@ -104,6 +104,22 @@ function markReportedInCache(queryClient: ReturnType<typeof useQueryClient>, men
   });
 }
 
+/** 빈 응답(컨텐츠 없음) 판별: 멘토/멘티 구조 모두 커버 */
+const isEmptyPages = (data: any) => {
+  if (!data?.pages || !Array.isArray(data.pages)) return false;
+  return data.pages.every((pg: any) => {
+    const content = pg?.result?.content ?? pg?.content;
+    if (content == null) return true;
+    return Array.isArray(content) ? content.length === 0 : true;
+  });
+};
+
+/** 에러를 '컨텐츠 없음'으로 간주할 상태(선택) */
+const isNoContentError = (err: any) => {
+  const s = err?.response?.status;
+  return s === 204 || s === 404;
+};
+
 interface ReviewModalData {
   mentosSeq?: number; // 사용 안 해도 남겨둠(타입 호환)
   initialRating?: number;
@@ -306,7 +322,12 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
         return true;
       });
   }, [mentee.data]);
+
+  // 기존 빈 플래그 + '컨텐츠 없음' 에러 보정
   const menteeEmpty = !mentee.isLoading && !mentee.isError && menteeList.length === 0;
+  const menteeNoContent =
+    (!mentee.isLoading && isEmptyPages(mentee.data)) ||
+    (mentee.isError && isNoContentError(mentee.error));
 
   useEffect(() => {
     if (role === "menti") mentee.refetch();
@@ -324,7 +345,11 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
         return true;
       });
   }, [mentor.data]);
+
   const mentorEmpty = !mentor.isLoading && !mentor.isError && mentorList.length === 0;
+  const mentorNoContent =
+    (!mentor.isLoading && isEmptyPages(mentor.data)) ||
+    (mentor.isError && isNoContentError(mentor.error));
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
@@ -374,7 +399,14 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
           </div>
 
           {mentor.isLoading && <div className="py-6 text-center text-sm">불러오는 중…</div>}
-          {mentor.isError && (
+
+          {(mentorEmpty || mentorNoContent) && (
+            <div className="py-10 text-center text-sm text-gray-500">
+              멘토가 작성한 멘토링 내역이 존재하지 않습니다.
+            </div>
+          )}
+
+          {!mentorEmpty && !mentorNoContent && mentor.isError && (
             <div className="py-6 text-center text-sm text-red-500">
               데이터를 불러오지 못했습니다.
               <button
@@ -384,32 +416,33 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
               </button>
             </div>
           )}
-          {mentorEmpty && (
-            <div className="py-10 text-center text-sm text-gray-500">등록된 멘토링이 없습니다.</div>
-          )}
 
-          <section className="flex w-full flex-col items-center gap-4">
-            {mentorList.map((item) => (
-              <MentosCard
-                key={item.mentosSeq}
-                mentosSeq={item.mentosSeq}
-                title={item.mentosTitle}
-                price={item.price}
-                location={item.region}
-                status="mento"
-                imageUrl={item.mentosImage}
-                onUpdateClick={() => onUpdateClick(item.mentosSeq)}
-                onDeleteClick={() => onDeleteClick(item.mentosSeq)}
-              />
-            ))}
-          </section>
+          {!mentorEmpty && !mentorNoContent && !mentor.isError && (
+            <>
+              <section className="flex w-full flex-col items-center gap-4">
+                {mentorList.map((item) => (
+                  <MentosCard
+                    key={item.mentosSeq}
+                    mentosSeq={item.mentosSeq}
+                    title={item.mentosTitle}
+                    price={item.price}
+                    location={item.region}
+                    status="mento"
+                    imageUrl={item.mentosImage}
+                    onUpdateClick={() => onUpdateClick(item.mentosSeq)}
+                    onDeleteClick={() => onDeleteClick(item.mentosSeq)}
+                  />
+                ))}
+              </section>
 
-          {mentor.hasNextPage && !mentorEmpty && <div ref={loaderRef} className="h-10 w-full" />}
-          {mentor.isFetchingNextPage && (
-            <div className="py-4 text-center text-sm text-gray-500">더 불러오는 중…</div>
-          )}
-          {!mentor.hasNextPage && !mentorEmpty && mentorList.length > 0 && (
-            <div className="py-6 text-center text-xs text-gray-400">마지막 페이지입니다.</div>
+              {mentor.hasNextPage && <div ref={loaderRef} className="h-10 w-full" />}
+              {mentor.isFetchingNextPage && (
+                <div className="py-4 text-center text-sm text-gray-500">더 불러오는 중…</div>
+              )}
+              {!mentor.hasNextPage && mentorList.length > 0 && (
+                <div className="py-6 text-center text-xs text-gray-400">마지막 페이지입니다.</div>
+              )}
+            </>
           )}
 
           {isOpen && modalType ? (
@@ -433,7 +466,12 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
       <MentosMainTitleComponent mainTitle={"나의 멘토링 내역"} />
 
       {mentee.isLoading && <div className="py-6 text-center text-sm">불러오는 중…</div>}
-      {mentee.isError && (
+
+      {(menteeEmpty || menteeNoContent) && (
+        <div className="py-10 text-center text-sm text-gray-500">멘토링 내역이 없습니다.</div>
+      )}
+
+      {!menteeEmpty && !menteeNoContent && mentee.isError && (
         <div className="py-6 text-center text-sm text-red-500">
           데이터를 불러오지 못했습니다.
           <button
@@ -443,13 +481,10 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
           </button>
         </div>
       )}
-      {menteeEmpty && (
-        <div className="py-10 text-center text-sm text-gray-500">데이터가 없습니다.</div>
-      )}
 
-      <section className="flex w-full flex-col items-center gap-3">
-        {!menteeEmpty &&
-          menteeList.map((item: MyMentosItem) => {
+      {!menteeEmpty && !menteeNoContent && !mentee.isError && (
+        <section className="flex w-full flex-col items-center gap-3">
+          {menteeList.map((item: MyMentosItem) => {
             const dateLabel = fmtDateTime(item.mentosAt, item.mentosTime);
             const locationLabel = dateLabel
               ? `${dateLabel}${item.region ? ` · ${item.region}` : ""}`
@@ -484,14 +519,15 @@ const MyMentosList: FC<MyMentosListProps> = ({ role }) => {
             );
           })}
 
-        {mentee.hasNextPage && !menteeEmpty && <div ref={loaderRef} className="h-10 w-full" />}
-        {mentee.isFetchingNextPage && (
-          <div className="py-4 text-center text-sm text-gray-500">더 불러오는 중…</div>
-        )}
-        {!mentee.hasNextPage && !menteeEmpty && menteeList.length > 0 && (
-          <div className="py-6 text-center text-xs text-gray-400">마지막 페이지입니다.</div>
-        )}
-      </section>
+          {mentee.hasNextPage && <div ref={loaderRef} className="h-10 w-full" />}
+          {mentee.isFetchingNextPage && (
+            <div className="py-4 text-center text-sm text-gray-500">더 불러오는 중…</div>
+          )}
+          {!mentee.hasNextPage && menteeList.length > 0 && (
+            <div className="py-6 text-center text-xs text-gray-400">마지막 페이지입니다.</div>
+          )}
+        </section>
+      )}
 
       {isOpen && modalType ? (
         <CommonModal
