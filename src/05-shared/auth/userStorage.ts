@@ -1,4 +1,4 @@
-import type { UserRole } from "@/entities/auth";
+import type { UserRole } from "@entities/auth";
 
 const KEY = "auth:user";
 export type SnapshotUser = {

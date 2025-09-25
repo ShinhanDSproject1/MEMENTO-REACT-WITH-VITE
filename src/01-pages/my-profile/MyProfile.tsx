@@ -1,9 +1,9 @@
 // src/pages/MyProfile.tsx
-import DateField from "@/03-widgets/profile/BirthDate";
-import SectionCard from "@/03-widgets/profile/CardSection";
-import CommonInput from "@/03-widgets/profile/CommonInput";
-import FieldRow from "@/03-widgets/profile/FieldRow";
-import PageContainer from "@/03-widgets/profile/PageContainer";
+import DateField from "@/02-widgets/profile/BirthDate";
+import SectionCard from "@/02-widgets/profile/CardSection";
+import CommonInput from "@/02-widgets/profile/CommonInput";
+import FieldRow from "@/02-widgets/profile/FieldRow";
+import PageContainer from "@/02-widgets/profile/PageContainer";
 import { clearAccessToken, clearUserSnapshot } from "@/05-shared";
 import { updateMyPassword, useMyProfile, useUpdateMyProfile } from "@entities/profile";
 import { withdrawMember } from "@entities/profile/api/withdrawMemeber";
@@ -12,7 +12,7 @@ import { type ChangeEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 /* ✅ 모달 훅/컴포넌트 */
-import { CommonModal } from "@/03-widgets/common";
+import { CommonModal } from "@/02-widgets/common";
 import { useModal } from "@/05-shared/hooks/ui/useModal";
 
 /* ---------- utils ---------- */

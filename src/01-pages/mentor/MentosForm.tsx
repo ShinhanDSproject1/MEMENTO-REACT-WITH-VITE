@@ -1,6 +1,6 @@
 // src/pages/mentor/MentosForm.tsx
-import Button from "@/03-widgets/common/Button";
-import { SimpleEditor } from "@/03-widgets/common/tiptap-templates/simple/simple-editor";
+import Button from "@/02-widgets/common/Button";
+import { SimpleEditor } from "@/02-widgets/common/tiptap-templates/simple/simple-editor";
 import type { ChangeEvent, FormEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 

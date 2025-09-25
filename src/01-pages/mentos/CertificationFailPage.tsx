@@ -1,5 +1,5 @@
 // src/pages/CertificationFailPage.tsx
-import Button from "@/03-widgets/common/Button";
+import Button from "@/02-widgets/common/Button";
 import certificationFail from "@assets/images/certification/certification-fail.svg";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";

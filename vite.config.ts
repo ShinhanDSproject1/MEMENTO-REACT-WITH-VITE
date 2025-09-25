@@ -42,8 +42,8 @@ export default defineConfig({
       "@": r("src"),
       "@app": r("src/00-app"),
       "@pages": r("src/01-pages"),
-      "@features": r("src/02-features"),
-      "@widgets": r("src/03-widgets"),
+      "@widgets": r("src/02-widgets"),
+      "@features": r("src/03-features"),
       "@entities": r("src/04-entities"),
       "@shared": r("src/05-shared"),
       "@assets": r("src/05-shared/assets"),
@@ -88,6 +88,7 @@ export default defineConfig({
           });
         },
       },
+
       "/py": {
         target: "http://192.168.0.180:8001",
         changeOrigin: true,

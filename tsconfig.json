@@ -11,11 +11,11 @@
       "@app/*": ["src/00-app/*"],
       "@pages/*": ["src/01-pages/*"],
 
-      "@features": ["src/02-features/index.ts"],
-      "@features/*": ["src/02-features/*"],
+      "@widgets": ["src/02-widgets/index.ts"],
+      "@widgets/*": ["src/02-widgets/*"],
 
-      "@widgets": ["src/03-widgets/index.ts"],
-      "@widgets/*": ["src/03-widgets/*"],
+      "@features": ["src/03-features/index.ts"],
+      "@features/*": ["src/03-features/*"],
 
       "@entities": ["src/04-entities/index.ts"],
       "@entities/*": ["src/04-entities/*"],

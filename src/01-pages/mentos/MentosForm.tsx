@@ -1,7 +1,7 @@
 // src/pages/MentosForm.tsx
-import Button from "@/03-widgets/common/Button";
-import { SimpleEditor } from "@/03-widgets/common/tiptap-templates/simple/simple-editor";
-import { CommonModal } from "@/03-widgets/common";
+import Button from "@/02-widgets/common/Button";
+import { SimpleEditor } from "@/02-widgets/common/tiptap-templates/simple/simple-editor";
+import { CommonModal } from "@/02-widgets/common";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 
 /* ── 카테고리 옵션 (요구사항: 1~4) ───────────────────────── */

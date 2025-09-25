@@ -3,8 +3,8 @@ import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 import { useCalendar, useKoreanHolidays } from "@/05-shared/hooks";
-import { Calendar } from "@/03-widgets/booking";
-import TimeGrid from "@/03-widgets/booking/TimeGrid";
+import { Calendar } from "@/02-widgets/booking";
+import TimeGrid from "@/02-widgets/booking/TimeGrid";
 
 import { toYM, toYMD } from "@/05-shared/lib/datetime";
 import { fetchAvailability } from "@/05-shared/api/reservations";

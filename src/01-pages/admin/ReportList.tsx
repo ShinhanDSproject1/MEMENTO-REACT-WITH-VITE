@@ -1,4 +1,4 @@
-import { CommonModal } from "@/03-widgets/common";
+import { CommonModal } from "@/02-widgets/common";
 import { http } from "@/05-shared/api/https";
 import { useModal } from "@/05-shared/hooks/ui/useModal";
 import type {

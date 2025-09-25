@@ -1,11 +1,11 @@
 // src/pages/MentoIntroduce.tsx
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 
-import Button from "@/03-widgets/common/Button";
-import DayChips, { DAYS, type Day } from "@/03-widgets/common/DayChips";
-import HourRangePicker, { type HourRange } from "@/03-widgets/common/HourRangePicker";
-import LocationField, { type LocationFieldValue } from "@/03-widgets/common/LocationField";
-import { SimpleEditor } from "@/03-widgets/common/tiptap-templates/simple/simple-editor";
+import Button from "@/02-widgets/common/Button";
+import DayChips, { DAYS, type Day } from "@/02-widgets/common/DayChips";
+import HourRangePicker, { type HourRange } from "@/02-widgets/common/HourRangePicker";
+import LocationField, { type LocationFieldValue } from "@/02-widgets/common/LocationField";
+import { SimpleEditor } from "@/02-widgets/common/tiptap-templates/simple/simple-editor";
 
 import kogiriFace from "@assets/images/character/character-kogiri-face.svg";
 import { updateMentoProfileDetail, useMentoProfileDetail } from "@entities/profile";
@@ -13,7 +13,7 @@ import { updateMentoProfileDetail, useMentoProfileDetail } from "@entities/profi
 // ★ 모달 훅 & 컴포넌트
 import { useModal } from "@/05-shared/hooks/ui/useModal";
 import type { ModalKey } from "@/05-shared/ui/ModalConfig";
-import { CommonModal } from "@/03-widgets/common";
+import { CommonModal } from "@/02-widgets/common";
 
 // ---------- 유틸: 서버 ↔ UI 매핑 ----------
 const ISO_TO_KOR_DAY: Record<string, Day> = {

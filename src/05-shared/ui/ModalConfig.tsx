@@ -1,8 +1,8 @@
 // src/utils/modal-config.ts
-import FileInput from "@/03-widgets/common/FileInput";
-import SelectBar from "@/03-widgets/common/SelectBar";
-import { StarRating } from "@/03-widgets/common/StarRating";
-import TitleTextComponent from "@/03-widgets/common/TitleTextComponent";
+import FileInput from "@/02-widgets/common/FileInput";
+import SelectBar from "@/02-widgets/common/SelectBar";
+import { StarRating } from "@/02-widgets/common/StarRating";
+import TitleTextComponent from "@/02-widgets/common/TitleTextComponent";
 import { downloadImage } from "@/05-shared/utils/downloadUtils";
 import type { ReportDetail } from "@/05-shared/utils/reportUtils";
 import { translateReportType } from "@/05-shared/utils/reportUtils";
@@ -11,7 +11,7 @@ import checkRedIcon from "@assets/icons/icon-check-red.svg";
 import deleteIcon from "@assets/icons/icon-delete.svg";
 import questionIcon from "@assets/icons/icon-question.svg";
 
-import type { ButtonProps } from "@/03-widgets/common/Button";
+import type { ButtonProps } from "@/02-widgets/common/Button";
 import type { ReportType } from "@entities/mentos/model/types";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";

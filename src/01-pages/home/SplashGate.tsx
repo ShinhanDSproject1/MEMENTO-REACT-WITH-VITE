@@ -1,5 +1,5 @@
 // src/widgets/splash/SplashGate.tsx
-import { Splash } from "@/03-widgets/common";
+import { Splash } from "@/02-widgets/common";
 import React, { useEffect, useState } from "react";
 
 const KEY = "app.splash.seen";

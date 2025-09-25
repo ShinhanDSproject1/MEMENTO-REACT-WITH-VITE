@@ -3,7 +3,7 @@ import MentosForm, { type MentosFormValues } from "@pages/mentor/MentosForm";
 import type { MentosDetailResult } from "@entities/mentos";
 import { getUpdateMentos, updateMentoMentos, type UpdateMentosRequest } from "@entities/mentos";
 import { useModal } from "@/05-shared/hooks/ui/useModal";
-import { CommonModal } from "@/03-widgets/common";
+import { CommonModal } from "@/02-widgets/common";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 

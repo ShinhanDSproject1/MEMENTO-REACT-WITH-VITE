@@ -1,6 +1,6 @@
 import { http } from "@/05-shared/api/https";
 import { useModal } from "@/05-shared/hooks/ui/useModal";
-import { CommonModal } from "@/03-widgets/common";
+import { CommonModal } from "@/02-widgets/common";
 import { useEffect, useMemo, useState } from "react";
 import { formatDate } from "@/utils/memberTypes";
 import type { MemberInfo, MemberApiResponse } from "@/utils/memberTypes";

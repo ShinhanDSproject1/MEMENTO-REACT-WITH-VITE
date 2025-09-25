@@ -2,11 +2,11 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-import Button from "@/03-widgets/common/Button";
-import DayChips, { type Day } from "@/03-widgets/common/DayChips";
-import HourRangePicker, { type HourRange } from "@/03-widgets/common/HourRangePicker";
-import LocationField, { type LocationFieldValue } from "@/03-widgets/common/LocationField";
-import { SimpleEditor } from "@/03-widgets/common/tiptap-templates/simple/simple-editor";
+import Button from "@/02-widgets/common/Button";
+import DayChips, { type Day } from "@/02-widgets/common/DayChips";
+import HourRangePicker, { type HourRange } from "@/02-widgets/common/HourRangePicker";
+import LocationField, { type LocationFieldValue } from "@/02-widgets/common/LocationField";
+import { SimpleEditor } from "@/02-widgets/common/tiptap-templates/simple/simple-editor";
 
 import {
   loadMentorOnboardingDraft,

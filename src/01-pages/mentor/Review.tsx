@@ -1,5 +1,5 @@
-import PageContainer from "@/03-widgets/profile/PageContainer";
-import ReviewCard from "@/03-widgets/profile/ReviewCard";
+import PageContainer from "@/02-widgets/profile/PageContainer";
+import ReviewCard from "@/02-widgets/profile/ReviewCard";
 import { getMentoReviews, type MentorReview } from "@entities/review";
 import { useCallback, useEffect, useRef, useState } from "react";
 

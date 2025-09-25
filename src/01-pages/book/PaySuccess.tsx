@@ -1,7 +1,7 @@
 import { confirmPayment } from "@/05-shared/api/payments";
 import { getAccessToken } from "@/05-shared/auth/token";
 import { MODAL_CONFIG } from "@/05-shared/ui/ModalConfig";
-import CommonModal from "@/03-widgets/common/CommonModal";
+import CommonModal from "@/02-widgets/common/CommonModal";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 

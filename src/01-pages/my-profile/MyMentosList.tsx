@@ -1,12 +1,12 @@
 // src/pages/MyMentosList.tsx
 import { createReview } from "@entities/review/api/createReview";
 
-import { useMentoMentosInfiniteList } from "@/02-features/mentos-list";
-import { useMyMentosInfiniteList } from "@/02-features/mentos-list/hooks/useMyMentosInfiniteList";
-import { CommonModal } from "@/03-widgets/common";
-import Button from "@/03-widgets/common/Button";
-import MentosCard from "@/03-widgets/common/MentosCard";
-import MentosMainTitleComponent from "@/03-widgets/mentos/MentosMainTitleComponent";
+import { useMentoMentosInfiniteList } from "@/03-features/mentos-list";
+import { useMyMentosInfiniteList } from "@/03-features/mentos-list/hooks/useMyMentosInfiniteList";
+import { CommonModal } from "@/02-widgets/common";
+import Button from "@/02-widgets/common/Button";
+import MentosCard from "@/02-widgets/common/MentosCard";
+import MentosMainTitleComponent from "@/02-widgets/mentos/MentosMainTitleComponent";
 import { refundPayment } from "@/05-shared/api/payments";
 import { useModal } from "@/05-shared/hooks/ui/useModal";
 import type { ModalKey } from "@/05-shared/ui/ModalConfig";

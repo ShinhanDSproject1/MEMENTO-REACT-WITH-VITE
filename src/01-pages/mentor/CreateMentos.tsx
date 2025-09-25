@@ -1,5 +1,5 @@
 // src/pages/mentor/CreateMentos.tsx
-import { CommonModal } from "@/03-widgets/common";
+import { CommonModal } from "@/02-widgets/common";
 import { useModal } from "@/05-shared/hooks/ui/useModal";
 import { useCreateMentos } from "@entities/mentos";
 import MentosForm, { type MentosFormValues } from "@pages/mentor/MentosForm";

@@ -1,5 +1,5 @@
 // src/pages/CertificationRegister.tsx
-import Button from "@/03-widgets/common/Button";
+import Button from "@/02-widgets/common/Button";
 import { FileInput, Label } from "flowbite-react";
 import React, { useCallback, useEffect, useState } from "react";
 

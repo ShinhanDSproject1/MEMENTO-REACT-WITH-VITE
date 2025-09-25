@@ -1,8 +1,8 @@
-import BookingSummaryCard from "@/03-widgets/booking/BookingSummaryCard";
-import TermsAccordion from "@/03-widgets/booking/TermsAccordion";
-import PrivacyCollectTerms from "@/03-widgets/booking/term/PrivacyCollectTerms";
-import PrivacyThirdPartyTerms from "@/03-widgets/booking/term/PrivacyThirdPartyTerms";
-import TermsOfUse from "@/03-widgets/booking/term/TermsOfUse";
+import BookingSummaryCard from "@/02-widgets/booking/BookingSummaryCard";
+import TermsAccordion from "@/02-widgets/booking/TermsAccordion";
+import PrivacyCollectTerms from "@/02-widgets/booking/term/PrivacyCollectTerms";
+import PrivacyThirdPartyTerms from "@/02-widgets/booking/term/PrivacyThirdPartyTerms";
+import TermsOfUse from "@/02-widgets/booking/term/TermsOfUse";
 
 import { initMentosPayment } from "@/05-shared/api/payments";
 import { createReservation } from "@/05-shared/api/reservations";

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import Button from "@/03-widgets/common/Button";
-import SnapCarousel from "@/03-widgets/common/SnapCarousel";
-import ReviewMentosDetailCard from "@/03-widgets/mentos/ReviewMentosDetailCard";
+import Button from "@/02-widgets/common/Button";
+import SnapCarousel from "@/02-widgets/common/SnapCarousel";
+import ReviewMentosDetailCard from "@/02-widgets/mentos/ReviewMentosDetailCard";
 import clockIcon from "@assets/icons/icon-clock.svg";
 import locationIcon from "@assets/icons/icon-location.svg";
 import starIcon from "@assets/icons/icon-star.svg";

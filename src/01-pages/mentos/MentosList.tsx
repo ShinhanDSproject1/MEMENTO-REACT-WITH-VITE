@@ -1,7 +1,7 @@
 // src/pages/mentos/MentosList.tsx
-import { useMentosInfiniteList } from "@/02-features";
-import { MentosCard } from "@/03-widgets/common";
-import { MentosMainTitleComponent } from "@/03-widgets/mentos";
+import { MentosCard } from "@/02-widgets/common";
+import { MentosMainTitleComponent } from "@/02-widgets/mentos";
+import { useMentosInfiniteList } from "@/03-features";
 import { useEffect, useMemo, useRef } from "react";
 import { useParams } from "react-router-dom";
 
