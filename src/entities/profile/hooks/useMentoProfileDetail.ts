@@ -8,5 +8,6 @@ export function useMentoProfileDetail() {
     queryKey: MENTO_PROFILE_DETAIL_QK,
     queryFn: getMentoProfileDetail,
     staleTime: 60_000,
+    refetchOnMount: "always",
   });
 }
