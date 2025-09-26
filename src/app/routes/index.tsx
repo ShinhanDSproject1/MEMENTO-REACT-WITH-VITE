@@ -1,4 +1,6 @@
 // src/app/routes/index.tsx
+import DelayedFallback from "@/shared/ui/DelayedFallBack";
+import LoadingBar from "@/shared/ui/LoadingBar";
 import React, { Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import RootLayout from "./layouts/RootLayout";
@@ -57,7 +59,14 @@ const ChatBot = React.lazy(() => import("@/pages/chat/ChatBot"));
 const RecommendPage = React.lazy(() => import("@/pages/chat/RecommendPage"));
 
 const withSuspense = (el: React.ReactNode) => (
-  <Suspense fallback={<div className="p-6 text-sm text-gray-500">로딩 중…</div>}>{el}</Suspense>
+  <Suspense
+    fallback={
+      <DelayedFallback delay={1000}>
+        <LoadingBar variant="inline" label="페이지 로딩 중…" />
+      </DelayedFallback>
+    }>
+    {el}
+  </Suspense>
 );
 
 export const router = createBrowserRouter([
