@@ -1,4 +1,3 @@
-// src/components/review/ReviewCard.tsx
 import StarStatic from "@/widgets/profile/StarStatic";
 
 export interface ReviewCardProps {
@@ -8,9 +7,7 @@ export interface ReviewCardProps {
   name: string;
   content: string;
   className?: string;
-  full?: boolean;
 }
-
 export default function ReviewCard({
   title,
   date,
@@ -23,12 +20,15 @@ export default function ReviewCard({
     <article
       role="article"
       aria-label="리뷰"
-      className={`w-full rounded-[12px] border border-[#E5E7ED] bg-white p-4 shadow-[0_2px_10px_rgba(11,15,25,0.06)] ${className}`}>
-      <h3 className="text-[15px] font-extrabold text-[#111827]">{title}</h3>
-      <p className="mt-1 text-xs text-[#6B7280]">{date}</p>
-      <StarStatic value={rating} className="mt-2" />
-      <p className="mt-1 text-sm font-semibold text-[#1F2937]">{name}</p>
-      <p className="mt-1 text-sm leading-6 whitespace-pre-wrap text-[#6B7280]">{content}</p>
+      className={`w-full rounded-xl border border-gray-200 bg-white p-4 shadow-sm ${className}`}>
+      <h3 className="text-[15px] font-bold text-gray-900">{title}</h3>
+      <div className="mt-2 flex items-center gap-2 rounded-md bg-gray-50 px-2 py-1 text-xs text-gray-600">
+        <StarStatic value={rating} />
+        <span className="font-medium text-gray-800">{name}</span>
+        <span className="mx-2 h-3 w-px bg-gray-300" aria-hidden="true" />
+        <span className="ml-auto text-gray-500 tabular-nums">{date}</span>
+      </div>
+      <p className="mt-3 text-sm leading-relaxed whitespace-pre-line text-gray-700">{content}</p>
     </article>
   );
 }
