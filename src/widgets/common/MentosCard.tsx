@@ -9,6 +9,7 @@ type MentosCardProps = {
   price?: number;
   location?: string;
   status: MentosStatus;
+  approved: boolean;
   imageUrl?: string;
   onReportClick?: () => void;
   onReviewClick?: () => void;
@@ -39,6 +40,7 @@ export default function MentosCard({
   onRefundClick,
   onReportClick,
   onUpdateClick,
+  approved = false,
   title,
   price,
   location,

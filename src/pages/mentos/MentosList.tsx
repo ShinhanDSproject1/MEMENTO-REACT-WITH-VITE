@@ -130,6 +130,7 @@ export default function MentosList() {
                 title={item.mentosTitle}
                 price={item.mentosPrice}
                 location={item.region}
+                approved={item.approved}
                 status={"guest"}
                 imageUrl={item.mentosImg}
                 fixedHeight={cardH} // 2장 딱 맞춤
