@@ -8,13 +8,12 @@ import RequireAuth from "./quards/RequireAuth";
 
 // [ Layout ]
 const HomeLayout = React.lazy(() => import("@/00-app/routes/layouts/HomeLayout"));
-const AppLayout = React.lazy(() => import("@/00-app/routes/layouts/AppLayout"));
 const Error400 = React.lazy(() => import("@/01-pages/home/Error400"));
 const Error404 = React.lazy(() => import("@/01-pages/home/Error404"));
 const Error500 = React.lazy(() => import("@/01-pages/home/Error500"));
 
 // [ Home ]
-const Home = React.lazy(() => import("@pages/home/Home"));
+const Home = React.lazy(() => import("@pages/home/Home2"));
 
 // [ auth ]
 const Login = React.lazy(() => import("@/01-pages/login/Login"));

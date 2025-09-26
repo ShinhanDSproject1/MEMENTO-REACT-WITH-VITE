@@ -1,5 +1,5 @@
 // src/pages/MentosCarouselPage.tsx
-import { motion, PanInfo, useReducedMotion, type MotionProps } from "framer-motion";
+import { motion, useReducedMotion, type MotionProps, type PanInfo } from "framer-motion";
 import { CreditCard, Lightbulb, LineChart, Menu, PiggyBank, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 

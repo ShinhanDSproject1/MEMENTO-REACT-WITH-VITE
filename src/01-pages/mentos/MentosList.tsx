@@ -2,29 +2,22 @@
 import { MentosCard } from "@/02-widgets/common";
 import { MentosMainTitleComponent } from "@/02-widgets/mentos";
 import { useMentosInfiniteList } from "@/03-features";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 
 const LIMIT = 5;
 
-const TITLE_MAP: Record<string, string> = {
-  consumption: "소비패턴 멘토링",
-  tips: "생활노하우 멘토링",
-  saving: "저축방식 멘토링",
-  growth: "자산증식 멘토링",
-};
-
-const CATEGORY_ID_MAP: Record<string, number> = {
-  consumption: 1,
-  tips: 2,
-  saving: 3,
-  growth: 4,
+const TITLE_MAP: Record<number, string> = {
+  1: "소비패턴 멘토링",
+  2: "생활노하우 멘토링",
+  3: "저축방식 멘토링",
+  4: "자산증식 멘토링",
 };
 
 export default function MentosList() {
   const { category } = useParams<{ category?: string }>();
-  const mainTitle = useMemo(() => (category ? (TITLE_MAP[category] ?? "") : ""), [category]);
-  const categoryId = category ? CATEGORY_ID_MAP[category] : undefined;
+  const categoryId = category ? Number(category) : undefined;
+  const mainTitle = categoryId ? (TITLE_MAP[categoryId] ?? "") : "";
 
   // hook은 여기서만 호출해야 함
   const loaderRef = useRef<HTMLDivElement | null>(null);
