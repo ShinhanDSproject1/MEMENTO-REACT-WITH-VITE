@@ -285,7 +285,7 @@ function buildInfoHtml(mentor: MentorItem) {
               data-mentos-id="${m.mentosSeq ?? ""}" 
               style="
                 display:flex;align-items:center;justify-content:space-between;gap:12px;
-                padding:10px 14px;margin:8px 0 0 0;
+                padding:12px 14px;margin:8px 0 0 0;
                 background:#F4F6FA;border:1px solid #E6EAF2;border-radius:12px;
                 scroll-snap-align:start;     
               ">
@@ -306,10 +306,10 @@ function buildInfoHtml(mentor: MentorItem) {
 
   const html = `
   <div class="font-WooridaumR memento-iw-root" style="
-    width: 250px; max-width: 80vw;
+    width: clamp(280px, 88vw, 360px);
     font-size:14px; line-height:1.55; word-break:keep-all;
-    background:#fff; overflow:hidden;
-    border: none; box-shadow: 0 6px 18px rgba(16,24,40,.08); ">
+     background:#fff; overflow:hidden; border:none;
+     box-shadow: 0 4px 12px rgba(0,0,0,.08), 0 10px 24px rgba(0,0,0,.06); ">
       <button id="memento-iw-close" style=" position:absolute; top:13px; right:8px;
       border:none; background:transparent; color:#111; font-size:18px; font-weight:bold; line-height:1; cursor:pointer;">&times;</button>
     <div style="height:6px;background:#0B63F6;"></div>
@@ -346,7 +346,7 @@ function buildInfoHtml(mentor: MentorItem) {
       padding:0 16px 14px 16px;
       margin:0;
       font-size:12px;
-      max-height:150px;
+      max-height: clamp(132px, 24vh, 192px);
       overflow-y:auto;
       overscroll-behavior:contain;
       -webkit-overflow-scrolling:touch;  
@@ -371,6 +371,47 @@ export class KakaoMapController {
   private infoWindow: any | null = null;
   private myMarker: any | null = null;
   private mentorMarkers: any[] = [];
+
+  private _centerInfoWindow() {
+    if (!this.map) return;
+
+    const nodes = document.querySelectorAll(".memento-iw-root");
+    const root = nodes[nodes.length - 1] as HTMLElement | null;
+    if (!root) return;
+
+    const mapRect = this.mapEl.getBoundingClientRect();
+    const iwRect = root.getBoundingClientRect();
+
+    // 각 중심 좌표(컨테이너 픽셀 좌표)
+    const mapCx = mapRect.left + mapRect.width / 2;
+    const mapCy = mapRect.top + mapRect.height / 2;
+    const iwCx = iwRect.left + iwRect.width / 2;
+    const iwCy = iwRect.top + iwRect.height / 2;
+
+    // "오버레이 중심을 지도 중심으로 옮기기 위해 필요한 오버레이 이동량"
+    const dx = mapCx - iwCx; // +면 오버레이가 오른쪽으로 가야 함
+    const dy = mapCy - iwCy; // +면 오버레이가 아래로 가야 함
+
+    // 지도 중심을 픽셀 단위로 보정 (오버레이 이동의 반대 방향으로)
+    const proj = this.map.getProjection();
+    const c = this.map.getCenter();
+    const pt = proj.containerPointFromCoords(c);
+
+    // ⬅️➡️ 좌우는 -dx, ⬆️⬇️ 상하는 -dy (부호 주의)
+    const nextPt = new window.kakao.maps.Point(pt.x - dx, pt.y - dy);
+    const nextCenter = proj.coordsFromContainerPoint(nextPt);
+    this.map.panTo(nextCenter);
+  }
+  private _closeInfoWindowWithFade() {
+    const root = document.querySelector(".memento-iw-root") as HTMLElement | null;
+    if (root) {
+      root.classList.remove("show");
+      root.classList.add("hide");
+      root.addEventListener("transitionend", () => this.infoWindow?.close(), { once: true });
+    } else {
+      this.infoWindow?.close();
+    }
+  }
 
   constructor(mapEl: HTMLDivElement) {
     this.mapEl = mapEl;
@@ -408,8 +449,8 @@ export class KakaoMapController {
         scrollwheel: true,
         disableDoubleClick: false,
       });
-
       this.infoWindow = new kakao.maps.InfoWindow({ removable: false });
+      kakao.maps.event.addListener(this.map, "click", () => this._closeInfoWindowWithFade());
     } catch (error) {
       console.error("[DEBUG] Failed to initialize Kakao Map:", error);
       throw error;
@@ -559,20 +600,18 @@ export class KakaoMapController {
 
           setTimeout(() => {
             ensureIwStylesInjected();
-            const root = document.querySelector(".memento-iw-root") as HTMLElement | null;
 
+            const nodes = document.querySelectorAll(".memento-iw-root");
+            const root = nodes[nodes.length - 1] as HTMLElement | null;
             if (root) requestAnimationFrame(() => root.classList.add("show"));
-
             root?.querySelectorAll<HTMLLIElement>(".memento-iw-item").forEach((el) => {
               el.addEventListener("click", () => {
                 const id = el.dataset.mentosId;
-                if (id) {
-                  window.location.href = `/menti/mentos-detail/${id}`;
-                }
+                if (id) window.location.href = `/menti/mentos-detail/${id}`;
               });
             });
 
-            // 닫기 버튼 처리
+            // 닫기 버튼
             const btn = document.getElementById("memento-iw-close");
             if (btn) {
               btn.addEventListener(
@@ -582,13 +621,9 @@ export class KakaoMapController {
                   if (root) {
                     root.classList.remove("show");
                     root.classList.add("hide");
-                    root.addEventListener(
-                      "transitionend",
-                      () => {
-                        this.infoWindow?.close();
-                      },
-                      { once: true },
-                    );
+                    root.addEventListener("transitionend", () => this.infoWindow?.close(), {
+                      once: true,
+                    });
                   } else {
                     this.infoWindow?.close();
                   }
@@ -607,9 +642,11 @@ export class KakaoMapController {
               }
               cur = cur.parentElement as HTMLElement | null;
             }
+            this._centerInfoWindow();
+            setTimeout(() => this._centerInfoWindow(), 40);
           }, 0);
         } catch (error) {
-          console.error(`[DEBUG] InfoWindow 처리 중 오류:`, error);
+          console.error("[DEBUG] InfoWindow 처리 중 오류:", error);
         }
       });
 
