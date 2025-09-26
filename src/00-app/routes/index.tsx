@@ -1,4 +1,6 @@
 // src/app/routes/index.tsx
+import MentosDiscoverDemo from "@/01-pages/home/DemoMentosDiscover";
+import MentosListDemoPage from "@/01-pages/home/DemoMentosList";
 import React, { Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import RootLayout from "./layouts/RootLayout";
@@ -74,7 +76,6 @@ export const router = createBrowserRouter([
       { path: "/500", element: withSuspense(<Error500 />) },
 
       {
-        element: withSuspense(<AppLayout />),
         children: [
           // ----- (1) 공개 라우트 -----
           { path: "/login", element: withSuspense(<Login />) },
@@ -89,7 +90,8 @@ export const router = createBrowserRouter([
           { path: "/menti/mentos-detail/:id", element: withSuspense(<MentosDetail />) },
           { path: "/video", element: withSuspense(<HomeVideo />) },
           { path: "/ready", element: withSuspense(<Ready />) },
-
+          { path: "/mentos-demo", element: <MentosListDemoPage /> },
+          { path: "/discover-demo", element: <MentosDiscoverDemo /> },
           // ----- (2) 보호 라우트 그룹 (RequireAuth) -----
           {
             element: withSuspense(<RequireAuth />),
